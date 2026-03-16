@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Copied at build time (from aidlc-workflows/)
+templates/aidlc-rule-details/
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+
+# Logs
+*.log
+
+aidlc-workflows/
