@@ -78,3 +78,6 @@ export {
 
 // Resolver — Agent frontmatter parser
 export { parseAgentFrontmatter } from "./resolver.js";
+
+// Session Context — project-context.json persistence
+export { saveContext, loadContext, mergeAgentLearning } from "./session-context.js";
