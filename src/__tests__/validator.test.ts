@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   validateBundleConfig,
+  validateConfigYaml,
   validateGraphYaml,
   validatePluginJson,
   validateHooksJson,
@@ -364,5 +365,101 @@ describe("validateStateJson", () => {
       },
     });
     expect(result.valid).toBe(true);
+  });
+});
+
+// ============================================================
+// validateConfigYaml
+// ============================================================
+
+describe("validateConfigYaml", () => {
+  const validConfig = {
+    version: "2.0",
+    execution: { defaultModel: "claude-sonnet-4", maxParallelUnits: 3, teammateMode: "tmux" },
+    hats: { requirePlanApproval: false, autoTransition: true, pipeline: [] },
+    checkpoints: { auto: true, triggers: [] },
+    language: "ko",
+  };
+
+  it("accepts a valid config", () => {
+    const result = validateConfigYaml(validConfig);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
+  });
+
+  it("rejects non-object input", () => {
+    const result = validateConfigYaml("string");
+    expect(result.valid).toBe(false);
+  });
+
+  it("requires version", () => {
+    const { version: _, ...rest } = validConfig;
+    const result = validateConfigYaml(rest);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path.includes("version"))).toBe(true);
+  });
+
+  it("requires execution.defaultModel", () => {
+    const data = { ...validConfig, execution: {} };
+    const result = validateConfigYaml(data);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path.includes("defaultModel"))).toBe(true);
+  });
+
+  it("requires hats.pipeline to be an array", () => {
+    const data = { ...validConfig, hats: { pipeline: "not-array" } };
+    const result = validateConfigYaml(data);
+    expect(result.valid).toBe(false);
+  });
+
+  it("requires language to be ko or en", () => {
+    const data = { ...validConfig, language: "fr" };
+    const result = validateConfigYaml(data);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path === "language")).toBe(true);
+  });
+});
+
+// ============================================================
+// Router condition warning (FR-9)
+// ============================================================
+
+describe("router condition warning", () => {
+  it("emits a warning when a router node has a condition field", () => {
+    const data = {
+      nodes: [
+        {
+          id: "r1",
+          type: "router",
+          agent: "planner",
+          depends_on: [],
+          condition: "status == success",
+          config: { isolation: "none" },
+        },
+      ],
+    };
+    const result = validateGraphYaml(data);
+    expect(result.valid).toBe(true); // warnings do not fail validation
+    const condWarning = result.errors.find((e) => e.path.includes("condition"));
+    expect(condWarning).toBeDefined();
+    expect(condWarning!.severity).toBe("warning");
+    expect(condWarning!.message).toContain("not yet implemented");
+  });
+
+  it("does not warn when router has no condition", () => {
+    const data = {
+      nodes: [
+        {
+          id: "r1",
+          type: "router",
+          agent: "planner",
+          depends_on: [],
+          config: { isolation: "none" },
+        },
+      ],
+    };
+    const result = validateGraphYaml(data);
+    expect(result.valid).toBe(true);
+    expect(result.errors.filter((e) => e.path.includes("condition"))).toHaveLength(0);
   });
 });

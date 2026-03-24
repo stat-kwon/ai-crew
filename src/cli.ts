@@ -6,6 +6,7 @@ import { install } from "./installer.js";
 import { StateManager } from "./state.js";
 import { loadConfig } from "./config.js";
 import { diagnose, uninstall } from "./install-state.js";
+import { runValidate } from "./cli-validate.js";
 
 const program = new Command();
 
@@ -26,12 +27,12 @@ program
         lang: options.lang as "ko" | "en",
         force: options.force,
       });
-      console.log(chalk.green("✓ AI-Crew initialized successfully!"));
+      console.log(chalk.green("\u2713 AI-Crew initialized successfully!"));
       console.log();
       console.log("Created:");
-      console.log(`  ${chalk.cyan(".ai-crew/")}        — state, config, specs, rules`);
-      console.log(`  ${chalk.cyan(".claude/commands/crew/")} — slash commands`);
-      console.log(`  ${chalk.cyan("CLAUDE.md")}        — AI-Crew section appended`);
+      console.log(`  ${chalk.cyan(".ai-crew/")}        \u2014 state, config, specs, rules`);
+      console.log(`  ${chalk.cyan(".claude/commands/crew/")} \u2014 slash commands`);
+      console.log(`  ${chalk.cyan("CLAUDE.md")}        \u2014 AI-Crew section appended`);
       console.log();
       console.log(`Start with: ${chalk.yellow("/crew:elaborate <your intent>")}`);
     } catch (err) {
@@ -64,10 +65,10 @@ program
     for (const unit of state.units) {
       const icon =
         unit.status === "complete"
-          ? chalk.green("✓")
+          ? chalk.green("\u2713")
           : unit.status === "in-progress"
-            ? chalk.yellow("→")
-            : chalk.dim("○");
+            ? chalk.yellow("\u2192")
+            : chalk.dim("\u25CB");
       console.log(`  ${icon} ${unit.name} [${unit.status}]`);
     }
   });
@@ -158,6 +159,15 @@ program
       console.error(chalk.red(`Error: ${(err as Error).message}`));
       process.exit(1);
     }
+  });
+
+program
+  .command("validate")
+  .description("Validate .ai-crew configuration files (config.yaml, graph.yaml, state.json)")
+  .option("--target <path>", "Project root to validate", process.cwd())
+  .action(async (options) => {
+    const exitCode = await runValidate(options.target);
+    process.exit(exitCode);
   });
 
 program

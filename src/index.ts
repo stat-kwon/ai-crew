@@ -78,6 +78,7 @@ export {
 // Validator
 export {
   validateBundleConfig,
+  validateConfigYaml,
   validateGraphYaml,
   validatePluginJson,
   validateHooksJson,
