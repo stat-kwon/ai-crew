@@ -1,0 +1,16 @@
+{
+  "version": "3.0",
+  "bundleName": "e2e-premium",
+  "nodes": {
+    "foundation": { "status": "pending", "startedAt": null, "completedAt": null },
+    "graph_ext": { "status": "pending", "startedAt": null, "completedAt": null },
+    "verifier": { "status": "pending", "startedAt": null, "completedAt": null },
+    "install_state": { "status": "pending", "startedAt": null, "completedAt": null },
+    "shared_memory": { "status": "pending", "startedAt": null, "completedAt": null },
+    "session_context": { "status": "pending", "startedAt": null, "completedAt": null },
+    "hook_profiling": { "status": "pending", "startedAt": null, "completedAt": null },
+    "cli_validate": { "status": "pending", "startedAt": null, "completedAt": null },
+    "checkpoint": { "status": "pending", "startedAt": null, "completedAt": null },
+    "integration_review": { "status": "pending", "startedAt": null, "completedAt": null }
+  }
+}
