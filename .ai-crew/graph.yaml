@@ -1,0 +1,126 @@
+graph:
+  nodes:
+    - id: foundation
+      type: worker
+      agent: backend-dev
+      skills:
+        - backend-node
+        - clean-code
+      depends_on: []
+      hooks: []
+      config:
+        isolation: worktree
+
+    - id: graph_ext
+      type: worker
+      agent: backend-dev
+      skills:
+        - backend-node
+        - testing
+      depends_on:
+        - foundation
+      hooks: []
+      config:
+        isolation: worktree
+
+    - id: verifier
+      type: worker
+      agent: backend-dev
+      skills:
+        - backend-node
+        - testing
+      depends_on:
+        - foundation
+      hooks: []
+      config:
+        isolation: worktree
+
+    - id: install_state
+      type: worker
+      agent: backend-dev
+      skills:
+        - backend-node
+        - clean-code
+      depends_on:
+        - foundation
+      hooks: []
+      config:
+        isolation: worktree
+
+    - id: shared_memory
+      type: worker
+      agent: backend-dev
+      skills:
+        - backend-node
+        - testing
+      depends_on:
+        - foundation
+      hooks: []
+      config:
+        isolation: worktree
+
+    - id: session_context
+      type: worker
+      agent: backend-dev
+      skills:
+        - backend-node
+      depends_on:
+        - foundation
+      hooks: []
+      config:
+        isolation: worktree
+
+    - id: hook_profiling
+      type: worker
+      agent: backend-dev
+      skills:
+        - backend-node
+      depends_on: []
+      hooks: []
+      config:
+        isolation: worktree
+
+    - id: cli_validate
+      type: worker
+      agent: backend-dev
+      skills:
+        - backend-node
+        - clean-code
+      depends_on:
+        - foundation
+      hooks: []
+      config:
+        isolation: worktree
+
+    - id: checkpoint
+      type: worker
+      agent: backend-dev
+      skills:
+        - backend-node
+        - testing
+      depends_on:
+        - foundation
+        - shared_memory
+      hooks: []
+      config:
+        isolation: worktree
+
+    - id: integration_review
+      type: aggregator
+      agent: reviewer
+      skills:
+        - code-review
+        - testing
+      depends_on:
+        - graph_ext
+        - verifier
+        - install_state
+        - shared_memory
+        - session_context
+        - hook_profiling
+        - cli_validate
+        - checkpoint
+      wait: all
+      hooks: []
+      config:
+        isolation: worktree

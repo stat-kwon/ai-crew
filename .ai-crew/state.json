@@ -1,0 +1,16 @@
+{
+  "version": "3.0",
+  "bundleName": "e2e-premium",
+  "nodes": {
+    "foundation": { "status": "completed", "startedAt": "2026-03-24T05:00:00Z", "completedAt": "2026-03-24T05:08:00Z" },
+    "hook_profiling": { "status": "completed", "startedAt": "2026-03-24T05:00:00Z", "completedAt": "2026-03-24T05:05:00Z" },
+    "graph_ext": { "status": "completed", "startedAt": "2026-03-24T05:10:00Z", "completedAt": "2026-03-24T05:13:00Z" },
+    "verifier": { "status": "completed", "startedAt": "2026-03-24T05:10:00Z", "completedAt": "2026-03-24T05:12:00Z" },
+    "install_state": { "status": "completed", "startedAt": "2026-03-24T05:10:00Z", "completedAt": "2026-03-24T05:14:00Z" },
+    "shared_memory": { "status": "completed", "startedAt": "2026-03-24T05:10:00Z", "completedAt": "2026-03-24T05:13:00Z" },
+    "session_context": { "status": "completed", "startedAt": "2026-03-24T05:10:00Z", "completedAt": "2026-03-24T05:13:00Z" },
+    "cli_validate": { "status": "completed", "startedAt": "2026-03-24T05:10:00Z", "completedAt": "2026-03-24T05:14:00Z" },
+    "checkpoint": { "status": "completed", "startedAt": "2026-03-24T05:16:00Z", "completedAt": "2026-03-24T05:19:00Z" },
+    "integration_review": { "status": "completed", "startedAt": "2026-03-24T05:20:00Z", "completedAt": "2026-03-24T05:28:00Z" }
+  }
+}
