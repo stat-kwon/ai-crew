@@ -78,3 +78,6 @@ export {
 
 // Resolver — Agent frontmatter parser
 export { parseAgentFrontmatter } from "./resolver.js";
+
+// Verifier — Node verification checks
+export { getDefaultCommands, verifyNode } from "./verifier.js";
