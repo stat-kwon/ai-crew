@@ -117,3 +117,10 @@ export {
 
 // Session Context — project-context.json persistence
 export { saveContext, loadContext, mergeAgentLearning } from "./session-context.js";
+
+// Checkpoint
+export {
+  createCheckpoint,
+  listCheckpoints,
+  restoreCheckpoint,
+} from "./checkpoint.js";
