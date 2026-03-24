@@ -1,5 +1,7 @@
 {
   "name": "backend-node",
-  "description": "|",
-  "version": "1.0.0"
+  "description": "Node.js backend development patterns, API design, and database integration",
+  "author": {
+    "name": "ai-crew"
+  }
 }

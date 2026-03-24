@@ -1,0 +1,73 @@
+plugin:
+  id: plugin.aidlc-tdd
+  name: AIDLC TDD
+  description: "AI-DLC TDD 팀: plan > test > build > review (테스트 우선 개발)"
+  version: "2.0.0"
+
+workflow: aidlc
+
+aidlc:
+  install: native
+
+defaults:
+  model: claude-sonnet-4
+  isolation: worktree
+  rules: [global]
+  mcp: [multi-provider]
+
+includes:
+  skills:
+    - planning
+    - testing
+    - code-review
+  commands:
+    - crew-auto
+    - crew-elaborate
+    - crew-run
+    - crew-integrate
+    - crew-status
+    - crew-checkpoint
+    - crew-restore
+  agents:
+    - owner
+    - planner
+    - tester
+    - builder
+    - reviewer
+  hooks:
+    - quality-gate
+
+graph:
+  nodes:
+    - id: plan
+      type: worker
+      agent: planner
+      skills: [planning]
+      depends_on: []
+      config:
+        isolation: none
+
+    - id: test
+      type: worker
+      agent: tester
+      skills: [testing]
+      depends_on: [plan]
+      config:
+        isolation: worktree
+
+    - id: build
+      type: worker
+      agent: builder
+      skills: [testing]
+      hooks: [quality-gate]
+      depends_on: [test]
+      config:
+        isolation: worktree
+
+    - id: review
+      type: worker
+      agent: reviewer
+      skills: [code-review]
+      depends_on: [build]
+      config:
+        isolation: worktree

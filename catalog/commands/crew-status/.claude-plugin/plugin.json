@@ -1,0 +1,7 @@
+{
+  "name": "crew-status",
+  "description": "Display current AI-Crew workflow state and next actions",
+  "author": {
+    "name": "ai-crew"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "crew-checkpoint",
+  "description": "Create a manual checkpoint snapshot of state and git context",
+  "author": {
+    "name": "ai-crew"
+  }
+}

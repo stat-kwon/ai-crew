@@ -1,0 +1,89 @@
+plugin:
+  id: plugin.fullstack
+  name: Fullstack
+  description: "풀스택 팀: plan > frontend + backend (병렬) > review > qa"
+  version: "2.0.0"
+
+workflow: aidlc
+
+aidlc:
+  install: native
+
+defaults:
+  model: claude-sonnet-4
+  isolation: worktree
+  rules: [global]
+  mcp: [multi-provider, ouroboros]
+
+includes:
+  skills:
+    - planning
+    - frontend-react
+    - backend-node
+    - testing
+    - code-review
+    - design-refinement
+  commands:
+    - crew-auto
+    - crew-elaborate
+    - crew-run
+    - crew-integrate
+    - crew-status
+    - crew-checkpoint
+    - crew-restore
+    - crew-refine
+  agents:
+    - owner
+    - planner
+    - frontend-dev
+    - backend-dev
+    - reviewer
+    - qa-engineer
+  hooks:
+    - quality-gate
+
+graph:
+  nodes:
+    - id: plan
+      type: worker
+      agent: planner
+      skills: [planning]
+      depends_on: []
+      config:
+        isolation: none
+
+    - id: frontend
+      type: worker
+      agent: frontend-dev
+      skills: [frontend-react, testing]
+      hooks: [quality-gate]
+      depends_on: [plan]
+      config:
+        isolation: worktree
+
+    - id: backend
+      type: worker
+      agent: backend-dev
+      skills: [backend-node, testing]
+      hooks: [quality-gate]
+      depends_on: [plan]
+      config:
+        isolation: worktree
+
+    - id: review
+      type: aggregator
+      agent: reviewer
+      skills: [code-review]
+      depends_on: [frontend, backend]
+      wait: all
+      config:
+        isolation: worktree
+        model: gpt-5.2-codex
+
+    - id: qa
+      type: worker
+      agent: qa-engineer
+      skills: [testing]
+      depends_on: [review]
+      config:
+        isolation: worktree

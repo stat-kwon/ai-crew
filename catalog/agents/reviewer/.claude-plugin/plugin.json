@@ -1,0 +1,7 @@
+{
+  "name": "reviewer",
+  "description": "Reviewer agent - validates code quality, runs tests and lint",
+  "author": {
+    "name": "ai-crew"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "planner",
+  "description": "Planning agent - analyzes tasks and creates implementation plans",
+  "author": {
+    "name": "ai-crew"
+  }
+}

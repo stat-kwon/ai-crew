@@ -1,0 +1,8 @@
+{
+  "name": "crew-run",
+  "description": "Graph Executor — DAG-based multi-agent execution command",
+  "version": "1.0.0",
+  "author": { "name": "ai-crew" },
+  "category": "commands",
+  "tags": ["command", "execution", "dag"]
+}

@@ -4,7 +4,6 @@
     "PreCompact": [
       {
         "matcher": "*",
-        "profiles": ["minimal", "standard", "strict"],
         "hooks": [
           {
             "type": "command",
@@ -17,7 +16,6 @@
     "Stop": [
       {
         "matcher": "*",
-        "profiles": ["minimal", "standard", "strict"],
         "hooks": [
           {
             "type": "command",

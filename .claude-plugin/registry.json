@@ -1,0 +1,184 @@
+{
+  "$schema": "./schema/plugin.schema.json",
+  "name": "ai-crew",
+  "version": "0.2.0",
+  "description": "Catalog-based Plugin Composition Platform for Claude Code",
+  "catalog": {
+    "skills": [
+      {
+        "id": "skill.backend-node",
+        "path": "catalog/skills/backend-node"
+      },
+      {
+        "id": "skill.code-review",
+        "path": "catalog/skills/code-review"
+      },
+      {
+        "id": "skill.frontend-react",
+        "path": "catalog/skills/frontend-react"
+      },
+      {
+        "id": "skill.planning",
+        "path": "catalog/skills/planning"
+      },
+      {
+        "id": "skill.security-audit",
+        "path": "catalog/skills/security-audit"
+      },
+      {
+        "id": "skill.testing",
+        "path": "catalog/skills/testing"
+      },
+      {
+        "id": "skill.workflow-composer",
+        "path": "catalog/skills/workflow-composer"
+      }
+    ],
+    "agents": [
+      {
+        "id": "agent.backend-dev",
+        "path": "catalog/agents/backend-dev"
+      },
+      {
+        "id": "agent.builder",
+        "path": "catalog/agents/builder"
+      },
+      {
+        "id": "agent.frontend-dev",
+        "path": "catalog/agents/frontend-dev"
+      },
+      {
+        "id": "agent.owner",
+        "path": "catalog/agents/owner"
+      },
+      {
+        "id": "agent.planner",
+        "path": "catalog/agents/planner"
+      },
+      {
+        "id": "agent.pm",
+        "path": "catalog/agents/pm"
+      },
+      {
+        "id": "agent.qa-engineer",
+        "path": "catalog/agents/qa-engineer"
+      },
+      {
+        "id": "agent.reviewer",
+        "path": "catalog/agents/reviewer"
+      },
+      {
+        "id": "agent.tester",
+        "path": "catalog/agents/tester"
+      }
+    ],
+    "commands": [
+      {
+        "id": "command.crew-auto",
+        "path": "catalog/commands/crew-auto"
+      },
+      {
+        "id": "command.crew-checkpoint",
+        "path": "catalog/commands/crew-checkpoint"
+      },
+      {
+        "id": "command.crew-elaborate",
+        "path": "catalog/commands/crew-elaborate"
+      },
+      {
+        "id": "command.crew-execute",
+        "path": "catalog/commands/crew-execute"
+      },
+      {
+        "id": "command.crew-integrate",
+        "path": "catalog/commands/crew-integrate"
+      },
+      {
+        "id": "command.crew-restore",
+        "path": "catalog/commands/crew-restore"
+      },
+      {
+        "id": "command.crew-run",
+        "path": "catalog/commands/crew-run"
+      },
+      {
+        "id": "command.crew-status",
+        "path": "catalog/commands/crew-status"
+      }
+    ],
+    "hooks": [
+      {
+        "id": "hook.lint-on-save",
+        "path": "catalog/hooks/lint-on-save"
+      },
+      {
+        "id": "hook.quality-gate",
+        "path": "catalog/hooks/quality-gate"
+      }
+    ],
+    "mcp": [
+      {
+        "id": "mcp.multi-provider",
+        "path": "catalog/mcp/multi-provider"
+      }
+    ],
+    "rules": [
+      {
+        "id": "rules.coding-standards",
+        "path": "catalog/rules/coding-standards"
+      },
+      {
+        "id": "rules.git-conventions",
+        "path": "catalog/rules/git-conventions"
+      },
+      {
+        "id": "rules.global",
+        "path": "catalog/rules/global"
+      },
+      {
+        "id": "rules.hat-builder",
+        "path": "catalog/rules/hat-builder"
+      },
+      {
+        "id": "rules.hat-planner",
+        "path": "catalog/rules/hat-planner"
+      },
+      {
+        "id": "rules.hat-reviewer",
+        "path": "catalog/rules/hat-reviewer"
+      },
+      {
+        "id": "rules.hat-tester",
+        "path": "catalog/rules/hat-tester"
+      }
+    ],
+    "workflows": [
+      {
+        "id": "workflow.aidlc",
+        "path": "catalog/workflows/aidlc"
+      }
+    ]
+  },
+  "bundles": [
+    {
+      "id": "plugin.advanced-fullstack",
+      "path": "catalog/bundles/advanced-fullstack"
+    },
+    {
+      "id": "plugin.aidlc-standard",
+      "path": "catalog/bundles/aidlc-standard"
+    },
+    {
+      "id": "plugin.aidlc-tdd",
+      "path": "catalog/bundles/aidlc-tdd"
+    },
+    {
+      "id": "plugin.fullstack",
+      "path": "catalog/bundles/fullstack"
+    },
+    {
+      "id": "plugin.lightweight",
+      "path": "catalog/bundles/lightweight"
+    }
+  ]
+}

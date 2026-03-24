@@ -4,7 +4,6 @@
     "SubagentStart": [
       {
         "matcher": "*",
-        "profiles": ["standard", "strict"],
         "hooks": [
           {
             "type": "command",
@@ -17,7 +16,6 @@
     "SubagentStop": [
       {
         "matcher": "*",
-        "profiles": ["standard", "strict"],
         "hooks": [
           {
             "type": "command",

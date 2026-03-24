@@ -1,0 +1,7 @@
+{
+  "name": "crew-integrate",
+  "description": "Integration phase - merge branches, run quality gates, verify completion",
+  "author": {
+    "name": "ai-crew"
+  }
+}

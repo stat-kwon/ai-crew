@@ -1,0 +1,7 @@
+{
+  "name": "crew-restore",
+  "description": "Restore AI-Crew state from a previously saved checkpoint",
+  "author": {
+    "name": "ai-crew"
+  }
+}

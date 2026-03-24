@@ -1,0 +1,7 @@
+{
+  "name": "owner",
+  "description": "Owner Agent - drives AI-DLC Inception in auto mode, stopping only at mandatory approval gates",
+  "author": {
+    "name": "ai-crew"
+  }
+}

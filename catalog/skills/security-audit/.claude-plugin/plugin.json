@@ -1,5 +1,7 @@
 {
   "name": "security-audit",
-  "description": "|",
-  "version": "1.0.0"
+  "description": "Security audit skill covering OWASP top 10, dependency scanning, and secure coding practices",
+  "author": {
+    "name": "ai-crew"
+  }
 }

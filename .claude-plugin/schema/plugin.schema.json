@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Plugin (Generated Artifact)",
+  "description": "Schema for generated plugin.yaml in plugins/ directory",
+  "type": "object",
+  "required": ["id", "name", "version", "source_bundle"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^plugin\\..+$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "source_bundle": {
+      "type": "string",
+      "description": "Path to the source bundle.yaml"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "contents": {
+      "type": "object",
+      "properties": {
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "agents": { "type": "array", "items": { "type": "string" } },
+        "commands": { "type": "array", "items": { "type": "string" } },
+        "hooks": { "type": "array", "items": { "type": "string" } },
+        "mcp": { "type": "array", "items": { "type": "string" } },
+        "rules": { "type": "array", "items": { "type": "string" } },
+        "workflows": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

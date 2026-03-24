@@ -1,5 +1,7 @@
 {
   "name": "code-review",
-  "description": "|",
-  "version": "1.0.0"
+  "description": "Structured code review with severity ratings and categorized feedback",
+  "author": {
+    "name": "ai-crew"
+  }
 }

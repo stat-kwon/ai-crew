@@ -1,0 +1,93 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Bash",
+      "Agent"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/run-tests.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"[ai-crew] Agent started: $AGENT_NAME at $(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> .ai-crew/execution.log 2>/dev/null || true'",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"[ai-crew] Agent stopped: $AGENT_NAME at $(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> .ai-crew/execution.log 2>/dev/null || true'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"[ai-crew] Context compaction at $(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> .ai-crew/execution.log 2>/dev/null || true'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if [ -f .ai-crew/state.json ]; then cp .ai-crew/state.json \".ai-crew/state.$(date -u +%Y%m%d%H%M%S).backup.json\" 2>/dev/null; fi; echo \"[ai-crew] Session stopped at $(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> .ai-crew/execution.log 2>/dev/null || true'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "mcpServers": {
+    "ai-crew": {
+      "command": "python3",
+      "args": [
+        "-m",
+        "mcp_server"
+      ],
+      "cwd": "/Users/seolmin.kwon/projects/ai-crew"
+    },
+    "ouroboros": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "ouroboros-ai",
+        "ouroboros",
+        "mcp",
+        "serve"
+      ]
+    }
+  }
+}

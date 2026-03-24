@@ -1,0 +1,7 @@
+{
+  "name": "tester",
+  "description": "Tester agent - writes tests first following TDD approach",
+  "author": {
+    "name": "ai-crew"
+  }
+}

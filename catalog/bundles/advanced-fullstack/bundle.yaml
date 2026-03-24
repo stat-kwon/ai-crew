@@ -1,0 +1,113 @@
+plugin:
+  id: plugin.advanced-fullstack
+  name: Advanced Fullstack
+  description: "고도화 풀스택 팀: plan > fe_test + be_test + security (병렬) > fe_build + be_build (병렬) > review (aggregator) > qa"
+  version: "1.0.0"
+
+workflow: aidlc
+
+aidlc:
+  install: native
+
+defaults:
+  model: claude-sonnet-4
+  isolation: worktree
+  rules: [global]
+  mcp: [multi-provider]
+
+includes:
+  skills:
+    - planning
+    - frontend-react
+    - backend-node
+    - testing
+    - code-review
+    - security-audit
+  commands:
+    - crew-auto
+    - crew-elaborate
+    - crew-run
+    - crew-integrate
+    - crew-status
+    - crew-checkpoint
+    - crew-restore
+  agents:
+    - owner
+    - planner
+    - tester
+    - frontend-dev
+    - backend-dev
+    - reviewer
+    - qa-engineer
+  hooks:
+    - quality-gate
+    - lint-on-save
+
+graph:
+  nodes:
+    - id: plan
+      type: worker
+      agent: planner
+      skills: [planning]
+      depends_on: []
+      config:
+        isolation: none
+
+    - id: fe_test
+      type: worker
+      agent: tester
+      skills: [testing, frontend-react]
+      depends_on: [plan]
+      config:
+        isolation: worktree
+
+    - id: be_test
+      type: worker
+      agent: tester
+      skills: [testing, backend-node]
+      depends_on: [plan]
+      config:
+        isolation: worktree
+
+    - id: security
+      type: worker
+      agent: reviewer
+      skills: [security-audit]
+      depends_on: [plan]
+      config:
+        isolation: worktree
+
+    - id: fe_build
+      type: worker
+      agent: frontend-dev
+      skills: [frontend-react, testing]
+      hooks: [quality-gate, lint-on-save]
+      depends_on: [fe_test]
+      config:
+        isolation: worktree
+
+    - id: be_build
+      type: worker
+      agent: backend-dev
+      skills: [backend-node, testing]
+      hooks: [quality-gate, lint-on-save]
+      depends_on: [be_test]
+      config:
+        isolation: worktree
+
+    - id: review
+      type: aggregator
+      agent: reviewer
+      skills: [code-review]
+      depends_on: [fe_build, be_build, security]
+      wait: all
+      config:
+        isolation: worktree
+
+    - id: qa
+      type: worker
+      agent: qa-engineer
+      skills: [testing]
+      depends_on: [review]
+      config:
+        isolation: worktree

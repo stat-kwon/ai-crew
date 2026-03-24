@@ -1,5 +1,7 @@
 {
   "name": "frontend-react",
-  "description": "|",
-  "version": "1.0.0"
+  "description": "React frontend development patterns, component design, and state management",
+  "author": {
+    "name": "ai-crew"
+  }
 }

@@ -1,0 +1,7 @@
+{
+  "ai-crew": {
+    "command": "python3",
+    "args": ["-m", "mcp_server"],
+    "cwd": "__AI_CREW_ROOT__"
+  }
+}

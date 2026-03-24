@@ -1,0 +1,58 @@
+plugin:
+  id: plugin.lightweight
+  name: Lightweight
+  description: "경량 팀: plan > frontend + backend (병렬), 리뷰 없이 빠른 개발"
+  version: "2.0.0"
+
+workflow: aidlc
+
+defaults:
+  model: claude-sonnet-4
+  isolation: worktree
+  rules: [global]
+  mcp: [multi-provider]
+
+includes:
+  skills:
+    - planning
+    - frontend-react
+    - backend-node
+    - testing
+  commands:
+    - crew-elaborate
+    - crew-run
+    - crew-status
+  agents:
+    - planner
+    - frontend-dev
+    - backend-dev
+  hooks:
+    - quality-gate
+
+graph:
+  nodes:
+    - id: plan
+      type: worker
+      agent: planner
+      skills: [planning]
+      depends_on: []
+      config:
+        isolation: none
+
+    - id: frontend
+      type: worker
+      agent: frontend-dev
+      skills: [frontend-react, testing]
+      hooks: [quality-gate]
+      depends_on: [plan]
+      config:
+        isolation: worktree
+
+    - id: backend
+      type: worker
+      agent: backend-dev
+      skills: [backend-node, testing]
+      hooks: [quality-gate]
+      depends_on: [plan]
+      config:
+        isolation: worktree

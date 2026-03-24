@@ -1,0 +1,175 @@
+plugin:
+  id: plugin.e2e-premium
+  name: E2E Premium
+  description: "프리미엄 E2E 팀: plan > pm_review > db_design + api_design + design_refine (병렬) > design_gate > fe_test + be_test (병렬 TDD) > fe_build + be_build (병렬) > security > review (aggregator) > qa"
+  version: "1.0.0"
+
+workflow: aidlc
+
+aidlc:
+  install: native
+
+defaults:
+  model: claude-sonnet-4
+  isolation: worktree
+  rules: [global]
+  mcp: [multi-provider, ouroboros]
+
+includes:
+  skills:
+    - planning
+    - workflow-composer
+    - frontend-react
+    - backend-node
+    - database-engineering
+    - api-design
+    - design-refinement
+    - testing
+    - clean-code
+    - code-review
+    - security-audit
+    - ultimate-ui
+  commands:
+    - crew-auto
+    - crew-elaborate
+    - crew-run
+    - crew-integrate
+    - crew-status
+    - crew-checkpoint
+    - crew-restore
+    - crew-refine
+  agents:
+    - owner
+    - planner
+    - pm
+    - builder
+    - tester
+    - frontend-dev
+    - backend-dev
+    - reviewer
+    - qa-engineer
+  hooks:
+    - quality-gate
+    - subagent-tracker
+    - context-guard
+
+graph:
+  nodes:
+    - id: plan
+      type: worker
+      agent: planner
+      skills: [planning, workflow-composer]
+      depends_on: []
+      config:
+        isolation: none
+
+    - id: pm_review
+      type: worker
+      agent: pm
+      skills: [planning, design-refinement]
+      hooks: [context-guard]
+      depends_on: [plan]
+      config:
+        model: claude-opus-4
+        isolation: none
+
+    - id: db_design
+      type: worker
+      agent: backend-dev
+      skills: [database-engineering]
+      depends_on: [pm_review]
+      config:
+        isolation: worktree
+
+    - id: api_design
+      type: worker
+      agent: backend-dev
+      skills: [api-design, backend-node]
+      depends_on: [pm_review]
+      config:
+        isolation: worktree
+
+    - id: design_refine
+      type: worker
+      agent: frontend-dev
+      skills: [design-refinement, frontend-react, ultimate-ui]
+      depends_on: [pm_review]
+      config:
+        isolation: worktree
+
+    - id: design_gate
+      type: aggregator
+      agent: pm
+      skills: [planning]
+      hooks: [context-guard]
+      depends_on: [db_design, api_design, design_refine]
+      wait: all
+      config:
+        model: claude-opus-4
+        isolation: none
+
+    - id: fe_test
+      type: worker
+      agent: tester
+      skills: [testing, frontend-react]
+      hooks: [subagent-tracker]
+      depends_on: [design_gate]
+      config:
+        isolation: worktree
+
+    - id: be_test
+      type: worker
+      agent: tester
+      skills: [testing, backend-node]
+      hooks: [subagent-tracker]
+      depends_on: [design_gate]
+      config:
+        isolation: worktree
+
+    - id: fe_build
+      type: worker
+      agent: frontend-dev
+      skills: [frontend-react, clean-code, testing, ultimate-ui]
+      hooks: [quality-gate, subagent-tracker]
+      depends_on: [fe_test]
+      config:
+        isolation: worktree
+
+    - id: be_build
+      type: worker
+      agent: backend-dev
+      skills: [backend-node, clean-code, testing]
+      hooks: [quality-gate, subagent-tracker]
+      depends_on: [be_test]
+      config:
+        isolation: worktree
+
+    - id: security
+      type: worker
+      agent: reviewer
+      skills: [security-audit]
+      depends_on: [fe_build, be_build]
+      config:
+        model: codex
+        isolation: worktree
+
+    - id: review
+      type: aggregator
+      agent: reviewer
+      skills: [code-review, clean-code]
+      hooks: [context-guard]
+      depends_on: [fe_build, be_build, security]
+      wait: all
+      config:
+        model: codex
+        isolation: worktree
+
+    - id: qa
+      type: worker
+      agent: qa-engineer
+      skills: [testing]
+      hooks: [quality-gate]
+      depends_on: [review]
+      config:
+        model: codex
+        isolation: worktree

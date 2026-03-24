@@ -1,0 +1,7 @@
+{
+  "name": "pm",
+  "description": "Project manager agent - coordinates team and tracks progress",
+  "author": {
+    "name": "ai-crew"
+  }
+}

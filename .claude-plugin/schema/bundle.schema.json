@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bundle",
+  "description": "Schema for bundle.yaml — declares plugin composition from catalog items",
+  "type": "object",
+  "required": ["plugin", "includes"],
+  "properties": {
+    "plugin": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^plugin\\..+$",
+          "description": "Unique plugin identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable plugin name"
+        },
+        "description": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        }
+      }
+    },
+    "workflow": {
+      "type": ["string", "null"],
+      "description": "Workflow methodology (e.g., aidlc)"
+    },
+    "defaults": {
+      "type": "object",
+      "properties": {
+        "model": { "type": "string" },
+        "isolation": { "type": "string", "enum": ["worktree", "none"] },
+        "rules": { "type": "array", "items": { "type": "string" } },
+        "mcp": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "includes": {
+      "type": "object",
+      "properties": {
+        "skills": { "type": "array", "items": { "type": "string" } },
+        "commands": { "type": "array", "items": { "type": "string" } },
+        "agents": { "type": "array", "items": { "type": "string" } },
+        "hooks": { "type": "array", "items": { "type": "string" } },
+        "mcp": { "type": "array", "items": { "type": "string" } },
+        "rules": { "type": "array", "items": { "type": "string" } },
+        "workflows": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "pipeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["stage", "agent"],
+        "properties": {
+          "stage": { "type": "string" },
+          "agent": { "type": "string" },
+          "skills": { "type": "array", "items": { "type": "string" } },
+          "hooks": { "type": "array", "items": { "type": "string" } },
+          "config": {
+            "type": "object",
+            "properties": {
+              "isolation": { "type": "string", "enum": ["worktree", "none"] },
+              "branch_prefix": { "type": "string" },
+              "model": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "properties": {
+        "parallel_groups": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+# Tasks: {{intent.description}}
+
+## Units
+
+{{#each units}}
+### {{this.name}}
+> {{this.description}}
+
+**Dependencies:** {{#if this.dependencies}}{{this.dependencies}}{{else}}없음{{/if}}
+
+#### Tasks
+{{#each this.tasks}}
+- [ ] **{{this.title}}**: {{this.description}}
+{{/each}}
+
+---
+{{/each}}
+
+## 의존성 그래프
+<!-- Unit 간 실행 순서 -->
+
+## 병렬 실행 계획
+<!-- 동시 실행 가능한 Unit 그룹 -->

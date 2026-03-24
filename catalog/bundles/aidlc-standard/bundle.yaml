@@ -1,0 +1,64 @@
+plugin:
+  id: plugin.aidlc-standard
+  name: AIDLC Standard
+  description: "AI-DLC 표준 팀: plan > build > review 순차 실행"
+  version: "2.0.0"
+
+workflow: aidlc
+
+aidlc:
+  install: native
+
+defaults:
+  model: claude-sonnet-4
+  isolation: worktree
+  rules: [global]
+  mcp: [multi-provider]
+
+includes:
+  skills:
+    - planning
+    - testing
+    - code-review
+  commands:
+    - crew-auto
+    - crew-elaborate
+    - crew-run
+    - crew-integrate
+    - crew-status
+    - crew-checkpoint
+    - crew-restore
+  agents:
+    - owner
+    - planner
+    - builder
+    - reviewer
+  hooks:
+    - quality-gate
+
+graph:
+  nodes:
+    - id: plan
+      type: worker
+      agent: planner
+      skills: [planning]
+      depends_on: []
+      config:
+        isolation: none
+
+    - id: build
+      type: worker
+      agent: builder
+      skills: [testing]
+      hooks: [quality-gate]
+      depends_on: [plan]
+      config:
+        isolation: worktree
+
+    - id: review
+      type: worker
+      agent: reviewer
+      skills: [code-review]
+      depends_on: [build]
+      config:
+        isolation: worktree

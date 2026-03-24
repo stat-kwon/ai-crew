@@ -1,0 +1,7 @@
+{
+  "name": "builder",
+  "description": "Builder agent - implements code and writes tests per plan",
+  "author": {
+    "name": "ai-crew"
+  }
+}

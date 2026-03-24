@@ -1,0 +1,7 @@
+{
+  "name": "global",
+  "description": "Global rules applied to all agents - coding standards, git conventions, testing",
+  "author": {
+    "name": "ai-crew"
+  }
+}

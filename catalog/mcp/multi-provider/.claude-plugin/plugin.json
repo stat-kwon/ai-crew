@@ -1,0 +1,7 @@
+{
+  "name": "multi-provider",
+  "description": "MCP server for multi-provider agent chat (OpenAI, Google, Codex)",
+  "author": {
+    "name": "ai-crew"
+  }
+}

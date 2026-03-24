@@ -1,5 +1,7 @@
 {
   "name": "testing",
-  "description": "|",
-  "version": "1.0.0"
+  "description": "Test writing and TDD skill with coverage tracking",
+  "author": {
+    "name": "ai-crew"
+  }
 }

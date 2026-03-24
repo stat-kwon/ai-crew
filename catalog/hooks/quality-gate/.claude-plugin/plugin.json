@@ -1,0 +1,7 @@
+{
+  "name": "quality-gate",
+  "description": "Quality gate hooks - run tests after code changes to ensure quality",
+  "author": {
+    "name": "ai-crew"
+  }
+}

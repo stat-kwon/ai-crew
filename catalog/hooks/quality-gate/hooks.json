@@ -4,7 +4,6 @@
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
-        "profiles": ["standard", "strict"],
         "hooks": [
           {
             "type": "command",
