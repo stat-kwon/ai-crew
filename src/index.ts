@@ -91,3 +91,6 @@ export type {
   HooksConfig,
   HookProfile,
 } from "./hook-profiler.js";
+
+// Graph validation
+export { validateGraph } from "./graph.js";
