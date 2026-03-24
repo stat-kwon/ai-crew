@@ -67,6 +67,14 @@ export { StateManager } from "./state.js";
 export { loadConfig, saveConfig, DEFAULT_CONFIG } from "./config.js";
 export { install } from "./installer.js";
 
+// Install State
+export {
+  recordInstall,
+  readInstallState,
+  diagnose,
+  uninstall,
+} from "./install-state.js";
+
 // Validator
 export {
   validateBundleConfig,
