@@ -78,3 +78,11 @@ export {
 
 // Resolver — Agent frontmatter parser
 export { parseAgentFrontmatter } from "./resolver.js";
+
+// Shared Memory
+export {
+  writeNodeOutput,
+  readNodeOutput,
+  readDependencyOutputs,
+  clearMemory,
+} from "./shared-memory.js";
