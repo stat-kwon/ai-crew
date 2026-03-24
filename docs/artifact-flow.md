@@ -1,0 +1,116 @@
+# Artifact Flow Architecture
+
+> ai-crew의 아티팩트 흐름과 소유권 규칙
+
+---
+
+## 1. 개요
+
+ai-crew는 2단계 워크플로우를 사용한다:
+
+1. **AI-DLC Inception** (설계) — 요구사항 분석, 아키텍처 설계, 유닛 분해
+2. **Graph Agent Construction** (구현) — 그래프 기반 병렬 에이전트 실행
+
+각 단계는 독립된 아티팩트 저장소를 가지며, 명확한 소유권 규칙이 적용된다.
+
+---
+
+## 2. 아티팩트 저장소
+
+```
+aidlc-docs/          -> 설계 아티팩트 (AI-DLC Inception)
+.ai-crew/scratchpad/ -> 실행 핸드오프 (Graph Agent Construction)
+project root/        -> 코드 산출물 (최종 결과물)
+```
+
+| 저장소 | 역할 | 생성 시점 |
+|--------|------|-----------|
+| `aidlc-docs/inception/` | 요구사항, 설계, 유저스토리 등 설계 문서 | Inception 단계 |
+| `aidlc-docs/construction/` | 구현 결과 요약 | `/crew:integrate` 실행 시 |
+| `.ai-crew/scratchpad/` | 에이전트 간 실행 핸드오프 | `/crew:run` 실행 시 |
+| 프로젝트 루트 | 실제 코드 파일 | Construction 단계 |
+
+---
+
+## 3. 생명주기 규칙
+
+### aidlc-docs/inception/
+- Inception 단계에서 **쓰기 가능**
+- Construction 단계에서 **읽기 전용** (freeze)
+- 예외: `pm_review`와 `design_gate` 노드만 ouroboros(ooo)를 통해 패치 가능
+
+### .ai-crew/scratchpad/
+- **임시(ephemeral)** 저장소
+- `/crew:run` 실행 시 에이전트가 생성
+- `/crew:integrate` 후 아카이브
+
+### aidlc-docs/construction/
+- `/crew:integrate`만 쓰기 가능
+- scratchpad 내용을 요약하여 변환
+
+---
+
+## 4. 데이터 흐름도
+
+```
+/crew:elaborate  ->  aidlc-docs/inception/
+       |
+/crew:refine     ->  aidlc-docs/inception/ (ooo evaluate/evolve)
+       |
+       -- inception/ freeze --
+       |
+/crew:run        ->  .ai-crew/scratchpad/ (에이전트: aidlc-docs/ 읽기, scratchpad 쓰기)
+       |              +-- pm_review: ooo를 통해 inception/ 패치 가능
+       |              +-- design_gate: ooo를 통해 inception/ 패치 가능
+       |
+/crew:integrate  ->  aidlc-docs/construction/ (scratchpad -> 요약)
+                     worktree 브랜치 -> main 병합
+```
+
+---
+
+## 5. 상태 추적
+
+| 파일 | 추적 대상 | 갱신 주체 | 수명 |
+|------|-----------|-----------|------|
+| `aidlc-docs/aidlc-state.md` | AI-DLC 단계 진행 | elaborate, refine, integrate | 프로젝트 전체 |
+| `.ai-crew/state.json` | 그래프 노드 상태 | `/crew:run` | 실행 단위 |
+| `aidlc-docs/audit.md` | 모든 상호작용 로그 | 모든 명령어 | 프로젝트 전체 |
+
+---
+
+## 6. 권한 매트릭스
+
+| 에이전트/명령어 | aidlc-docs/inception/ | aidlc-docs/construction/ | scratchpad/ |
+|---|---|---|---|
+| `/crew:elaborate` | WRITE | - | - |
+| `/crew:refine` | WRITE (ooo) | - | - |
+| `/crew:run` 에이전트 | READ-ONLY | - | WRITE |
+| `pm_review` 노드 | PATCH (ooo only) | - | WRITE |
+| `design_gate` 노드 | PATCH (ooo only) | - | WRITE |
+| `/crew:integrate` | - | WRITE | READ |
+
+---
+
+## 7. 사용자 흐름 (4개 명령어)
+
+1. **`/crew:elaborate`** — AI-DLC Inception 실행. 요구사항 분석부터 유닛 분해까지 설계 문서를 생성한다.
+2. **`/crew:refine`** — ouroboros를 통해 설계를 반복 개선한다. 수렴할 때까지 evaluate/evolve 사이클을 실행한다.
+3. **`/crew:run`** — 그래프 실행기를 시작한다. 각 유닛이 독립 worktree에서 병렬로 구현된다. 에이전트는 inception 문서를 읽고 scratchpad에 결과를 기록한다.
+4. **`/crew:integrate`** — scratchpad를 construction 문서로 변환하고, worktree 브랜치를 main에 병합한다.
+
+---
+
+## 8. 설계 결정
+
+### 왜 dual-write를 하지 않는가
+단일 책임 원칙. inception과 construction에 동시에 쓰면 불일치(divergence) 위험이 발생한다. 각 저장소는 하나의 명령어만 쓰기 권한을 가진다.
+
+### 왜 scratchpad는 임시인가
+에이전트 간 핸드오프는 일시적이다. 최종 결과물은 코드이며, scratchpad는 중간 산출물일 뿐이다. integrate가 필요한 정보를 construction 문서로 추출한 후에는 보존할 필요가 없다.
+
+### 왜 integrate가 변환하는가
+관심사 분리(separation of concerns). 에이전트는 구현에 집중하고, 문서화는 integrate가 일괄 처리한다. 이렇게 하면 에이전트가 문서 형식을 신경 쓸 필요가 없다.
+
+### 왜 pm_review/design_gate가 inception을 패치할 수 있는가
+현실적인 피드백 루프. 구현 중 설계 결함을 발견하면 즉시 반영해야 한다. ooo의 evaluate/evolve를 통해서만 패치가 가능하므로 통제된 방식으로 업데이트된다.
