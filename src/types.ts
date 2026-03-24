@@ -195,7 +195,7 @@ export interface Checkpoint {
 }
 
 // ============================================================
-// Bundle Configuration Types
+// Bundle Configuration Types (graph-workflow-design.md)
 // ============================================================
 
 export interface BundlePlugin {
@@ -205,10 +205,15 @@ export interface BundlePlugin {
   version: string;
 }
 
+/**
+ * External workflow source reference.
+ * When workflow is an object, it specifies an external source to fetch.
+ * When workflow is a string, it's either a local name or "none".
+ */
 export interface ExternalWorkflow {
-  source: string;
-  path: string;
-  ref?: string;
+  source: string; // "github:owner/repo" or "npm:package-name"
+  path: string; // subpath within the source
+  ref?: string; // git ref (branch, tag, commit)
 }
 
 export interface BundleDefaults {
@@ -217,7 +222,7 @@ export interface BundleDefaults {
   rules: string[];
   mcp: string[];
   merge_mode?: "auto" | "manual";
-  locale?: string;
+  locale?: string; // e.g., "ko", "en" (default: "en")
 }
 
 export interface BundleIncludes {
@@ -246,8 +251,8 @@ export interface GraphNode {
   skills: string[];
   hooks: string[];
   depends_on: string[];
-  condition?: string;
-  wait?: "all" | "any";
+  condition?: string; // e.g. "{id}.output.{key} == '{val}'"
+  wait?: "all" | "any"; // aggregator only
   config: GraphNodeConfig;
   verify?: VerifyCheck[];
 }
@@ -273,7 +278,7 @@ export interface AidlcConfig {
 
 export interface BundleConfig {
   plugin: BundlePlugin;
-  workflow: ExternalWorkflow | string | null;
+  workflow: ExternalWorkflow | string | null; // object, local name, or "none"/null
   defaults: BundleDefaults;
   includes: BundleIncludes;
   graph: BundleGraph;
@@ -309,12 +314,12 @@ export interface ResolvedFiles {
 }
 
 export interface HooksResolution {
-  files: FileMapping[];
-  configs: Record<string, unknown>[];
+  files: FileMapping[]; // handler scripts
+  configs: Record<string, unknown>[]; // parsed hooks.json contents
 }
 
 export interface McpResolution {
-  configs: Record<string, unknown>[];
+  configs: Record<string, unknown>[]; // parsed .mcp.json contents
 }
 
 // ============================================================

@@ -1,3 +1,4 @@
+// -- Types ------------------------------------------------------------
 export type {
   // State Model
   AICrewState,
@@ -63,11 +64,16 @@ export type {
   ProjectContext,
 } from "./types.js";
 
-export { StateManager } from "./state.js";
-export { loadConfig, saveConfig, DEFAULT_CONFIG } from "./config.js";
+// -- Graph Engine -----------------------------------------------------
+export { validateGraph } from "./graph.js";
+
+// -- Resolver ---------------------------------------------------------
+export { parseAgentFrontmatter } from "./resolver.js";
+
+// -- Installer --------------------------------------------------------
 export { install } from "./installer.js";
 
-// Install State
+// -- Install State ----------------------------------------------------
 export {
   recordInstall,
   readInstallState,
@@ -75,7 +81,7 @@ export {
   uninstall,
 } from "./install-state.js";
 
-// Validator
+// -- Validator --------------------------------------------------------
 export {
   validateBundleConfig,
   validateConfigYaml,
@@ -85,10 +91,7 @@ export {
   validateStateJson,
 } from "./validator.js";
 
-// Resolver — Agent frontmatter parser
-export { parseAgentFrontmatter } from "./resolver.js";
-
-// Hook Profiler
+// -- Hook Profiler ----------------------------------------------------
 export {
   filterHooksByProfile,
   filterHooksConfigByProfile,
@@ -101,13 +104,10 @@ export type {
   HookProfile,
 } from "./hook-profiler.js";
 
-// Graph validation
-export { validateGraph } from "./graph.js";
-
-// Verifier — Node verification checks
+// -- Verifier — Node verification checks ------------------------------
 export { getDefaultCommands, verifyNode } from "./verifier.js";
 
-// Shared Memory
+// -- Shared Memory ----------------------------------------------------
 export {
   writeNodeOutput,
   readNodeOutput,
@@ -115,10 +115,10 @@ export {
   clearMemory,
 } from "./shared-memory.js";
 
-// Session Context — project-context.json persistence
+// -- Session Context — project-context.json persistence ---------------
 export { saveContext, loadContext, mergeAgentLearning } from "./session-context.js";
 
-// Checkpoint
+// -- Checkpoint -------------------------------------------------------
 export {
   createCheckpoint,
   listCheckpoints,

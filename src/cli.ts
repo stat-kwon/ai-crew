@@ -3,8 +3,6 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { install } from "./installer.js";
-import { StateManager } from "./state.js";
-import { loadConfig } from "./config.js";
 import { diagnose, uninstall } from "./install-state.js";
 import { runValidate } from "./cli-validate.js";
 
@@ -12,74 +10,126 @@ const program = new Command();
 
 program
   .name("ai-crew")
-  .description("AI-DLC methodology on Claude Code Agent Teams")
-  .version("0.1.0");
+  .description("Catalog-based Plugin Composition Platform for Claude Code")
+  .version("0.3.0");
+
+// -- install --------------------------------------------------------
 
 program
-  .command("init")
-  .description("Initialize AI-Crew in the current project")
-  .option("--lang <lang>", "Language (ko|en)", "ko")
+  .command("install")
+  .description("Install a bundle into a target project")
+  .requiredOption("--team <name>", "Bundle name (e.g., aidlc-standard, fullstack)")
+  .requiredOption("--target <path>", "Target project path")
   .option("--force", "Overwrite existing configuration", false)
   .action(async (options) => {
-    const projectRoot = process.cwd();
     try {
-      await install(projectRoot, {
-        lang: options.lang as "ko" | "en",
+      const result = await install(options.team, options.target, {
         force: options.force,
       });
-      console.log(chalk.green("\u2713 AI-Crew initialized successfully!"));
+
+      console.log(
+        chalk.green(
+          `\u2713 Installed bundle "${result.bundleName}" to ${result.targetPath}`,
+        ),
+      );
       console.log();
       console.log("Created:");
-      console.log(`  ${chalk.cyan(".ai-crew/")}        \u2014 state, config, specs, rules`);
-      console.log(`  ${chalk.cyan(".claude/commands/crew/")} \u2014 slash commands`);
-      console.log(`  ${chalk.cyan("CLAUDE.md")}        \u2014 AI-Crew section appended`);
+      console.log(
+        `  ${chalk.cyan(".ai-crew/")}          \u2014 config, state, graph, workflow`,
+      );
+      console.log(
+        `  ${chalk.cyan(".claude/commands/")}   \u2014 slash commands`,
+      );
+      console.log(
+        `  ${chalk.cyan(".claude/agents/")}     \u2014 agent definitions`,
+      );
+      console.log(
+        `  ${chalk.cyan(".claude/skills/")}     \u2014 skill definitions`,
+      );
       console.log();
-      console.log(`Start with: ${chalk.yellow("/crew:elaborate <your intent>")}`);
+      console.log(`Files installed: ${result.filesInstalled}`);
+      if (result.graphNodes > 0) {
+        console.log(`Graph nodes: ${result.graphNodes}`);
+      }
+      if (result.workflowSource) {
+        console.log(`Workflow: ${result.workflowSource}`);
+      }
+      console.log();
+      console.log(
+        `Start with: ${chalk.yellow("/crew:elaborate <your intent>")}`,
+      );
     } catch (err) {
       console.error(chalk.red(`Error: ${(err as Error).message}`));
       process.exit(1);
     }
   });
 
+// -- status ---------------------------------------------------------
+
 program
   .command("status")
-  .description("Show current AI-Crew state")
-  .action(async () => {
-    const projectRoot = process.cwd();
-    const sm = new StateManager(projectRoot);
-    const state = await sm.load();
+  .description("Show current AI-Crew state for a project")
+  .option("--target <path>", "Project path", process.cwd())
+  .action(async (options) => {
+    const { readFile } = await import("node:fs/promises");
+    const { join } = await import("node:path");
+    const { existsSync } = await import("node:fs");
 
-    if (!state.intent) {
-      console.log(chalk.dim("No active intent. Start with /crew:elaborate"));
+    const crewDir = join(options.target, ".ai-crew");
+    if (!existsSync(crewDir)) {
+      console.log(
+        chalk.dim("No AI-Crew installation found. Install with: ai-crew install --team <name> --target <path>"),
+      );
       return;
     }
 
-    console.log(chalk.bold("Intent:"), state.intent.description);
-    console.log(chalk.bold("Status:"), state.intent.status);
-    console.log(
-      chalk.bold("Units:"),
-      `${state.units.filter((u) => u.status === "complete").length}/${state.units.length} complete`,
-    );
-    console.log();
+    try {
+      const statePath = join(crewDir, "state.json");
+      if (!existsSync(statePath)) {
+        console.log(chalk.dim("No state file found."));
+        return;
+      }
 
-    for (const unit of state.units) {
-      const icon =
-        unit.status === "complete"
-          ? chalk.green("\u2713")
-          : unit.status === "in-progress"
-            ? chalk.yellow("\u2192")
-            : chalk.dim("\u25CB");
-      console.log(`  ${icon} ${unit.name} [${unit.status}]`);
+      const state = JSON.parse(await readFile(statePath, "utf-8"));
+      console.log(chalk.bold(`Bundle: ${state.bundleName ?? state.version ?? "unknown"}`));
+      console.log();
+
+      const nodes = state.nodes as Record<
+        string,
+        { status: string }
+      > | undefined;
+      if (!nodes || Object.keys(nodes).length === 0) {
+        console.log(chalk.dim("No graph nodes defined."));
+        return;
+      }
+
+      for (const [id, node] of Object.entries(nodes)) {
+        const icon =
+          node.status === "completed"
+            ? chalk.green("\u2713")
+            : node.status === "running"
+              ? chalk.yellow("\u2192")
+              : node.status === "failed"
+                ? chalk.red("\u2717")
+                : chalk.dim("\u25CB");
+        console.log(`  ${icon} ${id} [${node.status}]`);
+      }
+    } catch (err) {
+      console.error(chalk.red(`Error: ${(err as Error).message}`));
+      process.exit(1);
     }
   });
+
+// -- doctor ---------------------------------------------------------
 
 program
   .command("doctor")
   .description("Diagnose the AI-Crew installation")
-  .action(async () => {
-    const projectRoot = process.cwd();
+  .option("--target <path>", "Project path", process.cwd())
+  .action(async (options) => {
+    const targetPath = options.target;
     try {
-      const result = await diagnose(projectRoot);
+      const result = await diagnose(targetPath);
 
       if (result.healthy) {
         console.log(chalk.green("Installation is healthy. All files present."));
@@ -113,7 +163,7 @@ program
       }
 
       console.log(
-        chalk.dim("Run 'ai-crew init --force' to repair the installation."),
+        chalk.dim("Run 'ai-crew install --team <name> --target <path> --force' to repair the installation."),
       );
     } catch (err) {
       console.error(chalk.red(`Error: ${(err as Error).message}`));
@@ -121,12 +171,15 @@ program
     }
   });
 
+// -- uninstall ------------------------------------------------------
+
 program
   .command("uninstall")
-  .description("Remove AI-Crew files from the current project")
+  .description("Remove AI-Crew files from a project")
+  .option("--target <path>", "Project path", process.cwd())
   .option("--yes", "Skip confirmation prompt", false)
   .action(async (options) => {
-    const projectRoot = process.cwd();
+    const targetPath = options.target;
     try {
       if (!options.yes) {
         // Simple confirmation via stderr prompt
@@ -151,7 +204,7 @@ program
         }
       }
 
-      const result = await uninstall(projectRoot);
+      const result = await uninstall(targetPath);
       console.log(chalk.green("AI-Crew uninstalled successfully."));
       console.log(`  Files removed: ${result.filesRemoved}`);
       console.log(`  Directories cleaned: ${result.dirsRemoved}`);
@@ -161,6 +214,8 @@ program
     }
   });
 
+// -- validate -------------------------------------------------------
+
 program
   .command("validate")
   .description("Validate .ai-crew configuration files (config.yaml, graph.yaml, state.json)")
@@ -169,6 +224,8 @@ program
     const exitCode = await runValidate(options.target);
     process.exit(exitCode);
   });
+
+// -- mcp ------------------------------------------------------------
 
 program
   .command("mcp")

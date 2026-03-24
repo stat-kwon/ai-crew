@@ -3,16 +3,81 @@ import { join, dirname } from "node:path";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { stringify } from "yaml";
-import { DEFAULT_CONFIG } from "./config.js";
 import { recordInstall } from "./install-state.js";
 import {
   resolveHookProfile,
   filterHooksConfigByProfile,
 } from "./hook-profiler.js";
 import type { HooksConfig } from "./hook-profiler.js";
-import type { AICrewConfig, InstallResult } from "./types.js";
+import type {
+  AICrewConfig,
+  InstallOptions,
+  InstallResult,
+} from "./types.js";
 
-export interface InstallOptions {
+/** Default configuration for AI-Crew projects. */
+const DEFAULT_CONFIG: AICrewConfig = {
+  version: "2.0",
+  execution: {
+    maxParallelUnits: 3,
+    defaultModel: "claude-sonnet-4",
+    teammateMode: "tmux",
+  },
+  hats: {
+    requirePlanApproval: false,
+    autoTransition: true,
+    pipeline: [
+      {
+        id: "planner",
+        name: "Planner",
+        description: "Task analysis, approach decision, plan documentation",
+        rules: ".ai-crew/rules/hat-planner.md",
+        artifacts: [".ai-crew/scratchpad/{agent}.md"],
+        transitions: ["plan documented in scratchpad"],
+        qualityGates: [],
+      },
+      {
+        id: "builder",
+        name: "Builder",
+        description: "Code implementation, test writing",
+        rules: ".ai-crew/rules/hat-builder.md",
+        artifacts: ["src/**", "tests/**"],
+        transitions: ["all tasks attempted", "tests written"],
+        qualityGates: [
+          { command: "npm test -- --related", failAction: "block" },
+        ],
+      },
+      {
+        id: "reviewer",
+        name: "Reviewer",
+        description: "Test/lint execution, code quality verification",
+        rules: ".ai-crew/rules/hat-reviewer.md",
+        artifacts: [],
+        transitions: ["all tests pass", "lint passes", "criteria verified"],
+        qualityGates: [
+          { command: "npm run lint", failAction: "warn" },
+          {
+            command: "npm run test:coverage",
+            failAction: "block",
+            minCoverage: 80,
+          },
+        ],
+      },
+    ],
+    presets: {
+      core: ["planner", "builder", "reviewer"],
+      tdd: ["planner", "tester", "builder", "reviewer"],
+      secure: ["planner", "builder", "reviewer", "security-reviewer"],
+    },
+  },
+  checkpoints: {
+    auto: true,
+    triggers: ["unit:completed", "hat:changed"],
+  },
+  language: "ko",
+};
+
+export interface LegacyInstallOptions {
   lang?: "ko" | "en";
   force?: boolean;
   hookProfile?: string;
@@ -20,19 +85,30 @@ export interface InstallOptions {
 
 function getTemplatesDir(): string {
   const thisFile = fileURLToPath(import.meta.url);
-  // In dist/cli.js → templates/ is at ../templates/
-  // In src/installer.ts → templates/ is at ../templates/
+  // In dist/cli.js -> templates/ is at ../templates/
+  // In src/installer.ts -> templates/ is at ../templates/
   return join(dirname(thisFile), "..", "templates");
 }
 
+/**
+ * Install a bundle into a target project.
+ *
+ * Signature follows the new architecture:
+ *   install(bundleName, targetPath, options?)
+ *
+ * Currently the bundleName is recorded but the installer uses
+ * the template-based approach (will be replaced by catalog
+ * resolver when loadBundle / resolveIncludes are available).
+ */
 export async function install(
-  projectRoot: string,
-  options: InstallOptions = {},
-): Promise<void> {
-  const lang = options.lang ?? "ko";
-  const force = options.force ?? false;
-  const crewDir = join(projectRoot, ".ai-crew");
-  const claudeDir = join(projectRoot, ".claude");
+  bundleName: string,
+  targetPath: string,
+  options?: InstallOptions & LegacyInstallOptions,
+): Promise<InstallResult> {
+  const lang = options?.lang ?? "ko";
+  const force = options?.force ?? false;
+  const crewDir = join(targetPath, ".ai-crew");
+  const claudeDir = join(targetPath, ".claude");
   const templatesDir = getTemplatesDir();
   const installedFiles: string[] = [];
 
@@ -85,7 +161,7 @@ export async function install(
   );
   installedFiles.push(...promptFiles);
 
-  // 5. Copy doc-templates → .ai-crew/templates
+  // 5. Copy doc-templates -> .ai-crew/templates
   const templateFiles = await copyDirTracked(
     join(templatesDir, "doc-templates"),
     join(crewDir, "templates"),
@@ -122,19 +198,19 @@ export async function install(
   installedFiles.push(...commandFiles);
 
   // 9. Create/update .claude/settings.json
-  await writeSettingsJson(claudeDir, crewDir);
+  await writeSettingsJson(claudeDir);
   installedFiles.push(join(claudeDir, "settings.json"));
 
   // 10. Merge hooks configs with profile filtering
   const hooksFiles = await mergeHooksConfigs(
-    projectRoot,
-    options.hookProfile,
+    targetPath,
+    options?.hookProfile,
   );
   installedFiles.push(...hooksFiles);
 
   // 11. Append AI-Crew section to CLAUDE.md
-  await appendClaudeMd(projectRoot);
-  installedFiles.push(join(projectRoot, "CLAUDE.md"));
+  await appendClaudeMd(targetPath);
+  installedFiles.push(join(targetPath, "CLAUDE.md"));
 
   // 12. Create .gitkeep in empty dirs
   for (const dir of ["specs", "checkpoints", "scratchpad", "sessions"]) {
@@ -145,21 +221,23 @@ export async function install(
     installedFiles.push(gitkeep);
   }
 
-  // 13. Record install state for doctor/uninstall
+  // 13. Build result and record install state for doctor/uninstall
   const result: InstallResult = {
-    bundleName: "ai-crew",
-    targetPath: projectRoot,
+    bundleName,
+    targetPath,
     filesInstalled: installedFiles.length,
     graphNodes: 0,
     workflowSource: null,
   };
-  await recordInstall(projectRoot, result, installedFiles);
+  await recordInstall(targetPath, result, installedFiles);
+
+  return result;
 }
 
 /**
  * Collect hooks.json files from catalog/hooks/*, merge them into a single
  * hooks config, filter by the active hook profile, and write the result
- * to .claude/settings.local.hooks.json for Claude to discover.
+ * to .claude/hooks.json for Claude to discover.
  *
  * Returns paths of files written (empty if no hooks found).
  */
@@ -243,10 +321,7 @@ async function collectFilesInDir(dir: string): Promise<string[]> {
   return results;
 }
 
-async function writeSettingsJson(
-  claudeDir: string,
-  crewDir: string,
-): Promise<void> {
+async function writeSettingsJson(claudeDir: string): Promise<void> {
   const settingsPath = join(claudeDir, "settings.json");
   let settings: Record<string, unknown> = {};
 
@@ -298,24 +373,24 @@ async function appendClaudeMd(projectRoot: string): Promise<void> {
 ${marker}
 ## AI-Crew
 
-이 프로젝트는 AI-Crew (AI-DLC on Claude Code Agent Teams)를 사용합니다.
+This project uses AI-Crew (AI-DLC on Claude Code Agent Teams).
 
-### 명령어
-- \`/crew:elaborate\` — Intent 정의 & Unit 분해 (Inception)
-- \`/crew:execute\` — Agent Team 생성 & 실행 (Construction)
-- \`/crew:integrate\` — 결과 통합 & 검증 (Integration)
-- \`/crew:status\` — 현재 상태 조회
-- \`/crew:checkpoint\` — 상태 스냅샷 저장
-- \`/crew:restore\` — 이전 상태 복구
+### Commands
+- \`/crew:elaborate\` — Define intent & decompose units (Inception)
+- \`/crew:run\` — Create & run agent team (Construction)
+- \`/crew:integrate\` — Merge results & verify (Integration)
+- \`/crew:status\` — Show current state
+- \`/crew:checkpoint\` — Save state snapshot
+- \`/crew:restore\` — Restore previous state
 
-### 디렉토리
-- \`.ai-crew/\` — 상태, 설정, 스펙, 프롬프트
-- \`.ai-crew/specs/\` — Intent별 요구사항/설계/태스크 문서
-- \`.ai-crew/aidlc-rule-details/\` — AI-DLC 방법론 규칙
+### Directories
+- \`.ai-crew/\` — State, config, specs, prompts
+- \`.ai-crew/specs/\` — Requirements/design/task docs per intent
+- \`.ai-crew/aidlc-rule-details/\` — AI-DLC methodology rules
 
-### 참고
-- 상태 파일: \`.ai-crew/state.json\`
-- 설정 파일: \`.ai-crew/config.yaml\`
+### Reference
+- State file: \`.ai-crew/state.json\`
+- Config file: \`.ai-crew/config.yaml\`
 <!-- ai-crew:end -->
 `;
 
