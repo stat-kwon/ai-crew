@@ -1,0 +1,31 @@
+{
+  "description": "Guard against work loss on context compression or unexpected stop",
+  "hooks": {
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "profiles": ["minimal", "standard", "strict"],
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"[ai-crew] Context compaction at $(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> .ai-crew/execution.log 2>/dev/null || true'",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "profiles": ["minimal", "standard", "strict"],
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'if [ -f .ai-crew/state.json ]; then cp .ai-crew/state.json \".ai-crew/state.$(date -u +%Y%m%d%H%M%S).backup.json\" 2>/dev/null; fi; echo \"[ai-crew] Session stopped at $(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> .ai-crew/execution.log 2>/dev/null || true'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

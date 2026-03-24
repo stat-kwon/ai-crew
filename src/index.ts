@@ -78,3 +78,16 @@ export {
 
 // Resolver — Agent frontmatter parser
 export { parseAgentFrontmatter } from "./resolver.js";
+
+// Hook Profiler
+export {
+  filterHooksByProfile,
+  filterHooksConfigByProfile,
+  resolveHookProfile,
+} from "./hook-profiler.js";
+export type {
+  HookMatcher,
+  HookAction,
+  HooksConfig,
+  HookProfile,
+} from "./hook-profiler.js";
