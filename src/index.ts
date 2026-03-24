@@ -70,6 +70,7 @@ export { install } from "./installer.js";
 // Validator
 export {
   validateBundleConfig,
+  validateConfigYaml,
   validateGraphYaml,
   validatePluginJson,
   validateHooksJson,

@@ -5,6 +5,7 @@ import chalk from "chalk";
 import { install } from "./installer.js";
 import { StateManager } from "./state.js";
 import { loadConfig } from "./config.js";
+import { runValidate } from "./cli-validate.js";
 
 const program = new Command();
 
@@ -69,6 +70,15 @@ program
             : chalk.dim("○");
       console.log(`  ${icon} ${unit.name} [${unit.status}]`);
     }
+  });
+
+program
+  .command("validate")
+  .description("Validate .ai-crew configuration files (config.yaml, graph.yaml, state.json)")
+  .option("--target <path>", "Project root to validate", process.cwd())
+  .action(async (options) => {
+    const exitCode = await runValidate(options.target);
+    process.exit(exitCode);
   });
 
 program

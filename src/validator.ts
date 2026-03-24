@@ -42,6 +42,45 @@ function requireObject(
 }
 
 // ============================================================
+// validateConfigYaml
+// ============================================================
+
+/**
+ * Validate a parsed config.yaml (AICrewConfig) structure.
+ * Required: version, execution.defaultModel, hats.pipeline, checkpoints, language.
+ */
+export function validateConfigYaml(data: unknown): ValidationResult {
+  const errors: ValidationError[] = [];
+
+  if (!isObject(data)) {
+    errors.push(err("", "config.yaml must be an object"));
+    return { valid: false, errors };
+  }
+
+  requireString(data, "version", "", errors);
+
+  const execution = requireObject(data, "execution", "", errors);
+  if (execution) {
+    requireString(execution, "defaultModel", "execution", errors);
+  }
+
+  const hats = requireObject(data, "hats", "", errors);
+  if (hats) {
+    if (!Array.isArray(hats.pipeline)) {
+      errors.push(err("hats.pipeline", '"pipeline" must be an array'));
+    }
+  }
+
+  requireObject(data, "checkpoints", "", errors);
+
+  if (typeof data.language !== "string" || !["ko", "en"].includes(data.language as string)) {
+    errors.push(err("language", '"language" must be "ko" or "en"'));
+  }
+
+  return { valid: errors.filter((e) => e.severity === "error").length === 0, errors };
+}
+
+// ============================================================
 // validateBundleConfig
 // ============================================================
 
@@ -155,6 +194,22 @@ function validateGraphNodes(
       const config = isObject(node.config) ? node.config : {};
       if (config.isolation !== "none") {
         errors.push(err(`${nodePath}.config.isolation`, 'Router nodes must have isolation: "none"'));
+      }
+
+      // FR-9: Router condition field validation stub.
+      // Router nodes may declare a `condition` field that specifies a branch
+      // expression evaluated at runtime. Format: "<field> <op> <value>" where
+      // op is one of: ==, !=, contains, matches.
+      // Full condition evaluation is not yet implemented; emit a warning so
+      // users are aware the field is recognized but not enforced.
+      if (typeof node.condition === "string" && node.condition.length > 0) {
+        errors.push(
+          err(
+            `${nodePath}.condition`,
+            "Router condition evaluation not yet implemented",
+            "warning",
+          ),
+        );
       }
     }
 
