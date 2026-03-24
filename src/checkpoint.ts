@@ -237,7 +237,10 @@ export async function restoreCheckpoint(
   await backupFile(statePath);
   await backupFile(memoryPath);
 
-  // Restore using atomic writes
-  await writeJsonAtomic(statePath, data.state);
+  // Restore using atomic writes.
+  // Write memory first (less critical), then state (authoritative).
+  // If crash occurs between the two writes, the old state.json remains
+  // intact, which is the safer partial-failure mode.
   await writeJsonAtomic(memoryPath, data.memory);
+  await writeJsonAtomic(statePath, data.state);
 }

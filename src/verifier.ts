@@ -31,7 +31,10 @@ function resolveCommand(
   if (check in defaults) {
     return defaults[check];
   }
-  // Treat arbitrary string as a raw command
+  // Treat arbitrary string as a raw command.
+  // SECURITY NOTE: graph.yaml is a developer-authored trusted configuration file.
+  // Custom verify commands are executed in a shell. Only use graph.yaml from
+  // trusted sources. This is equivalent to npm scripts in package.json.
   return check;
 }
 

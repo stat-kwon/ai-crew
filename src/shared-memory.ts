@@ -89,6 +89,14 @@ function emptyStore(): SharedMemoryStore {
  * Atomic operation: read existing store -> merge node data -> write to
  * temp file -> rename into place. Each node writes only to its own key
  * so there are no key-level conflicts between concurrent node agents.
+ *
+ * CONCURRENCY NOTE: The read-modify-write cycle is NOT locked across callers.
+ * If two agents call writeNodeOutput concurrently, the last write wins for
+ * the full file (though each writes a different key). In practice this is safe
+ * because the graph executor runs nodes level-by-level, so concurrent writes
+ * only happen within a level where each node has a unique key. A future
+ * improvement could switch to per-node files (memory/{nodeId}.json) to
+ * eliminate this concern entirely.
  */
 export async function writeNodeOutput(
   crewDir: string,
@@ -165,14 +173,8 @@ export async function clearMemory(crewDir: string): Promise<void> {
     throw new Error("crewDir is required");
   }
 
-  try {
-    await rm(memoryPath(crewDir), { force: true });
-  } catch (err: unknown) {
-    if (isNodeError(err) && err.code === "ENOENT") {
-      return;
-    }
-    throw err;
-  }
+  // rm with force: true already suppresses ENOENT
+  await rm(memoryPath(crewDir), { force: true });
 }
 
 // ============================================================

@@ -233,6 +233,74 @@ function validateGraphNodes(
       }
     }
   }
+
+  // ── Cross-node validation ──────────────────────────────────
+
+  // Collect valid node IDs
+  const nodeIds = new Set<string>();
+  const seenIds = new Set<string>();
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (!isObject(node) || typeof node.id !== "string") continue;
+    if (seenIds.has(node.id)) {
+      errors.push(err(`${basePath}.nodes[${i}].id`, `Duplicate node id: "${node.id}"`));
+    }
+    seenIds.add(node.id);
+    nodeIds.add(node.id);
+  }
+
+  // Validate depends_on references exist
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (!isObject(node) || !Array.isArray(node.depends_on)) continue;
+    for (const dep of node.depends_on) {
+      if (typeof dep === "string" && !nodeIds.has(dep)) {
+        errors.push(err(
+          `${basePath}.nodes[${i}].depends_on`,
+          `References non-existent node: "${dep}"`,
+        ));
+      }
+    }
+  }
+
+  // Cycle detection using Kahn's algorithm
+  if (nodeIds.size > 0) {
+    const inDegree = new Map<string, number>();
+    const adj = new Map<string, string[]>();
+    for (const id of nodeIds) {
+      inDegree.set(id, 0);
+      adj.set(id, []);
+    }
+    for (const node of nodes) {
+      if (!isObject(node) || typeof node.id !== "string" || !Array.isArray(node.depends_on)) continue;
+      for (const dep of node.depends_on) {
+        if (typeof dep === "string" && nodeIds.has(dep)) {
+          adj.get(dep)!.push(node.id);
+          inDegree.set(node.id, (inDegree.get(node.id) ?? 0) + 1);
+        }
+      }
+    }
+
+    const queue: string[] = [];
+    for (const [id, deg] of inDegree) {
+      if (deg === 0) queue.push(id);
+    }
+
+    let visited = 0;
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      visited++;
+      for (const next of adj.get(current) ?? []) {
+        const newDeg = (inDegree.get(next) ?? 1) - 1;
+        inDegree.set(next, newDeg);
+        if (newDeg === 0) queue.push(next);
+      }
+    }
+
+    if (visited < nodeIds.size) {
+      errors.push(err(`${basePath}.nodes`, "Circular dependency detected in graph nodes"));
+    }
+  }
 }
 
 // ============================================================
