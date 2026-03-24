@@ -113,3 +113,6 @@ export {
   readDependencyOutputs,
   clearMemory,
 } from "./shared-memory.js";
+
+// Session Context — project-context.json persistence
+export { saveContext, loadContext, mergeAgentLearning } from "./session-context.js";
