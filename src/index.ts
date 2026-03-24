@@ -94,3 +94,6 @@ export type {
 
 // Graph validation
 export { validateGraph } from "./graph.js";
+
+// Verifier — Node verification checks
+export { getDefaultCommands, verifyNode } from "./verifier.js";
