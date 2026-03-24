@@ -1,0 +1,31 @@
+{
+  "description": "Track multi-agent execution state during /crew:run",
+  "hooks": {
+    "SubagentStart": [
+      {
+        "matcher": "*",
+        "profiles": ["standard", "strict"],
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"[ai-crew] Agent started: $AGENT_NAME at $(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> .ai-crew/execution.log 2>/dev/null || true'",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "*",
+        "profiles": ["standard", "strict"],
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'echo \"[ai-crew] Agent stopped: $AGENT_NAME at $(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> .ai-crew/execution.log 2>/dev/null || true'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
