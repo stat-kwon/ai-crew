@@ -1,17 +1,20 @@
 {
   "name": "ai-crew",
-  "version": "0.1.0",
-  "description": "AI-DLC methodology on Claude Code Agent Teams",
+  "version": "0.3.0",
+  "description": "Catalog-based Plugin Composition Platform for Claude Code",
   "type": "module",
   "bin": {
     "ai-crew": "./dist/cli.js"
   },
   "files": [
     "dist",
-    "templates"
+    "catalog",
+    "plugins",
+    "tools",
+    ".claude-plugin"
   ],
   "scripts": {
-    "build": "bash scripts/copy-aidlc.sh && tsup",
+    "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
     "test:watch": "vitest",
