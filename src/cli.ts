@@ -3,6 +3,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import { install } from "./installer.js";
+import { listBundles, loadBundle } from "./resolver.js";
 import { diagnose, uninstall } from "./install-state.js";
 import { runValidate } from "./cli-validate.js";
 
@@ -64,6 +65,58 @@ program
     }
   });
 
+// -- list -----------------------------------------------------------
+
+program
+  .command("list")
+  .description("List available bundles")
+  .option("--verbose", "Show detailed information", false)
+  .action(async (options) => {
+    try {
+      const bundles = await listBundles();
+
+      if (bundles.length === 0) {
+        console.log(chalk.dim("No bundles found."));
+        return;
+      }
+
+      console.log(chalk.bold("Available Bundles:\n"));
+      for (const bundle of bundles) {
+        console.log(
+          `  ${chalk.cyan(bundle.name)} ${chalk.dim(`v${bundle.version}`)}`,
+        );
+        console.log(`    ${bundle.description}`);
+
+        if (options.verbose) {
+          try {
+            const full = await loadBundle(bundle.name);
+            const nodes = full.graph.nodes.length;
+            const workflow =
+              full.workflow === null
+                ? "none"
+                : typeof full.workflow === "string"
+                  ? full.workflow
+                  : full.workflow.source;
+            console.log(`    Workflow: ${workflow}`);
+            console.log(`    Graph nodes: ${nodes}`);
+          } catch {
+            // skip
+          }
+        }
+        console.log();
+      }
+
+      console.log(
+        chalk.dim(
+          "Install with: ai-crew install --team <name> --target <path>",
+        ),
+      );
+    } catch (err) {
+      console.error(chalk.red(`Error: ${(err as Error).message}`));
+      process.exit(1);
+    }
+  });
+
 // -- status ---------------------------------------------------------
 
 program
@@ -91,14 +144,14 @@ program
       }
 
       const state = JSON.parse(await readFile(statePath, "utf-8"));
-      console.log(chalk.bold(`Bundle: ${state.bundleName ?? state.version ?? "unknown"}`));
+      console.log(chalk.bold(`Bundle: ${state.bundleName}`));
       console.log();
 
       const nodes = state.nodes as Record<
         string,
         { status: string }
-      > | undefined;
-      if (!nodes || Object.keys(nodes).length === 0) {
+      >;
+      if (Object.keys(nodes).length === 0) {
         console.log(chalk.dim("No graph nodes defined."));
         return;
       }

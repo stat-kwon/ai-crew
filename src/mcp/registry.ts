@@ -7,12 +7,16 @@ interface ModelCatalogEntry {
 
 /** Known model-to-provider mappings */
 const MODEL_CATALOG: ModelCatalogEntry[] = [
-  // OpenAI
+  // OpenAI (standard API key)
   { modelId: "gpt-4o", providerName: "openai" },
   { modelId: "gpt-4o-mini", providerName: "openai" },
   { modelId: "o3", providerName: "openai" },
   { modelId: "o3-mini", providerName: "openai" },
-  { modelId: "codex", providerName: "openai" },
+  // Codex (ChatGPT OAuth token)
+  { modelId: "codex-mini-latest", providerName: "codex" },
+  { modelId: "gpt-5.2-codex", providerName: "codex" },
+  { modelId: "gpt-5.1-codex", providerName: "codex" },
+  { modelId: "gpt-5.1-codex-mini", providerName: "codex" },
   // Google
   { modelId: "gemini-2.5-pro", providerName: "google" },
   { modelId: "gemini-2.5-flash", providerName: "google" },
@@ -39,6 +43,11 @@ export class ProviderRegistry {
           provider = new OpenAIProvider();
           break;
         }
+        case "codex": {
+          const { CodexProvider } = await import("./providers/codex.js");
+          provider = new CodexProvider();
+          break;
+        }
         case "google": {
           const { GoogleProvider } = await import("./providers/google.js");
           provider = new GoogleProvider();
@@ -63,7 +72,13 @@ export class ProviderRegistry {
     if (entry) return entry.providerName;
 
     // Heuristic: prefix-based routing
-    if (modelId.startsWith("gpt-") || modelId.startsWith("o3") || modelId === "codex") {
+    if (modelId.startsWith("gpt-") && modelId.includes("codex")) {
+      return "codex";
+    }
+    if (modelId.startsWith("codex")) {
+      return "codex";
+    }
+    if (modelId.startsWith("gpt-") || modelId.startsWith("o3")) {
       return "openai";
     }
     if (modelId.startsWith("gemini")) {
@@ -105,7 +120,10 @@ function getModelDescription(modelId: string): string {
     "gpt-4o-mini": "GPT-4o Mini - lightweight and cost-effective",
     "o3": "o3 - advanced reasoning model",
     "o3-mini": "o3-mini - efficient reasoning model",
-    "codex": "Codex - code generation model",
+    "codex-mini-latest": "Codex Mini - lightweight code model (latest)",
+    "gpt-5.2-codex": "GPT-5.2 Codex - advanced code generation",
+    "gpt-5.1-codex": "GPT-5.1 Codex - code generation",
+    "gpt-5.1-codex-mini": "GPT-5.1 Codex Mini - efficient code generation",
     "gemini-2.5-pro": "Gemini 2.5 Pro - advanced reasoning and coding",
     "gemini-2.5-flash": "Gemini 2.5 Flash - fast and efficient",
     "gemini-2.0-flash": "Gemini 2.0 Flash - previous gen fast model",

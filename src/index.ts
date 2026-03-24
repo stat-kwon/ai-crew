@@ -1,29 +1,5 @@
 // -- Types ------------------------------------------------------------
 export type {
-  // State Model
-  AICrewState,
-  Intent,
-  Unit,
-  Task,
-  CompletionCriteria,
-  TeamInfo,
-  AgentInfo,
-  HatTransition,
-  AICrewEvent,
-  HatType,
-  HatDefinition,
-  HatArtifact,
-  GateResult,
-  IntentStatus,
-  UnitStatus,
-  TaskStatus,
-  EventType,
-  AICrewConfig,
-  ExecutionConfig,
-  HatsConfig,
-  QualityGateRule,
-  CheckpointsConfig,
-  Checkpoint,
   // Bundle & Graph Types
   BundlePlugin,
   ExternalWorkflow,
@@ -67,8 +43,21 @@ export type {
 // -- Graph Engine -----------------------------------------------------
 export { validateGraph } from "./graph.js";
 
+// -- Workflow Fetcher -------------------------------------------------
+export {
+  fetchWorkflow,
+  resolveLocal,
+  getCacheKey,
+} from "./workflow-fetcher.js";
+
 // -- Resolver ---------------------------------------------------------
-export { parseAgentFrontmatter } from "./resolver.js";
+export {
+  loadBundle,
+  listBundles,
+  resolveIncludes,
+  getCatalogDir,
+  parseAgentFrontmatter,
+} from "./resolver.js";
 
 // -- Installer --------------------------------------------------------
 export { install } from "./installer.js";

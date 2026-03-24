@@ -1,115 +1,41 @@
-import { mkdir, cp, writeFile, readFile, readdir } from "node:fs/promises";
-import { join, dirname } from "node:path";
+import { mkdir, writeFile, readFile, copyFile } from "node:fs/promises";
+import { join, dirname, relative } from "node:path";
 import { existsSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { stringify } from "yaml";
+import { loadBundle, resolveIncludes, getCatalogDir } from "./resolver.js";
+import { validateGraph } from "./graph.js";
+import { fetchWorkflow } from "./workflow-fetcher.js";
 import { recordInstall } from "./install-state.js";
-import {
-  resolveHookProfile,
-  filterHooksConfigByProfile,
-} from "./hook-profiler.js";
-import type { HooksConfig } from "./hook-profiler.js";
 import type {
-  AICrewConfig,
+  BundleConfig,
+  FileMapping,
   InstallOptions,
   InstallResult,
+  ResolvedFiles,
+  GraphState,
 } from "./types.js";
-
-/** Default configuration for AI-Crew projects. */
-const DEFAULT_CONFIG: AICrewConfig = {
-  version: "2.0",
-  execution: {
-    maxParallelUnits: 3,
-    defaultModel: "claude-sonnet-4",
-    teammateMode: "tmux",
-  },
-  hats: {
-    requirePlanApproval: false,
-    autoTransition: true,
-    pipeline: [
-      {
-        id: "planner",
-        name: "Planner",
-        description: "Task analysis, approach decision, plan documentation",
-        rules: ".ai-crew/rules/hat-planner.md",
-        artifacts: [".ai-crew/scratchpad/{agent}.md"],
-        transitions: ["plan documented in scratchpad"],
-        qualityGates: [],
-      },
-      {
-        id: "builder",
-        name: "Builder",
-        description: "Code implementation, test writing",
-        rules: ".ai-crew/rules/hat-builder.md",
-        artifacts: ["src/**", "tests/**"],
-        transitions: ["all tasks attempted", "tests written"],
-        qualityGates: [
-          { command: "npm test -- --related", failAction: "block" },
-        ],
-      },
-      {
-        id: "reviewer",
-        name: "Reviewer",
-        description: "Test/lint execution, code quality verification",
-        rules: ".ai-crew/rules/hat-reviewer.md",
-        artifacts: [],
-        transitions: ["all tests pass", "lint passes", "criteria verified"],
-        qualityGates: [
-          { command: "npm run lint", failAction: "warn" },
-          {
-            command: "npm run test:coverage",
-            failAction: "block",
-            minCoverage: 80,
-          },
-        ],
-      },
-    ],
-    presets: {
-      core: ["planner", "builder", "reviewer"],
-      tdd: ["planner", "tester", "builder", "reviewer"],
-      secure: ["planner", "builder", "reviewer", "security-reviewer"],
-    },
-  },
-  checkpoints: {
-    auto: true,
-    triggers: ["unit:completed", "hat:changed"],
-  },
-  language: "ko",
-};
-
-export interface LegacyInstallOptions {
-  lang?: "ko" | "en";
-  force?: boolean;
-  hookProfile?: string;
-}
-
-function getTemplatesDir(): string {
-  const thisFile = fileURLToPath(import.meta.url);
-  // In dist/cli.js -> templates/ is at ../templates/
-  // In src/installer.ts -> templates/ is at ../templates/
-  return join(dirname(thisFile), "..", "templates");
-}
 
 /**
  * Install a bundle into a target project.
  *
- * Signature follows the new architecture:
- *   install(bundleName, targetPath, options?)
- *
- * Currently the bundleName is recorded but the installer uses
- * the template-based approach (will be replaced by catalog
- * resolver when loadBundle / resolveIncludes are available).
+ * Flow:
+ * 1. Load bundle.yaml
+ * 2. Validate graph
+ * 3. Resolve catalog includes -> file mappings
+ * 4. Fetch external workflow (if any)
+ * 5. Copy files to target
+ * 6. Write graph.yaml, config.yaml, state.json
+ * 7. Merge settings.json
  */
 export async function install(
   bundleName: string,
   targetPath: string,
-  options?: InstallOptions & LegacyInstallOptions,
+  options?: InstallOptions,
 ): Promise<InstallResult> {
-  const lang = options?.lang ?? "ko";
   const force = options?.force ?? false;
   const crewDir = join(targetPath, ".ai-crew");
   const claudeDir = join(targetPath, ".claude");
-  const templatesDir = getTemplatesDir();
+  const catalogDir = getCatalogDir();
   const installedFiles: string[] = [];
 
   // Check if already initialized
@@ -119,209 +45,230 @@ export async function install(
     );
   }
 
-  // 1. Create .ai-crew directory structure
-  const dirs = [
-    crewDir,
-    join(crewDir, "specs"),
-    join(crewDir, "checkpoints"),
-    join(crewDir, "scratchpad"),
-    join(crewDir, "prompts"),
-    join(crewDir, "templates"),
-    join(crewDir, "rules"),
-    join(crewDir, "aidlc-rule-details"),
-    join(crewDir, "sessions"),
-  ];
-  for (const dir of dirs) {
-    await mkdir(dir, { recursive: true });
+  // 1. Load bundle
+  const bundle = await loadBundle(bundleName);
+
+  // 2. Validate graph
+  if (bundle.graph.nodes.length > 0) {
+    validateGraph(bundle.graph.nodes);
   }
 
-  // 2. Write config.yaml
+  // 3. Resolve includes
+  const resolved = await resolveIncludes(
+    bundle.includes,
+    bundle.defaults,
+    bundle.workflow,
+    catalogDir,
+  );
+
+  // 4. Fetch external workflow
+  let workflowPath: string | null = null;
+  if (bundle.workflow && typeof bundle.workflow === "object") {
+    workflowPath = await fetchWorkflow(bundle.workflow, catalogDir);
+  } else if (typeof bundle.workflow === "string" && bundle.workflow !== "none") {
+    workflowPath = await fetchWorkflow(bundle.workflow, catalogDir);
+  }
+
+  // 5. Create directories
+  await createDirectories(crewDir, claudeDir);
+
+  // 6. Copy catalog files
+  let filesInstalled = 0;
+  const agentCount = await copyFilesTracked(targetPath, resolved.agents, installedFiles);
+  filesInstalled += agentCount;
+  const skillCount = await copyFilesTracked(targetPath, resolved.skills, installedFiles);
+  filesInstalled += skillCount;
+  const cmdCount = await copyFilesTracked(targetPath, resolved.commands, installedFiles);
+  filesInstalled += cmdCount;
+  const hookCount = await copyFilesTracked(targetPath, resolved.hooks.files, installedFiles);
+  filesInstalled += hookCount;
+  const ruleCount = await copyFilesTracked(targetPath, resolved.rules, installedFiles);
+  filesInstalled += ruleCount;
+
+  // Copy workflow files -- native AI-DLC or embedded
+  const isNativeAidlc = bundle.aidlc?.install === "native";
+  if (isNativeAidlc && workflowPath) {
+    // AI-DLC native: core-workflow.md -> CLAUDE.md + aidlc-rule-details/ -> .aidlc-rule-details/
+    filesInstalled += await installAidlcNative(targetPath, workflowPath, catalogDir);
+  } else if (resolved.workflows.length > 0) {
+    // Local workflow (embedded via resolver)
+    const wfCount = await copyFilesTracked(targetPath, resolved.workflows, installedFiles);
+    filesInstalled += wfCount;
+  } else if (
+    workflowPath &&
+    typeof bundle.workflow === "object" &&
+    resolved.workflows.length === 0
+  ) {
+    // External workflow (fetched from github/npm, embedded)
+    filesInstalled += await copyWorkflowDir(
+      workflowPath,
+      join(crewDir, "workflow"),
+    );
+  }
+
+  // 7. Write graph.yaml
+  if (bundle.graph.nodes.length > 0) {
+    const graphPath = join(crewDir, "graph.yaml");
+    await writeFile(
+      graphPath,
+      stringify({ graph: bundle.graph }),
+      "utf-8",
+    );
+    installedFiles.push(graphPath);
+  }
+
+  // 8. Write config.yaml
+  const workflowSource = getWorkflowSourceString(bundle.workflow);
+  const configDefaults = { ...bundle.defaults };
+  if (!configDefaults.locale) {
+    configDefaults.locale = "en";
+  }
   const configPath = join(crewDir, "config.yaml");
-  const config: AICrewConfig = { ...DEFAULT_CONFIG, language: lang };
-  await writeFile(configPath, stringify(config), "utf-8");
+  await writeFile(
+    configPath,
+    stringify({
+      version: "3.0",
+      bundle: bundleName,
+      workflow: workflowSource,
+      defaults: configDefaults,
+    }),
+    "utf-8",
+  );
   installedFiles.push(configPath);
 
-  // 3. Write empty state.json
+  // 9. Write empty state.json
+  const initialState: GraphState = {
+    version: "3.0",
+    bundleName,
+    nodes: {},
+  };
+  if (bundle.graph.nodes.length > 0) {
+    for (const node of bundle.graph.nodes) {
+      initialState.nodes[node.id] = {
+        status: "pending",
+        startedAt: null,
+        completedAt: null,
+      };
+    }
+  }
   const statePath = join(crewDir, "state.json");
   await writeFile(
     statePath,
-    JSON.stringify(
-      { version: "2.0", intent: null, units: [], team: null, events: [] },
-      null,
-      2,
-    ),
+    JSON.stringify(initialState, null, 2),
     "utf-8",
   );
   installedFiles.push(statePath);
 
-  // 4. Copy prompts
-  const promptFiles = await copyDirTracked(
-    join(templatesDir, "prompts"),
-    join(crewDir, "prompts"),
-  );
-  installedFiles.push(...promptFiles);
-
-  // 5. Copy doc-templates -> .ai-crew/templates
-  const templateFiles = await copyDirTracked(
-    join(templatesDir, "doc-templates"),
-    join(crewDir, "templates"),
-  );
-  installedFiles.push(...templateFiles);
-
-  // 6. Copy rules (global.md + hat-*.md)
-  const ruleFiles = await copyDirTracked(
-    join(templatesDir, "rules"),
-    join(crewDir, "rules"),
-  );
-  installedFiles.push(...ruleFiles);
-
-  // 7. Copy aidlc-rule-details
-  const aidlcSrc = join(templatesDir, "aidlc-rule-details");
-  if (existsSync(aidlcSrc)) {
-    await cp(aidlcSrc, join(crewDir, "aidlc-rule-details"), {
-      recursive: true,
-      force: true,
-    });
-    const aidlcFiles = await collectFilesInDir(
-      join(crewDir, "aidlc-rule-details"),
-    );
-    installedFiles.push(...aidlcFiles);
-  }
-
-  // 8. Create .claude/commands/crew/
-  const commandsDir = join(claudeDir, "commands", "crew");
-  await mkdir(commandsDir, { recursive: true });
-  const commandFiles = await copyDirTracked(
-    join(templatesDir, "commands"),
-    commandsDir,
-  );
-  installedFiles.push(...commandFiles);
-
-  // 9. Create/update .claude/settings.json
-  await writeSettingsJson(claudeDir);
+  // 10. Merge settings.json
+  await mergeSettings(claudeDir, resolved, catalogDir);
   installedFiles.push(join(claudeDir, "settings.json"));
 
-  // 10. Merge hooks configs with profile filtering
-  const hooksFiles = await mergeHooksConfigs(
-    targetPath,
-    options?.hookProfile,
-  );
-  installedFiles.push(...hooksFiles);
-
-  // 11. Append AI-Crew section to CLAUDE.md
-  await appendClaudeMd(targetPath);
-  installedFiles.push(join(targetPath, "CLAUDE.md"));
-
-  // 12. Create .gitkeep in empty dirs
-  for (const dir of ["specs", "checkpoints", "scratchpad", "sessions"]) {
-    const gitkeep = join(crewDir, dir, ".gitkeep");
-    if (!existsSync(gitkeep)) {
-      await writeFile(gitkeep, "", "utf-8");
-    }
-    installedFiles.push(gitkeep);
-  }
-
-  // 13. Build result and record install state for doctor/uninstall
+  // Build result
   const result: InstallResult = {
     bundleName,
     targetPath,
-    filesInstalled: installedFiles.length,
-    graphNodes: 0,
-    workflowSource: null,
+    filesInstalled,
+    graphNodes: bundle.graph.nodes.length,
+    workflowSource,
   };
+
+  // Record install state for doctor/uninstall
   await recordInstall(targetPath, result, installedFiles);
 
   return result;
 }
 
-/**
- * Collect hooks.json files from catalog/hooks/*, merge them into a single
- * hooks config, filter by the active hook profile, and write the result
- * to .claude/hooks.json for Claude to discover.
- *
- * Returns paths of files written (empty if no hooks found).
- */
-async function mergeHooksConfigs(
-  projectRoot: string,
-  explicitProfile?: string,
-): Promise<string[]> {
-  const hooksDir = join(projectRoot, "catalog", "hooks");
-  if (!existsSync(hooksDir)) return [];
+async function createDirectories(
+  crewDir: string,
+  claudeDir: string,
+): Promise<void> {
+  const dirs = [
+    crewDir,
+    join(crewDir, "rules"),
+    claudeDir,
+    join(claudeDir, "agents"),
+    join(claudeDir, "skills"),
+    join(claudeDir, "commands", "crew"),
+  ];
+  for (const dir of dirs) {
+    await mkdir(dir, { recursive: true });
+  }
+}
 
-  const profile = resolveHookProfile(explicitProfile);
+async function copyFilesTracked(
+  targetPath: string,
+  files: FileMapping[],
+  tracker: string[],
+): Promise<number> {
+  for (const file of files) {
+    const destPath = join(targetPath, file.destination);
+    await mkdir(dirname(destPath), { recursive: true });
+    await copyFile(file.source, destPath);
+    tracker.push(destPath);
+  }
+  return files.length;
+}
 
-  // Collect all hooks.json from catalog/hooks/*/hooks.json
-  const merged: HooksConfig = { hooks: {} };
-  const entries = await readdir(hooksDir, { withFileTypes: true });
+async function copyWorkflowDir(
+  srcDir: string,
+  destDir: string,
+): Promise<number> {
+  const { readdir, stat, copyFile: cpFile } = await import("node:fs/promises");
+  let count = 0;
 
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    const hooksJsonPath = join(hooksDir, entry.name, "hooks.json");
-    if (!existsSync(hooksJsonPath)) continue;
-
-    try {
-      const raw = await readFile(hooksJsonPath, "utf-8");
-      const hookConfig = JSON.parse(raw) as HooksConfig;
-
-      // Merge each event's matchers into the combined config
-      for (const [event, matchers] of Object.entries(hookConfig.hooks)) {
-        if (!merged.hooks[event]) {
-          merged.hooks[event] = [];
-        }
-        merged.hooks[event].push(...matchers);
+  async function walk(src: string, dest: string): Promise<void> {
+    await mkdir(dest, { recursive: true });
+    const entries = await readdir(src, { withFileTypes: true });
+    for (const entry of entries) {
+      const srcPath = join(src, entry.name);
+      const destPath = join(dest, entry.name);
+      if (entry.isDirectory()) {
+        await walk(srcPath, destPath);
+      } else {
+        await cpFile(srcPath, destPath);
+        count++;
       }
-    } catch {
-      // Skip malformed hooks.json files
     }
   }
 
-  // Filter by profile (no-op if profile is undefined)
-  const filtered = filterHooksConfigByProfile(merged, profile);
-
-  // Only write if there are hooks to install
-  if (Object.keys(filtered.hooks).length === 0) return [];
-
-  const claudeDir = join(projectRoot, ".claude");
-  await mkdir(claudeDir, { recursive: true });
-  const hooksOutPath = join(claudeDir, "hooks.json");
-  await writeFile(hooksOutPath, JSON.stringify(filtered, null, 2), "utf-8");
-
-  return [hooksOutPath];
+  await walk(srcDir, destDir);
+  return count;
 }
 
 /**
- * Copies a directory and returns absolute paths of all destination files.
+ * Install AI-DLC in native mode:
+ * 1. core-workflow.md -> CLAUDE.md (project root)
+ * 2. aidlc-rule-details/ -> .aidlc-rule-details/ (project root)
  */
-async function copyDirTracked(
-  src: string,
-  dest: string,
-): Promise<string[]> {
-  if (!existsSync(src)) return [];
-  await mkdir(dest, { recursive: true });
-  await cp(src, dest, { recursive: true, force: true });
-  return collectFilesInDir(dest);
-}
+async function installAidlcNative(
+  targetPath: string,
+  workflowPath: string,
+  catalogDir: string,
+): Promise<number> {
+  let count = 0;
 
-/**
- * Recursively collects all file paths under a directory.
- */
-async function collectFilesInDir(dir: string): Promise<string[]> {
-  const results: string[] = [];
-  if (!existsSync(dir)) return results;
-
-  const entries = await readdir(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    const fullPath = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      results.push(...(await collectFilesInDir(fullPath)));
-    } else {
-      results.push(fullPath);
-    }
+  // 1. core-workflow.md -> CLAUDE.md
+  const coreWorkflow = join(catalogDir, "workflows", "aidlc", "core-workflow.md");
+  const claudeMd = join(targetPath, "CLAUDE.md");
+  if (existsSync(claudeMd)) {
+    await copyFile(claudeMd, join(targetPath, "CLAUDE.md.bak"));
   }
-  return results;
+  await copyFile(coreWorkflow, claudeMd);
+  count++;
+
+  // 2. aidlc-rule-details/ -> .aidlc-rule-details/
+  const ruleDetailsDir = join(workflowPath, "aidlc-rule-details");
+  const src = existsSync(ruleDetailsDir) ? ruleDetailsDir : workflowPath;
+  count += await copyWorkflowDir(src, join(targetPath, ".aidlc-rule-details"));
+
+  return count;
 }
 
-async function writeSettingsJson(claudeDir: string): Promise<void> {
+async function mergeSettings(
+  claudeDir: string,
+  resolved: ResolvedFiles,
+  catalogDir: string,
+): Promise<void> {
   const settingsPath = join(claudeDir, "settings.json");
   let settings: Record<string, unknown> = {};
 
@@ -333,11 +280,6 @@ async function writeSettingsJson(claudeDir: string): Promise<void> {
     }
   }
 
-  // Merge env
-  const env = (settings.env as Record<string, string>) ?? {};
-  env["CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS"] = "1";
-  settings.env = env;
-
   // Merge permissions
   const permissions = (settings.permissions as Record<string, unknown>) ?? {};
   const allow = (permissions.allow as string[]) ?? [];
@@ -347,52 +289,54 @@ async function writeSettingsJson(claudeDir: string): Promise<void> {
   permissions.allow = allow;
   settings.permissions = permissions;
 
+  // Merge hooks
+  if (resolved.hooks.configs.length > 0) {
+    const existingHooks =
+      (settings.hooks as Record<string, unknown[]>) ?? {};
+    for (const config of resolved.hooks.configs) {
+      const hooks = (config as { hooks?: Record<string, unknown[]> }).hooks;
+      if (!hooks) continue;
+      for (const [event, handlers] of Object.entries(hooks)) {
+        if (!existingHooks[event]) {
+          existingHooks[event] = [];
+        }
+        if (Array.isArray(handlers)) {
+          (existingHooks[event] as unknown[]).push(...handlers);
+        }
+      }
+    }
+    settings.hooks = existingHooks;
+  }
+
   // Merge MCP servers
-  const mcpServers = (settings.mcpServers as Record<string, unknown>) ?? {};
-  mcpServers["ai-crew"] = {
-    command: "npx",
-    args: ["ai-crew", "mcp"],
-  };
-  settings.mcpServers = mcpServers;
+  if (resolved.mcp.configs.length > 0) {
+    const mcpServers =
+      (settings.mcpServers as Record<string, unknown>) ?? {};
+    const packageRoot = new URL("..", import.meta.url).pathname.replace(
+      /\/$/,
+      "",
+    );
+
+    for (const config of resolved.mcp.configs) {
+      for (const [name, serverConfig] of Object.entries(config)) {
+        const configStr = JSON.stringify(serverConfig);
+        const resolved = JSON.parse(
+          configStr.replace(/__AI_CREW_ROOT__/g, packageRoot),
+        );
+        mcpServers[name] = resolved;
+      }
+    }
+    settings.mcpServers = mcpServers;
+  }
 
   await mkdir(claudeDir, { recursive: true });
   await writeFile(settingsPath, JSON.stringify(settings, null, 2), "utf-8");
 }
 
-async function appendClaudeMd(projectRoot: string): Promise<void> {
-  const claudeMdPath = join(projectRoot, "CLAUDE.md");
-  const marker = "<!-- ai-crew:start -->";
-
-  let existing = "";
-  if (existsSync(claudeMdPath)) {
-    existing = await readFile(claudeMdPath, "utf-8");
-    if (existing.includes(marker)) return; // already has AI-Crew section
-  }
-
-  const section = `
-${marker}
-## AI-Crew
-
-This project uses AI-Crew (AI-DLC on Claude Code Agent Teams).
-
-### Commands
-- \`/crew:elaborate\` — Define intent & decompose units (Inception)
-- \`/crew:run\` — Create & run agent team (Construction)
-- \`/crew:integrate\` — Merge results & verify (Integration)
-- \`/crew:status\` — Show current state
-- \`/crew:checkpoint\` — Save state snapshot
-- \`/crew:restore\` — Restore previous state
-
-### Directories
-- \`.ai-crew/\` — State, config, specs, prompts
-- \`.ai-crew/specs/\` — Requirements/design/task docs per intent
-- \`.ai-crew/aidlc-rule-details/\` — AI-DLC methodology rules
-
-### Reference
-- State file: \`.ai-crew/state.json\`
-- Config file: \`.ai-crew/config.yaml\`
-<!-- ai-crew:end -->
-`;
-
-  await writeFile(claudeMdPath, existing + section, "utf-8");
+function getWorkflowSourceString(
+  workflow: BundleConfig["workflow"],
+): string | null {
+  if (workflow === null) return null;
+  if (typeof workflow === "string") return workflow;
+  return workflow.source;
 }
