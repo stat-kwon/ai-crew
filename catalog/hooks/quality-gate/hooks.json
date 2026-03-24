@@ -1,0 +1,18 @@
+{
+  "description": "Quality gate hooks - run tests after code changes",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "profiles": ["standard", "strict"],
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/run-tests.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
