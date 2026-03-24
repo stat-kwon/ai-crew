@@ -105,3 +105,11 @@ export { validateGraph } from "./graph.js";
 
 // Verifier — Node verification checks
 export { getDefaultCommands, verifyNode } from "./verifier.js";
+
+// Shared Memory
+export {
+  writeNodeOutput,
+  readNodeOutput,
+  readDependencyOutputs,
+  clearMemory,
+} from "./shared-memory.js";
