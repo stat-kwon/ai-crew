@@ -86,3 +86,10 @@ export {
   readDependencyOutputs,
   clearMemory,
 } from "./shared-memory.js";
+
+// Checkpoint
+export {
+  createCheckpoint,
+  listCheckpoints,
+  restoreCheckpoint,
+} from "./checkpoint.js";
