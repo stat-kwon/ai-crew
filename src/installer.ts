@@ -5,11 +5,17 @@ import { fileURLToPath } from "node:url";
 import { stringify } from "yaml";
 import { DEFAULT_CONFIG } from "./config.js";
 import { recordInstall } from "./install-state.js";
+import {
+  resolveHookProfile,
+  filterHooksConfigByProfile,
+} from "./hook-profiler.js";
+import type { HooksConfig } from "./hook-profiler.js";
 import type { AICrewConfig, InstallResult } from "./types.js";
 
 export interface InstallOptions {
   lang?: "ko" | "en";
   force?: boolean;
+  hookProfile?: string;
 }
 
 function getTemplatesDir(): string {
@@ -119,11 +125,18 @@ export async function install(
   await writeSettingsJson(claudeDir, crewDir);
   installedFiles.push(join(claudeDir, "settings.json"));
 
-  // 10. Append AI-Crew section to CLAUDE.md
+  // 10. Merge hooks configs with profile filtering
+  const hooksFiles = await mergeHooksConfigs(
+    projectRoot,
+    options.hookProfile,
+  );
+  installedFiles.push(...hooksFiles);
+
+  // 11. Append AI-Crew section to CLAUDE.md
   await appendClaudeMd(projectRoot);
   installedFiles.push(join(projectRoot, "CLAUDE.md"));
 
-  // 11. Create .gitkeep in empty dirs
+  // 12. Create .gitkeep in empty dirs
   for (const dir of ["specs", "checkpoints", "scratchpad", "sessions"]) {
     const gitkeep = join(crewDir, dir, ".gitkeep");
     if (!existsSync(gitkeep)) {
@@ -132,7 +145,7 @@ export async function install(
     installedFiles.push(gitkeep);
   }
 
-  // 12. Record install state for doctor/uninstall
+  // 13. Record install state for doctor/uninstall
   const result: InstallResult = {
     bundleName: "ai-crew",
     targetPath: projectRoot,
@@ -141,6 +154,61 @@ export async function install(
     workflowSource: null,
   };
   await recordInstall(projectRoot, result, installedFiles);
+}
+
+/**
+ * Collect hooks.json files from catalog/hooks/*, merge them into a single
+ * hooks config, filter by the active hook profile, and write the result
+ * to .claude/settings.local.hooks.json for Claude to discover.
+ *
+ * Returns paths of files written (empty if no hooks found).
+ */
+async function mergeHooksConfigs(
+  projectRoot: string,
+  explicitProfile?: string,
+): Promise<string[]> {
+  const hooksDir = join(projectRoot, "catalog", "hooks");
+  if (!existsSync(hooksDir)) return [];
+
+  const profile = resolveHookProfile(explicitProfile);
+
+  // Collect all hooks.json from catalog/hooks/*/hooks.json
+  const merged: HooksConfig = { hooks: {} };
+  const entries = await readdir(hooksDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const hooksJsonPath = join(hooksDir, entry.name, "hooks.json");
+    if (!existsSync(hooksJsonPath)) continue;
+
+    try {
+      const raw = await readFile(hooksJsonPath, "utf-8");
+      const hookConfig = JSON.parse(raw) as HooksConfig;
+
+      // Merge each event's matchers into the combined config
+      for (const [event, matchers] of Object.entries(hookConfig.hooks)) {
+        if (!merged.hooks[event]) {
+          merged.hooks[event] = [];
+        }
+        merged.hooks[event].push(...matchers);
+      }
+    } catch {
+      // Skip malformed hooks.json files
+    }
+  }
+
+  // Filter by profile (no-op if profile is undefined)
+  const filtered = filterHooksConfigByProfile(merged, profile);
+
+  // Only write if there are hooks to install
+  if (Object.keys(filtered.hooks).length === 0) return [];
+
+  const claudeDir = join(projectRoot, ".claude");
+  await mkdir(claudeDir, { recursive: true });
+  const hooksOutPath = join(claudeDir, "hooks.json");
+  await writeFile(hooksOutPath, JSON.stringify(filtered, null, 2), "utf-8");
+
+  return [hooksOutPath];
 }
 
 /**
