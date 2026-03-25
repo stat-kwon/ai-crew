@@ -21,11 +21,14 @@ afterEach(async () => {
 
 function validConfigYaml(): Record<string, unknown> {
   return {
-    version: "2.0",
-    execution: { defaultModel: "claude-sonnet-4", maxParallelUnits: 3, teammateMode: "tmux" },
-    hats: { requirePlanApproval: false, autoTransition: true, pipeline: [] },
-    checkpoints: { auto: true, triggers: [] },
-    language: "ko",
+    version: "3.0",
+    bundle: "aidlc-standard",
+    defaults: {
+      model: "claude-sonnet-4",
+      isolation: "worktree",
+      rules: ["global"],
+      locale: "en",
+    },
   };
 }
 
@@ -90,7 +93,7 @@ describe("runValidate", () => {
   });
 
   it("returns 1 when config.yaml has validation errors", async () => {
-    await writeConfig({ version: "2.0" }); // missing execution, hats, etc.
+    await writeConfig({ version: "2.0" }); // missing bundle, defaults
 
     const code = await runValidate(TEST_DIR);
     expect(code).toBe(1);

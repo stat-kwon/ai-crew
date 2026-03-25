@@ -46,8 +46,9 @@ function requireObject(
 // ============================================================
 
 /**
- * Validate a parsed config.yaml (AICrewConfig) structure.
- * Required: version, execution.defaultModel, hats.pipeline, checkpoints, language.
+ * Validate a parsed config.yaml structure.
+ * Required: version, bundle, defaults.model, defaults.isolation.
+ * Optional: workflow, defaults.rules, defaults.mcp, defaults.locale, defaults.runs.
  */
 export function validateConfigYaml(data: unknown): ValidationResult {
   const errors: ValidationError[] = [];
@@ -58,41 +59,47 @@ export function validateConfigYaml(data: unknown): ValidationResult {
   }
 
   requireString(data, "version", "", errors);
+  requireString(data, "bundle", "", errors);
 
-  const execution = requireObject(data, "execution", "", errors);
-  if (execution) {
-    requireString(execution, "defaultModel", "execution", errors);
-  }
+  // defaults object
+  const defaults = requireObject(data, "defaults", "", errors);
+  if (defaults) {
+    requireString(defaults, "model", "defaults", errors);
 
-  const hats = requireObject(data, "hats", "", errors);
-  if (hats) {
-    if (!Array.isArray(hats.pipeline)) {
-      errors.push(err("hats.pipeline", '"pipeline" must be an array'));
+    if (defaults.isolation !== undefined && defaults.isolation !== "worktree" && defaults.isolation !== "none") {
+      errors.push(err("defaults.isolation", '"isolation" must be "worktree" or "none"'));
     }
-  }
 
-  requireObject(data, "checkpoints", "", errors);
+    if (defaults.rules !== undefined && !isStringArray(defaults.rules)) {
+      errors.push(err("defaults.rules", '"rules" must be a string array'));
+    }
 
-  if (typeof data.language !== "string" || !["ko", "en"].includes(data.language as string)) {
-    errors.push(err("language", '"language" must be "ko" or "en"'));
-  }
+    if (defaults.mcp !== undefined && !isStringArray(defaults.mcp)) {
+      errors.push(err("defaults.mcp", '"mcp" must be a string array'));
+    }
 
-  // defaults.runs validation (optional — warn if invalid, don't error for backward compat)
-  if (data.defaults && isObject(data.defaults) && (data.defaults as Record<string, unknown>).runs !== undefined) {
-    const runs = (data.defaults as Record<string, unknown>).runs;
-    if (isObject(runs)) {
-      const r = runs as Record<string, unknown>;
-      if (r.retention !== undefined && (typeof r.retention !== "number" || (r.retention as number) < 1)) {
-        errors.push({ path: "defaults.runs.retention", message: '"retention" must be a number >= 1', severity: "warning" });
+    if (defaults.locale !== undefined) {
+      if (typeof defaults.locale !== "string" || !["ko", "en"].includes(defaults.locale as string)) {
+        errors.push(err("defaults.locale", '"locale" must be "ko" or "en"'));
       }
-      if (r.auto_archive !== undefined && typeof r.auto_archive !== "boolean") {
-        errors.push({ path: "defaults.runs.auto_archive", message: '"auto_archive" must be a boolean', severity: "warning" });
+    }
+
+    // defaults.runs validation (optional)
+    if (defaults.runs !== undefined) {
+      if (isObject(defaults.runs)) {
+        const r = defaults.runs as Record<string, unknown>;
+        if (r.retention !== undefined && (typeof r.retention !== "number" || (r.retention as number) < 1)) {
+          errors.push({ path: "defaults.runs.retention", message: '"retention" must be a number >= 1', severity: "warning" });
+        }
+        if (r.auto_archive !== undefined && typeof r.auto_archive !== "boolean") {
+          errors.push({ path: "defaults.runs.auto_archive", message: '"auto_archive" must be a boolean', severity: "warning" });
+        }
+        if (r.context_depth !== undefined && (typeof r.context_depth !== "number" || (r.context_depth as number) < 0)) {
+          errors.push({ path: "defaults.runs.context_depth", message: '"context_depth" must be a number >= 0', severity: "warning" });
+        }
+      } else {
+        errors.push({ path: "defaults.runs", message: '"runs" must be an object', severity: "warning" });
       }
-      if (r.context_depth !== undefined && (typeof r.context_depth !== "number" || (r.context_depth as number) < 0)) {
-        errors.push({ path: "defaults.runs.context_depth", message: '"context_depth" must be a number >= 0', severity: "warning" });
-      }
-    } else {
-      errors.push({ path: "defaults.runs", message: '"runs" must be an object', severity: "warning" });
     }
   }
 
@@ -163,7 +170,12 @@ export function validateGraphYaml(data: unknown): ValidationResult {
     return { valid: false, errors };
   }
 
-  validateGraphNodes(data, "", errors);
+  // Support both flat (nodes at root) and nested (graph.nodes) formats
+  if (isObject(data.graph)) {
+    validateGraphNodes(data.graph as Record<string, unknown>, "graph", errors);
+  } else {
+    validateGraphNodes(data, "", errors);
+  }
 
   return { valid: errors.filter((e) => e.severity === "error").length === 0, errors };
 }

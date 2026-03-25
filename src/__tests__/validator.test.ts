@@ -129,6 +129,17 @@ describe("validateGraphYaml", () => {
     expect(result.errors.some((e) => e.path.includes("nodes"))).toBe(true);
   });
 
+  it("accepts nested graph.nodes format (installer output)", () => {
+    const result = validateGraphYaml({
+      graph: {
+        nodes: [
+          { id: "a", type: "worker", agent: "dev", depends_on: [], config: {} },
+        ],
+      },
+    });
+    expect(result.valid).toBe(true);
+  });
+
   it("rejects invalid node type", () => {
     const result = validateGraphYaml({
       nodes: [{ id: "a", type: "unknown", agent: "dev", depends_on: [] }],
@@ -374,11 +385,16 @@ describe("validateStateJson", () => {
 
 describe("validateConfigYaml", () => {
   const validConfig = {
-    version: "2.0",
-    execution: { defaultModel: "claude-sonnet-4", maxParallelUnits: 3, teammateMode: "tmux" },
-    hats: { requirePlanApproval: false, autoTransition: true, pipeline: [] },
-    checkpoints: { auto: true, triggers: [] },
-    language: "ko",
+    version: "3.0",
+    bundle: "aidlc-standard",
+    workflow: "aidlc",
+    defaults: {
+      model: "claude-sonnet-4",
+      isolation: "worktree",
+      rules: ["global"],
+      mcp: ["multi-provider"],
+      locale: "en",
+    },
   };
 
   it("accepts a valid config", () => {
@@ -399,24 +415,45 @@ describe("validateConfigYaml", () => {
     expect(result.errors.some((e) => e.path.includes("version"))).toBe(true);
   });
 
-  it("requires execution.defaultModel", () => {
-    const data = { ...validConfig, execution: {} };
-    const result = validateConfigYaml(data);
+  it("requires bundle", () => {
+    const { bundle: _, ...rest } = validConfig;
+    const result = validateConfigYaml(rest);
     expect(result.valid).toBe(false);
-    expect(result.errors.some((e) => e.path.includes("defaultModel"))).toBe(true);
+    expect(result.errors.some((e) => e.path.includes("bundle"))).toBe(true);
   });
 
-  it("requires hats.pipeline to be an array", () => {
-    const data = { ...validConfig, hats: { pipeline: "not-array" } };
+  it("requires defaults.model", () => {
+    const data = { ...validConfig, defaults: { ...validConfig.defaults, model: "" } };
     const result = validateConfigYaml(data);
     expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path.includes("model"))).toBe(true);
   });
 
-  it("requires language to be ko or en", () => {
-    const data = { ...validConfig, language: "fr" };
+  it("rejects invalid isolation value", () => {
+    const data = { ...validConfig, defaults: { ...validConfig.defaults, isolation: "invalid" } };
     const result = validateConfigYaml(data);
     expect(result.valid).toBe(false);
-    expect(result.errors.some((e) => e.path === "language")).toBe(true);
+    expect(result.errors.some((e) => e.path.includes("isolation"))).toBe(true);
+  });
+
+  it("rejects invalid locale", () => {
+    const data = { ...validConfig, defaults: { ...validConfig.defaults, locale: "fr" } };
+    const result = validateConfigYaml(data);
+    expect(result.valid).toBe(false);
+    expect(result.errors.some((e) => e.path.includes("locale"))).toBe(true);
+  });
+
+  it("accepts config without optional fields", () => {
+    const minimal = { version: "3.0", bundle: "test", defaults: { model: "claude-sonnet-4" } };
+    const result = validateConfigYaml(minimal);
+    expect(result.valid).toBe(true);
+  });
+
+  it("warns on invalid defaults.runs.retention", () => {
+    const data = { ...validConfig, defaults: { ...validConfig.defaults, runs: { retention: 0 } } };
+    const result = validateConfigYaml(data);
+    expect(result.valid).toBe(true); // warning, not error
+    expect(result.errors.some((e) => e.path.includes("retention") && e.severity === "warning")).toBe(true);
   });
 });
 
