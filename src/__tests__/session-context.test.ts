@@ -84,6 +84,34 @@ describe("session-context", () => {
       const bad = { ...makeContext(), agentNotes: { node1: [123] } } as unknown as ProjectContext;
       await expect(saveContext(crewDir, bad)).rejects.toThrow('agentNotes["node1"] items must be strings');
     });
+
+    it("accepts v3.1 run-scoped agentNotes (Record<string, string[]>)", async () => {
+      const ctx = makeContext({
+        agentNotes: {
+          backend: { "initial-build-20260324-1": ["Used barrel exports"], "fix-auth-20260325-1": ["Added validation"] },
+        },
+      });
+      await saveContext(crewDir, ctx);
+      const loaded = await loadContext(crewDir);
+      expect(loaded).toEqual(ctx);
+    });
+
+    it("accepts mixed legacy and v3.1 agentNotes", async () => {
+      const ctx = makeContext({
+        agentNotes: {
+          backend: ["legacy note"],
+          frontend: { "run-1": ["scoped note"] },
+        },
+      });
+      await saveContext(crewDir, ctx);
+      const loaded = await loadContext(crewDir);
+      expect(loaded).toEqual(ctx);
+    });
+
+    it("throws if v3.1 agentNotes run entries are not string arrays", async () => {
+      const bad = { ...makeContext(), agentNotes: { backend: { "run-1": [123] } } } as unknown as ProjectContext;
+      await expect(saveContext(crewDir, bad)).rejects.toThrow('agentNotes["backend"]["run-1"] items must be strings');
+    });
   });
 
   // ── loadContext ──────────────────────────────────────────
@@ -184,6 +212,21 @@ describe("session-context", () => {
       const loaded = await loadContext(crewDir);
       expect(loaded!.techStack).toEqual(["Go", "Postgres"]);
       expect(loaded!.patterns).toEqual(["hexagonal"]);
+    });
+
+    it("preserves v3.1 run-scoped notes when merging", async () => {
+      const ctx = makeContext({
+        agentNotes: {
+          backend: { "run-1": ["existing note"] },
+        },
+      });
+      await saveContext(crewDir, ctx);
+      await mergeAgentLearning(crewDir, "backend", "new learning");
+
+      const loaded = await loadContext(crewDir);
+      const notes = loaded!.agentNotes.backend as Record<string, string[]>;
+      expect(notes["run-1"]).toEqual(["existing note"]);
+      expect(notes["_unscoped"]).toEqual(["new learning"]);
     });
   });
 });

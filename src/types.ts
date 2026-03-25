@@ -151,11 +151,13 @@ export interface PreflightState {
   modelsVerified: string[];
   modelsSkipped: string[];
   gitClean: boolean;
+  graphHash: string; // SHA-256 of graph.yaml — used by /crew:run for change detection
 }
 
 export interface GraphState {
-  version: "3.0";
+  version: "3.0" | "3.1";
   bundleName: string;
+  runId?: string; // Run identifier (e.g., "initial-build-20260324-1"). Absent in legacy v3.0.
   preflight?: PreflightState;
   nodes: Record<string, NodeState>;
 }
@@ -179,6 +181,90 @@ export interface ValidationError {
   path: string;
   message: string;
   severity: "error" | "warning";
+}
+
+// ============================================================
+// Run History Types (multi-session continuity)
+// ============================================================
+
+/** Per-node summary stored in RunManifest for efficient context loading */
+export interface NodeSummary {
+  nodeId: string;
+  agent: string;
+  status: "completed" | "failed" | "skipped";
+  duration: string; // e.g. "3m 42s"
+  filesChanged: string[];
+  keyDecisions: string[];
+}
+
+/** Canonical snapshot of a single run (ECC ecc.session.v1 pattern) */
+export interface RunManifest {
+  schema: "ai-crew.run.v1";
+  runId: string; // e.g. "initial-build-20260324-1"
+
+  intent: {
+    description: string;
+    slug: string;
+    source: "user" | "aidlc" | "auto";
+  };
+
+  context: {
+    bundleName: string;
+    graphHash: string;
+    graphNodeCount: number;
+    graphLevelCount: number;
+    model: string;
+    locale: string;
+  };
+
+  timeline: {
+    createdAt: string;
+    startedAt: string | null;
+    completedAt: string | null;
+  };
+
+  state: "preparing" | "running" | "completed" | "failed" | "archived";
+
+  outcome: {
+    nodesCompleted: string[];
+    nodesFailed: string[];
+    nodesSkipped: string[];
+    summary: string[];
+    issues: string[];
+  } | null;
+
+  nodeSummaries: Record<string, NodeSummary>;
+}
+
+/** Compact index entry for the run registry */
+export interface RunIndexEntry {
+  runId: string;
+  intent: string;
+  state: "preparing" | "running" | "completed" | "failed" | "archived";
+  createdAt: string;
+  completedAt: string | null;
+  nodesTotal: number;
+  nodesCompleted: number;
+  nodesFailed: number;
+}
+
+/** Run registry index file (.ai-crew/runs.json) */
+export interface RunRegistry {
+  schema: "ai-crew.runs.v1";
+  current: string | null;
+  runs: RunIndexEntry[];
+  stats: {
+    totalRuns: number;
+    totalCompleted: number;
+    totalFailed: number;
+  };
+}
+
+/** Run configuration in config.yaml defaults */
+export interface RunsConfig {
+  retention: number; // Max runs to keep (default: 5)
+  auto_archive: boolean; // Archive previous run on new run start
+  context_depth: number; // How many previous runs' context to provide (default: 1)
 }
 
 // ============================================================
@@ -257,7 +343,7 @@ export interface CheckpointInfo {
 export interface ProjectContext {
   techStack: string[];
   patterns: string[];
-  agentNotes: Record<string, string[]>;
+  agentNotes: Record<string, string[] | Record<string, string[]>>; // Legacy: string[], v3.1: {runId: notes[]}
   lastRunAt: string;
   updatedAt: string;
 }

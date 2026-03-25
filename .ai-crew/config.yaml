@@ -10,3 +10,7 @@ defaults:
     - multi-provider
     - ouroboros
   locale: en
+  runs:
+    retention: 5
+    auto_archive: true
+    context_depth: 1

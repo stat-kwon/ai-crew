@@ -16,6 +16,7 @@ You are the **Team Lead** executing a Graph-based multi-agent workflow. You read
    - Stop.
 2. Read `.ai-crew/state.json`. If it doesn't exist, create initial state.
 3. Read `.ai-crew/config.yaml` for defaults (model, isolation, mcp).
+3.5. Read `.ai-crew/runs.json` (if exists) for previous run history. Load the most recent archived run's `manifest.json` for context injection in Step 4.
 4. Load rule files for agent prompts:
    - **If native AI-DLC detected** (CLAUDE.md + `.aidlc-rule-details/` exist): load rules from `.aidlc-rule-details/` (construction-phase rules in particular).
    - **Otherwise**: load from `.ai-crew/rules/` (legacy/non-AI-DLC bundles).
@@ -24,7 +25,11 @@ You are the **Team Lead** executing a Graph-based multi-agent workflow. You read
 7. **(Optional) Preflight check**: Read `state.json` → `preflight?.completedAt`.
    If not found, display warning:
    ```
-   Warning: Preflight not run. Run `/crew:preflight` first for model auth and git checks.
+   Warning: Preflight not run. Run `/crew:preflight` first for:
+     - Graph validation (structural + semantic checks)
+     - Model authentication (API keys for non-Claude models)
+     - Git working tree cleanup
+   Without preflight, graph validation will run inline (slower startup).
    Continuing anyway...
    ```
    This is a WARNING, not a blocker — `/crew:run` can still proceed.
@@ -69,7 +74,7 @@ When reading upstream scratchpad, resolve the file by matching `*-{dep_id}.md` i
 ## Step 1: Topological Sort & Level Computation
 
 1. Parse all nodes from `graph.yaml`.
-2. Compute execution levels:
+2. Compute execution levels using Kahn's topological sort (same as `src/graph.ts::computeLevels()`):
    - **Level 0**: Nodes with no `depends_on` (root nodes)
    - **Level N**: Nodes whose ALL dependencies are in levels < N
 3. Display the execution plan:
@@ -88,15 +93,26 @@ Level 2 (after Level 1):
   ○ {node_id} [{aggregator}] — wait: all, depends_on: [{deps}]
 ```
 
-4. Validate the graph:
-   - No cycles
-   - All `depends_on` references exist
-   - Router nodes have `isolation: none`
-   - Aggregator nodes have `wait` field
-   - All referenced agents exist in `.claude/agents/`
-   - All referenced skills exist in `.claude/skills/`
+4. **Validate graph (hash-based trust)**:
 
-If validation fails, display errors and stop.
+   a. Read `state.json` → `preflight.graphHash`.
+   b. Compute current hash: `shasum -a 256 .ai-crew/graph.yaml | cut -d ' ' -f 1`
+   c. **If hashes match**: Skip validation. Preflight already validated this exact graph.
+      Display: `Graph validated by preflight ({preflight.completedAt}). Skipping re-validation.`
+   d. **If hashes differ**: Graph changed since preflight. Run full validation as fallback:
+      Display: `Warning: graph.yaml changed since preflight. Running inline validation...`
+      Apply all validation rules from `src/graph.ts::validateGraph()`:
+      - No duplicate node IDs
+      - No dangling depends_on references
+      - No cycles
+      - At least one root node
+      - Router nodes have `config.isolation: none`
+      - Aggregator nodes have `wait: all | any`
+      - All referenced agents exist in `.claude/agents/`
+      - All referenced skills exist in `.claude/skills/`
+   e. **If no preflight at all** (no `preflight` in state.json): Run full validation as fallback.
+
+If validation fails (in fallback cases), display errors and stop.
 
 ---
 
@@ -262,6 +278,33 @@ Read and apply the skill at `.claude/skills/{skill}/SKILL.md`.
 {content of .ai-crew/scratchpad/*-{dep_id}.md — specifically the Downstream Context section}
 {end for}
 
+## Previous Run Context
+{Inject ONLY if previous run manifest exists in .ai-crew/runs.json. Use graph-based relevance:}
+
+{RULE 1 — Same node re-execution (node_id exists in previous manifest's nodeSummaries):}
+This node was previously executed in "{prevRun.intent.description}" ({prevRunId}).
+- Status: {nodeSummary.status}
+- Files changed: {nodeSummary.filesChanged}
+- Key decisions: {nodeSummary.keyDecisions}
+{if status was "failed":}
+- FAILURE REASON: {extract from previous scratchpad's Result section — MUST include}
+{end if}
+Full scratchpad: .ai-crew/runs/{prevRunId}/scratchpad/L{N}-{node_id}.md
+
+{RULE 2 — New node (node_id NOT in previous manifest): }
+This node is new (not in previous run). No prior context available.
+
+{RULE 3 — Graph structure changed (compare current graph.yaml nodes vs previous manifest.context):}
+## Graph Changes Since Previous Run
+- Added nodes: {node IDs in current graph but not in previous manifest}
+- Removed nodes: {node IDs in previous manifest but not in current graph}
+{Only include this section if there are actual changes. Omit if graph is identical.}
+
+{RULE 4 — Do NOT inject:}
+{- Full run history table (that is for /crew:status only)}
+{- Scratchpad from unrelated nodes (not this node or its dependencies)}
+{- Full scratchpad content (summary is sufficient; path provided for on-demand reading)}
+
 ## Rules
 {content of all files in .ai-crew/rules/}
 
@@ -388,7 +431,9 @@ If `Agent(isolation: "worktree")` fails:
 10. **Scratchpad is traceable** — `L{level}-{node_id}.md` naming enables ordering and per-node tracking. Use the What/How/Result schema.
 11. **State updates are atomic** — commit state changes immediately after each level, before and after spawning.
 12. **AIDLC state sync** — update `aidlc-docs/aidlc-state.md` CONSTRUCTION PHASE section at each level completion. This file is mandatory for native AI-DLC.
-15. **Agents read aidlc-docs/ (read-only), write .ai-crew/scratchpad/** — during Construction, design artifacts in `aidlc-docs/` are the frozen SSOT from Inception. Agents must not modify them. All agent output goes to `.ai-crew/scratchpad/`.
-16. **Only pm_review and design_gate nodes may patch aidlc-docs/inception/** — these special nodes use `ouroboros_evaluate` to propose design amendments. No other node type may write to `aidlc-docs/inception/`.
-13. **No rebase** — agents use merge only.
-14. **Branch naming** — `crew/{node_id}` for graph executor branches.
+13. **Agents read aidlc-docs/ (read-only), write .ai-crew/scratchpad/** — during Construction, design artifacts in `aidlc-docs/` are the frozen SSOT from Inception. Agents must not modify them. All agent output goes to `.ai-crew/scratchpad/`.
+14. **Only pm_review and design_gate nodes may patch aidlc-docs/inception/** — these special nodes use `ouroboros_evaluate` to propose design amendments. No other node type may write to `aidlc-docs/inception/`.
+15. **No rebase** — agents use merge only.
+16. **Branch naming** — `crew/{node_id}` for graph executor branches.
+17. **Previous run context is graph-scoped** — inject only for same node ID re-execution and failed nodes. Do NOT inject full run history table or unrelated node scratchpad into agent prompts.
+18. **Graph validation uses hash-based trust** — if `preflight.graphHash` matches current graph, skip validation. Re-validate only as fallback when graph changed or preflight was skipped.

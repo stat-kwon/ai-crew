@@ -45,13 +45,28 @@ function validateContext(data: unknown): ProjectContext {
   }
   const notes = obj.agentNotes as Record<string, unknown>;
   for (const [key, value] of Object.entries(notes)) {
-    if (!Array.isArray(value)) {
-      throw new Error(`project-context.json: agentNotes["${key}"] must be an array`);
-    }
-    for (const item of value) {
-      if (typeof item !== "string") {
-        throw new Error(`project-context.json: agentNotes["${key}"] items must be strings`);
+    // Legacy format: string[] (v3.0)
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (typeof item !== "string") {
+          throw new Error(`project-context.json: agentNotes["${key}"] items must be strings`);
+        }
       }
+    // v3.1 format: Record<string, string[]> (run-scoped notes)
+    } else if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+      const runNotes = value as Record<string, unknown>;
+      for (const [runId, runItems] of Object.entries(runNotes)) {
+        if (!Array.isArray(runItems)) {
+          throw new Error(`project-context.json: agentNotes["${key}"]["${runId}"] must be an array`);
+        }
+        for (const item of runItems) {
+          if (typeof item !== "string") {
+            throw new Error(`project-context.json: agentNotes["${key}"]["${runId}"] items must be strings`);
+          }
+        }
+      }
+    } else {
+      throw new Error(`project-context.json: agentNotes["${key}"] must be an array or object`);
     }
   }
 
@@ -153,12 +168,22 @@ export async function mergeAgentLearning(
     };
   }
 
-  // Initialize the node's notes array if absent
-  if (!Array.isArray(context.agentNotes[nodeId])) {
-    context.agentNotes[nodeId] = [];
+  // Handle both legacy (string[]) and v3.1 (Record<string, string[]>) formats
+  const existing = context.agentNotes[nodeId];
+  if (Array.isArray(existing)) {
+    // Legacy format: append directly
+    existing.push(learning);
+  } else if (existing !== null && typeof existing === "object") {
+    // v3.1 format: append to "_unscoped" key (no runId available in this API)
+    const runNotes = existing as Record<string, string[]>;
+    if (!Array.isArray(runNotes["_unscoped"])) {
+      runNotes["_unscoped"] = [];
+    }
+    runNotes["_unscoped"].push(learning);
+  } else {
+    // Not yet initialized
+    context.agentNotes[nodeId] = [learning];
   }
-
-  context.agentNotes[nodeId].push(learning);
   context.updatedAt = now;
 
   await saveContext(crewDir, context);

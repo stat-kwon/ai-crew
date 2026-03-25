@@ -77,6 +77,25 @@ export function validateConfigYaml(data: unknown): ValidationResult {
     errors.push(err("language", '"language" must be "ko" or "en"'));
   }
 
+  // defaults.runs validation (optional — warn if invalid, don't error for backward compat)
+  if (data.defaults && isObject(data.defaults) && (data.defaults as Record<string, unknown>).runs !== undefined) {
+    const runs = (data.defaults as Record<string, unknown>).runs;
+    if (isObject(runs)) {
+      const r = runs as Record<string, unknown>;
+      if (r.retention !== undefined && (typeof r.retention !== "number" || (r.retention as number) < 1)) {
+        errors.push({ path: "defaults.runs.retention", message: '"retention" must be a number >= 1', severity: "warning" });
+      }
+      if (r.auto_archive !== undefined && typeof r.auto_archive !== "boolean") {
+        errors.push({ path: "defaults.runs.auto_archive", message: '"auto_archive" must be a boolean', severity: "warning" });
+      }
+      if (r.context_depth !== undefined && (typeof r.context_depth !== "number" || (r.context_depth as number) < 0)) {
+        errors.push({ path: "defaults.runs.context_depth", message: '"context_depth" must be a number >= 0', severity: "warning" });
+      }
+    } else {
+      errors.push({ path: "defaults.runs", message: '"runs" must be an object', severity: "warning" });
+    }
+  }
+
   return { valid: errors.filter((e) => e.severity === "error").length === 0, errors };
 }
 

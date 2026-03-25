@@ -37,12 +37,31 @@ export type {
   // Checkpoint Data Types
   CheckpointData,
   CheckpointInfo,
+  // Run History Types
+  NodeSummary,
+  RunManifest,
+  RunIndexEntry,
+  RunRegistry,
+  RunsConfig,
   // Session Context Types
   ProjectContext,
 } from "./types.js";
 
 // -- Graph Engine -----------------------------------------------------
-export { validateGraph } from "./graph.js";
+export { validateGraph, computeLevels } from "./graph.js";
+
+// -- Run History ------------------------------------------------------
+export {
+  slugify,
+  generateRunId,
+  loadRegistry,
+  saveRegistry,
+  createManifest,
+  archiveRun,
+  pruneOldRuns,
+  loadPreviousManifest,
+  hasCompletedNodes,
+} from "./run-history.js";
 
 // -- Workflow Fetcher -------------------------------------------------
 export {

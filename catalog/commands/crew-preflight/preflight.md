@@ -4,7 +4,7 @@ You are executing a **pre-flight check** before graph-based construction. This c
 
 **Purpose**: Dynamic bundle setup + model authentication + git readiness verification.
 
-**Non-destructive principle**: This command NEVER modifies `aidlc-docs/`, `.ai-crew/scratchpad/`, `.claude/agents/`, `.claude/skills/`, `CLAUDE.md`, or `.aidlc-rule-details/`. Only `.ai-crew/graph.yaml`, `.ai-crew/state.json`, and `.ai-crew/config.yaml` (bundle name only) may be changed.
+**Non-destructive principle**: This command NEVER modifies `aidlc-docs/`, `.claude/agents/`, `.claude/skills/`, `CLAUDE.md`, or `.aidlc-rule-details/`. Only `.ai-crew/graph.yaml`, `.ai-crew/state.json`, `.ai-crew/config.yaml` (bundle name only), `.ai-crew/runs.json`, and `.ai-crew/runs/` (archiving) may be changed. `.ai-crew/scratchpad/` and `.ai-crew/checkpoints/` are moved (not deleted) to `.ai-crew/runs/{runId}/` during archiving.
 
 ---
 
@@ -19,6 +19,68 @@ You are executing a **pre-flight check** before graph-based construction. This c
    - Stop.
 4. Check for `aidlc-docs/` → determine native AI-DLC mode.
 5. Read `defaults.locale` from config.yaml (default: `"en"`).
+
+---
+
+## Step 0.5: Run History Check
+
+Check if a previous run exists and archive it before starting a new one.
+
+1. Read `state.json`. If any node has status `completed` or `failed`:
+   - A previous run exists and needs archiving.
+
+2. Ask the user for the **intent** of the new run:
+   ```
+   Previous run detected ({N} nodes completed, {M} failed).
+   What is this new run about?
+
+   Examples: initial-build, fix-auth-bug, add-monitoring, refactor-graph
+   ```
+   Wait for user input.
+
+3. Generate Run ID:
+   - Slugify the user's intent input (lowercase, hyphens, max 30 chars)
+   - Format: `{slug}-{YYYYMMDD}-{seq}` (seq increments if same slug+date exists in `runs.json`)
+   - If `aidlc-docs/inception/requirements/` exists, suggest intent from requirements
+
+4. Create manifest from current state:
+   - Read `state.json` for node outcomes
+   - Read scratchpad files for each completed/failed node: extract `## How` section for `keyDecisions`
+   - Build `RunManifest` with `schema: "ai-crew.run.v1"`
+
+5. Archive the previous run:
+   ```bash
+   # Move artifacts to archive
+   mkdir -p .ai-crew/runs/{prevRunId}/
+   # Move scratchpad and checkpoints (not copy — to prevent disk bloat)
+   mv .ai-crew/scratchpad/ .ai-crew/runs/{prevRunId}/scratchpad/
+   mv .ai-crew/checkpoints/ .ai-crew/runs/{prevRunId}/checkpoints/
+   cp .ai-crew/state.json .ai-crew/runs/{prevRunId}/state-snapshot.json
+   # Write manifest
+   # Write to .ai-crew/runs/{prevRunId}/manifest.json
+   ```
+
+6. Update `.ai-crew/runs.json`:
+   - Add/update previous run entry with `state: "archived"`
+   - Add new run entry with `state: "preparing"`
+   - Update stats
+
+7. Apply retention policy:
+   - Read `defaults.runs.retention` from config.yaml (default: 5)
+   - If archived runs exceed retention, delete oldest run directories and remove from `runs.json`
+
+8. Reset `state.json` for new run:
+   - Set `runId` to the new Run ID
+   - Set `version` to `"3.1"`
+   - Reset all node statuses to `"pending"`
+
+9. Display summary:
+   ```
+   Archived: {prevRunId} ({N} nodes completed, {M} failed)
+   Starting: {newRunId}
+   ```
+
+If no completed/failed nodes exist (fresh state): set `runId` in state.json and proceed to Step 1.
 
 ---
 
@@ -53,9 +115,11 @@ D) Create official bundle (add to catalog)
 Wait for user selection before proceeding.
 
 ### Option A: Use as-is
-- Skip Step 2 (Graph Proposal).
-- Proceed to Step 3 (Model Check).
+- Skip Step 2 (Graph Proposal), but **still validate**: run the validation rules from Step 2.4 against the existing graph.yaml.
+  If validation fails, display errors and offer to switch to Option B (customize) or Option C (recreate).
+- Compute and display levels using the algorithm from Step 2.5.
 - Display current graph as ASCII for confirmation.
+- Proceed to Step 3 (Model Check).
 
 ### Option B: Customize graph
 - Proceed to Step 2 with **modification mode** (read current graph as base, propose changes).
@@ -132,17 +196,36 @@ For each unit-of-work from the design:
 6. **config.isolation**: `worktree` for workers, `none` for planners/routers.
 7. **config.model**: Use bundle defaults unless design specifies otherwise.
 
-### 2.4: Validate Graph
+### 2.4: Validate Graph (Canonical Validation Point)
 
-Apply the same rules as `src/graph.ts::validateGraph()`:
+This step is the **single source of truth (SSOT)** for graph validation. The `/crew:run` command trusts this validation via `graphHash` and only re-validates as a fallback when the graph changes after preflight.
+
+Apply all rules from `src/graph.ts::validateGraph()` plus file existence checks:
+
+**Structural rules** (same as `src/graph.ts::validateGraph()`):
 - No duplicate node IDs
 - No dangling depends_on references
-- No cycles
+- No cycles (Kahn's algorithm)
 - At least one root node (empty depends_on)
-- Router nodes have `isolation: none`
-- Aggregator nodes have `wait` field
+- `verify` field must be string[] if present
+- `config.retry` must be integer 0-3 if present
+
+**Semantic rules**:
+- Router nodes have `config.isolation: none`
+- Aggregator nodes have `wait: all | any`
+
+**File existence checks**:
+- All referenced agents exist in `.claude/agents/`
+- All referenced skills exist in `.claude/skills/`
 
 ### 2.5: Display & Approve
+
+**Level computation** (Kahn's topological sort — same algorithm as `src/graph.ts::computeLevels()`):
+1. Level 0: All nodes with empty `depends_on` (root nodes)
+2. Level N: Nodes whose ALL dependencies are assigned to levels < N
+3. Nodes at the same level can execute in parallel
+
+This is identical to the algorithm used by `/crew:run` Step 1 for execution ordering.
 
 Show proposed graph as ASCII diagram:
 
@@ -315,17 +398,25 @@ Next step: /crew:run
 
 ### 5.2: Update State
 
+Compute `graphHash` by reading the raw content of `.ai-crew/graph.yaml` and generating its SHA-256 hash:
+```bash
+shasum -a 256 .ai-crew/graph.yaml | cut -d ' ' -f 1
+```
+This hash allows `/crew:run` to detect if the graph changed since preflight.
+
 Write preflight state to `.ai-crew/state.json`:
 
 ```json
 {
-  "version": "3.0",
+  "version": "3.1",
   "bundleName": "{name}",
+  "runId": "{current run ID}",
   "preflight": {
     "completedAt": "{ISO 8601 timestamp}",
     "modelsVerified": ["{model1}", "{model2}"],
     "modelsSkipped": ["{model3}"],
-    "gitClean": true
+    "gitClean": true,
+    "graphHash": "{SHA-256 of graph.yaml content}"
   },
   "nodes": {
     "{node_id}": { "status": "pending", "startedAt": null, "completedAt": null },
@@ -352,10 +443,12 @@ Append to `aidlc-docs/audit.md`:
 
 ## Critical Rules
 
-1. **Non-destructive**: Never modify aidlc-docs/, scratchpad/, agents/, skills/, CLAUDE.md, or .aidlc-rule-details/.
-2. **Graph-only changes**: Only .ai-crew/graph.yaml, state.json, and config.yaml (bundle name) may be modified.
-3. **No silent fallback**: If model auth fails, explicitly report and ask — never silently substitute.
-4. **No auto-install**: Never run `ai-crew install --force` automatically. Always inform the user of consequences.
-5. **Git must be clean**: Do not proceed to /crew:run until git status is clean. This is a hard gate, not a soft warning.
-6. **Locale-aware**: Use `defaults.locale` for user-facing output.
-7. **Design artifacts are read-only**: Read aidlc-docs/ for graph proposal but never write to it.
+1. **Non-destructive**: Never modify aidlc-docs/, agents/, skills/, CLAUDE.md, or .aidlc-rule-details/.
+2. **Allowed modifications**: `.ai-crew/graph.yaml`, `state.json`, `config.yaml` (bundle name), `runs.json`, and `runs/` (archiving).
+3. **Run archival**: Step 0.5 archives previous runs to `.ai-crew/runs/{runId}/`. Scratchpad and checkpoints are moved (not copied) to prevent disk bloat. `runs.json` is the registry.
+4. **Retention policy**: Oldest archived runs are pruned per `defaults.runs.retention` (default: 5).
+5. **No silent fallback**: If model auth fails, explicitly report and ask — never silently substitute.
+6. **No auto-install**: Never run `ai-crew install --force` automatically. Always inform the user of consequences.
+7. **Git must be clean**: Do not proceed to /crew:run until git status is clean. This is a hard gate, not a soft warning.
+8. **Locale-aware**: Use `defaults.locale` for user-facing output.
+9. **Design artifacts are read-only**: Read aidlc-docs/ for graph proposal but never write to it.

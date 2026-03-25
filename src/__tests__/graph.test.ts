@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateGraph } from "../graph.js";
+import { validateGraph, computeLevels } from "../graph.js";
 import type { GraphNode } from "../types.js";
 
 function makeNode(overrides: Partial<GraphNode> & { id: string }): GraphNode {
@@ -234,5 +234,170 @@ describe("validateGraph", () => {
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.path.includes("verify"))).toBe(true);
     expect(result.errors.some((e) => e.path.includes("retry"))).toBe(true);
+  });
+
+  // --------------------------------------------------------
+  // Router isolation validation
+  // --------------------------------------------------------
+
+  describe("router isolation", () => {
+    it("accepts router with isolation: none", () => {
+      const result = validateGraph([
+        makeNode({ id: "a", type: "router", config: { isolation: "none" } }),
+      ]);
+      expect(result.valid).toBe(true);
+    });
+
+    it("rejects router without isolation: none", () => {
+      const result = validateGraph([
+        makeNode({ id: "a", type: "router", config: { isolation: "worktree" } }),
+      ]);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some((e) => e.message.includes("Router"))).toBe(true);
+    });
+
+    it("rejects router with empty config (no isolation)", () => {
+      const result = validateGraph([
+        makeNode({ id: "a", type: "router", config: {} }),
+      ]);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some((e) => e.message.includes("Router"))).toBe(true);
+    });
+  });
+
+  // --------------------------------------------------------
+  // Aggregator wait validation
+  // --------------------------------------------------------
+
+  describe("aggregator wait", () => {
+    it("accepts aggregator with wait: all", () => {
+      const result = validateGraph([
+        makeNode({ id: "root" }),
+        makeNode({ id: "a", type: "aggregator", wait: "all", depends_on: ["root"] }),
+      ]);
+      expect(result.valid).toBe(true);
+    });
+
+    it("accepts aggregator with wait: any", () => {
+      const result = validateGraph([
+        makeNode({ id: "root" }),
+        makeNode({ id: "a", type: "aggregator", wait: "any", depends_on: ["root"] }),
+      ]);
+      expect(result.valid).toBe(true);
+    });
+
+    it("rejects aggregator without wait field", () => {
+      const result = validateGraph([
+        makeNode({ id: "root" }),
+        makeNode({ id: "a", type: "aggregator", depends_on: ["root"] }),
+      ]);
+      expect(result.valid).toBe(false);
+      expect(result.errors.some((e) => e.message.includes("Aggregator"))).toBe(true);
+    });
+  });
+
+  // --------------------------------------------------------
+  // Root node validation
+  // --------------------------------------------------------
+
+  it("rejects graph with no root node", () => {
+    const result = validateGraph([
+      makeNode({ id: "a", depends_on: ["b"] }),
+      makeNode({ id: "b", depends_on: ["a"] }),
+    ]);
+    expect(result.valid).toBe(false);
+    // Should have both "no root" and "cycle" errors
+    expect(result.errors.some((e) => e.message.includes("root node"))).toBe(true);
+  });
+
+  it("accepts graph where all nodes are roots", () => {
+    const result = validateGraph([
+      makeNode({ id: "a" }),
+      makeNode({ id: "b" }),
+      makeNode({ id: "c" }),
+    ]);
+    expect(result.valid).toBe(true);
+  });
+});
+
+// ============================================================
+// computeLevels
+// ============================================================
+
+describe("computeLevels", () => {
+  it("returns empty map for empty graph", () => {
+    const levels = computeLevels([]);
+    expect(levels).not.toBeNull();
+    expect(levels!.size).toBe(0);
+  });
+
+  it("assigns level 0 to a single root node", () => {
+    const levels = computeLevels([makeNode({ id: "a" })]);
+    expect(levels).not.toBeNull();
+    expect(levels!.get("a")).toBe(0);
+  });
+
+  it("computes levels for a linear chain", () => {
+    const levels = computeLevels([
+      makeNode({ id: "a" }),
+      makeNode({ id: "b", depends_on: ["a"] }),
+      makeNode({ id: "c", depends_on: ["b"] }),
+    ]);
+    expect(levels).not.toBeNull();
+    expect(levels!.get("a")).toBe(0);
+    expect(levels!.get("b")).toBe(1);
+    expect(levels!.get("c")).toBe(2);
+  });
+
+  it("computes levels for a diamond DAG", () => {
+    const levels = computeLevels([
+      makeNode({ id: "a" }),
+      makeNode({ id: "b", depends_on: ["a"] }),
+      makeNode({ id: "c", depends_on: ["a"] }),
+      makeNode({ id: "d", depends_on: ["b", "c"] }),
+    ]);
+    expect(levels).not.toBeNull();
+    expect(levels!.get("a")).toBe(0);
+    expect(levels!.get("b")).toBe(1);
+    expect(levels!.get("c")).toBe(1);
+    expect(levels!.get("d")).toBe(2);
+  });
+
+  it("assigns level 0 to all independent roots", () => {
+    const levels = computeLevels([
+      makeNode({ id: "a" }),
+      makeNode({ id: "b" }),
+      makeNode({ id: "c" }),
+    ]);
+    expect(levels).not.toBeNull();
+    expect(levels!.get("a")).toBe(0);
+    expect(levels!.get("b")).toBe(0);
+    expect(levels!.get("c")).toBe(0);
+  });
+
+  it("returns null for a cycle", () => {
+    const levels = computeLevels([
+      makeNode({ id: "a", depends_on: ["b"] }),
+      makeNode({ id: "b", depends_on: ["a"] }),
+    ]);
+    expect(levels).toBeNull();
+  });
+
+  it("handles complex multi-level graph", () => {
+    const levels = computeLevels([
+      makeNode({ id: "foundation" }),
+      makeNode({ id: "hook_profiling" }),
+      makeNode({ id: "graph_ext", depends_on: ["foundation"] }),
+      makeNode({ id: "verifier", depends_on: ["foundation"] }),
+      makeNode({ id: "checkpoint", depends_on: ["foundation", "hook_profiling"] }),
+      makeNode({ id: "review", type: "aggregator", wait: "all", depends_on: ["graph_ext", "verifier", "checkpoint"] }),
+    ]);
+    expect(levels).not.toBeNull();
+    expect(levels!.get("foundation")).toBe(0);
+    expect(levels!.get("hook_profiling")).toBe(0);
+    expect(levels!.get("graph_ext")).toBe(1);
+    expect(levels!.get("verifier")).toBe(1);
+    expect(levels!.get("checkpoint")).toBe(1);
+    expect(levels!.get("review")).toBe(2);
   });
 });

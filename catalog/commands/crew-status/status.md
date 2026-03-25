@@ -16,6 +16,7 @@ Display the current status of the AI-Crew Graph workflow. Read state and graph f
 2. Read `.ai-crew/graph.yaml` (if exists).
 3. Read `.ai-crew/config.yaml` (if exists).
 4. Read `aidlc-docs/aidlc-state.md` (if exists) — this tracks AI-DLC stage progression across Inception and Construction phases.
+5. Read `.ai-crew/runs.json` (if exists) — run history registry.
 
 ---
 
@@ -52,6 +53,26 @@ Stop here.
   Bundle:     {state.bundleName}
   Version:    {state.version}
 ```
+
+### 2.1.5 Run History (if runs.json exists)
+
+If `.ai-crew/runs.json` was loaded and has entries, display run history:
+
+```
+  Run History:
+  ┌──────────────────────────────────┬───────────────────────────┬───────────┬─────────┐
+  │ Run ID                           │ Intent                    │ Status    │ Nodes   │
+  ├──────────────────────────────────┼───────────────────────────┼───────────┼─────────┤
+  │ initial-build-20260324-1         │ Graph executor 초기 구현   │ archived  │ 10/10   │
+  │ fix-auth-20260325-1              │ 인증 모듈 버그 수정        │ archived  │ 3/3     │
+  │ add-monitoring-20260325-1        │ 모니터링 추가             │ running   │ 0/5     │
+  └──────────────────────────────────┴───────────────────────────┴───────────┴─────────┘
+
+  Current Run: add-monitoring-20260325-1
+  Total: 3 runs (2 completed, 0 failed)
+```
+
+If no runs.json exists, skip this section.
 
 ### 2.2 Graph Nodes
 
