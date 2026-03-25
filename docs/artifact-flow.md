@@ -20,6 +20,8 @@ ai-crew는 2단계 워크플로우를 사용한다:
 ```
 aidlc-docs/          -> 설계 아티팩트 (AI-DLC Inception)
 .ai-crew/scratchpad/ -> 실행 핸드오프 (Graph Agent Construction)
+.ai-crew/runs/       -> 실행 이력 아카이브 (Run History)
+.ai-crew/runs.json   -> 실행 레지스트리 (Run Registry)
 project root/        -> 코드 산출물 (최종 결과물)
 ```
 
@@ -28,6 +30,8 @@ project root/        -> 코드 산출물 (최종 결과물)
 | `aidlc-docs/inception/` | 요구사항, 설계, 유저스토리 등 설계 문서 | Inception 단계 |
 | `aidlc-docs/construction/` | 구현 결과 요약 | `/crew:integrate` 실행 시 |
 | `.ai-crew/scratchpad/` | 에이전트 간 실행 핸드오프 | `/crew:run` 실행 시 |
+| `.ai-crew/runs/` | 과거 실행 이력 아카이브 (scratchpad, state 스냅샷) | `/crew:preflight` 실행 시 |
+| `.ai-crew/runs.json` | 전체 실행 레지스트리 (현재/과거 run 색인) | `/crew:preflight` 실행 시 |
 | 프로젝트 루트 | 실제 코드 파일 | Construction 단계 |
 
 ---
@@ -59,6 +63,9 @@ project root/        -> 코드 산출물 (최종 결과물)
        |
        -- inception/ freeze --
        |
+/crew:preflight  ->  Step 0.5: .ai-crew/runs/{runId}/ (이전 scratchpad 아카이브)
+       |              Step 0.6: 번들 규칙 동기화 (rules sync)
+       |
 /crew:run        ->  .ai-crew/scratchpad/ (에이전트: aidlc-docs/ 읽기, scratchpad 쓰기)
        |              +-- pm_review: ooo를 통해 inception/ 패치 가능
        |              +-- design_gate: ooo를 통해 inception/ 패치 가능
@@ -75,6 +82,8 @@ project root/        -> 코드 산출물 (최종 결과물)
 |------|-----------|-----------|------|
 | `aidlc-docs/aidlc-state.md` | AI-DLC 단계 진행 | elaborate, refine, integrate | 프로젝트 전체 |
 | `.ai-crew/state.json` | 그래프 노드 상태 | `/crew:run` | 실행 단위 |
+| `.ai-crew/runs.json` | Run 레지스트리 (전체 실행 색인, 통계) | `/crew:preflight`, archiveRun | 프로젝트 전체 |
+| `.ai-crew/runs/{runId}/manifest.json` | 개별 Run 스냅샷 (intent, 결과, 타임라인) | archiveRun | 아카이브 후 영구 |
 | `aidlc-docs/audit.md` | 모든 상호작용 로그 | 모든 명령어 | 프로젝트 전체 |
 
 ---
@@ -92,12 +101,14 @@ project root/        -> 코드 산출물 (최종 결과물)
 
 ---
 
-## 7. 사용자 흐름 (4개 명령어)
+## 7. 사용자 흐름 (6개 명령어)
 
 1. **`/crew:elaborate`** — AI-DLC Inception 실행. 요구사항 분석부터 유닛 분해까지 설계 문서를 생성한다.
 2. **`/crew:refine`** — ouroboros를 통해 설계를 반복 개선한다. 수렴할 때까지 evaluate/evolve 사이클을 실행한다.
-3. **`/crew:run`** — 그래프 실행기를 시작한다. 각 유닛이 독립 worktree에서 병렬로 구현된다. 에이전트는 inception 문서를 읽고 scratchpad에 결과를 기록한다.
-4. **`/crew:integrate`** — scratchpad를 construction 문서로 변환하고, worktree 브랜치를 main에 병합한다.
+3. **`/crew:preflight`** — 실행 전 환경을 준비한다. 이전 run의 scratchpad를 `.ai-crew/runs/{runId}/`에 아카이브하고, 번들 규칙을 동기화한다.
+4. **`/crew:run`** — 그래프 실행기를 시작한다. 각 유닛이 독립 worktree에서 병렬로 구현된다. 에이전트는 inception 문서를 읽고 scratchpad에 결과를 기록한다.
+5. **`/crew:status`** — 현재 실행 상태를 모니터링한다. 노드별 진행 상황과 전체 그래프 상태를 표시한다.
+6. **`/crew:integrate`** — scratchpad를 construction 문서로 변환하고, worktree 브랜치를 main에 병합한다.
 
 ---
 
@@ -106,8 +117,11 @@ project root/        -> 코드 산출물 (최종 결과물)
 ### 왜 dual-write를 하지 않는가
 단일 책임 원칙. inception과 construction에 동시에 쓰면 불일치(divergence) 위험이 발생한다. 각 저장소는 하나의 명령어만 쓰기 권한을 가진다.
 
-### 왜 scratchpad는 임시인가
-에이전트 간 핸드오프는 일시적이다. 최종 결과물은 코드이며, scratchpad는 중간 산출물일 뿐이다. integrate가 필요한 정보를 construction 문서로 추출한 후에는 보존할 필요가 없다.
+### 왜 scratchpad는 아카이브하는가
+scratchpad는 에이전트 간 핸드오프를 위한 작업 공간이다. 매 run 시작 전 `/crew:preflight`가 이전 scratchpad를 `.ai-crew/runs/{runId}/scratchpad/`에 아카이브한다. 이렇게 하면 새 run은 깨끗한 상태에서 시작하면서도, 과거 실행의 중간 산출물을 디버깅이나 비교 목적으로 참조할 수 있다.
+
+### 왜 run history를 파일 기반으로 관리하는가
+외부 DB 의존성 없이 git과 자연스럽게 통합된다. `runs.json`은 가벼운 색인 역할을 하고, 각 `runs/{runId}/` 디렉토리는 manifest, state 스냅샷, scratchpad를 독립적으로 보관한다. 파일 기반이므로 `ls`, `cat`, `jq` 같은 표준 도구로 바로 조회할 수 있고, git으로 버전 관리하거나 `.gitignore`로 제외하는 선택도 팀에 맡길 수 있다.
 
 ### 왜 integrate가 변환하는가
 관심사 분리(separation of concerns). 에이전트는 구현에 집중하고, 문서화는 integrate가 일괄 처리한다. 이렇게 하면 에이전트가 문서 형식을 신경 쓸 필요가 없다.
