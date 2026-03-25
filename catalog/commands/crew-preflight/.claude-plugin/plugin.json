@@ -1,0 +1,5 @@
+{
+  "name": "crew-preflight",
+  "description": "Pre-flight check - dynamic bundle setup, model auth, git readiness",
+  "version": "1.0.0"
+}

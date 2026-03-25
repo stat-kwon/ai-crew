@@ -121,6 +121,7 @@ After user approves final changes:
 
    Next steps:
    - `/crew:refine [stage]` — refine another design stage
+   - `/crew:preflight` — validate environment, customize graph, check model auth
    - `/crew:run` — proceed to implementation (Construction phase)
    ```
 

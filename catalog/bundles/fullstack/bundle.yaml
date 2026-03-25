@@ -32,6 +32,7 @@ includes:
     - crew-checkpoint
     - crew-restore
     - crew-refine
+    - crew-preflight
   agents:
     - owner
     - planner

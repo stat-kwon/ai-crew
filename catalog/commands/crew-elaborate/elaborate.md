@@ -193,7 +193,9 @@ Present the final summary:
 - **Level 1**: {nodes} (after Level 0)
 
 ## Next Step
-Run `/crew:run` to begin the Graph Executor and spawn agent teams.
+- `/crew:refine` — (optional) iterative design refinement
+- `/crew:preflight` — validate environment, customize graph, check model auth
+- `/crew:run` — begin the Graph Executor and spawn agent teams
 
 All specs are at: `aidlc-docs/` (native AI-DLC) or `.ai-crew/specs/{intent-id}/` (no workflow)
 ```

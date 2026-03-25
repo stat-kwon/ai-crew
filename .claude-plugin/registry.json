@@ -94,6 +94,10 @@
         "path": "catalog/commands/crew-integrate"
       },
       {
+        "id": "command.crew-preflight",
+        "path": "catalog/commands/crew-preflight"
+      },
+      {
         "id": "command.crew-restore",
         "path": "catalog/commands/crew-restore"
       },

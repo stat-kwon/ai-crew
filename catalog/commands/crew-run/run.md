@@ -21,7 +21,14 @@ You are the **Team Lead** executing a Graph-based multi-agent workflow. You read
    - **Otherwise**: load from `.ai-crew/rules/` (legacy/non-AI-DLC bundles).
 5. **Detect capabilities**: Check if `TeamCreate` tool is available. If yes, **Team mode** is enabled alongside Parallel and Inline modes.
 6. Read `defaults.locale` from `config.yaml` (default: `"en"`).
-   Use this locale for all **user-facing** output:
+7. **(Optional) Preflight check**: Read `state.json` → `preflight?.completedAt`.
+   If not found, display warning:
+   ```
+   Warning: Preflight not run. Run `/crew:preflight` first for model auth and git checks.
+   Continuing anyway...
+   ```
+   This is a WARNING, not a blocker — `/crew:run` can still proceed.
+8. Use locale for all **user-facing** output:
    - Terminal display messages (Level Complete, Execution Plan, etc.)
    - Scratchpad content (What/How/Result section **content**, NOT field names)
    - `aidlc-docs/aidlc-state.md` updates

@@ -20,6 +20,7 @@ includes:
     - testing
   commands:
     - crew-elaborate
+    - crew-preflight
     - crew-run
     - crew-status
   agents:

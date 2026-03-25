@@ -19,6 +19,7 @@ export type {
   McpResolution,
   InstallOptions,
   InstallResult,
+  PreflightState,
   GraphState,
   NodeState,
   // Validation Types

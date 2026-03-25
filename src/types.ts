@@ -146,9 +146,17 @@ export interface InstallResult {
 // Graph Execution State (written to .ai-crew/state.json)
 // ============================================================
 
+export interface PreflightState {
+  completedAt: string;
+  modelsVerified: string[];
+  modelsSkipped: string[];
+  gitClean: boolean;
+}
+
 export interface GraphState {
   version: "3.0";
   bundleName: string;
+  preflight?: PreflightState;
   nodes: Record<string, NodeState>;
 }
 
