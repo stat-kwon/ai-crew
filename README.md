@@ -1,61 +1,61 @@
 # ai-crew
 
-Catalog-based Plugin Composition Platform for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
+[Claude Code](https://docs.anthropic.com/en/docs/claude-code)를 위한 카탈로그 기반 플러그인 조합 플랫폼.
 
-Graph-based multi-agent orchestrator that manages agents, skills, rules, and commands as reusable catalog components. Bundles compose these into team configurations for parallel code generation.
+에이전트, 스킬, 규칙, 커맨드를 재사용 가능한 카탈로그 컴포넌트로 관리하고, 번들로 조합하여 그래프 기반 병렬 코드 생성을 수행하는 멀티 에이전트 오케스트레이터.
 
-## Install
+## 설치
 
 ```bash
 npm install -g ai-crew
 ```
 
-## Quick Start
+## 빠른 시작
 
 ```bash
-# List available team bundles
+# 사용 가능한 팀 번들 목록
 ai-crew list
 
-# Install a team into your project
+# 프로젝트에 팀 설치
 ai-crew install --team fullstack --target ./my-project
 
-# In Claude Code, run the workflow
-/crew:elaborate "Build a todo app with React and Node.js"
+# Claude Code에서 워크플로우 실행
+/crew:elaborate "React와 Node.js로 투두 앱 만들기"
 /crew:preflight
 /crew:run
 /crew:integrate
 ```
 
-## Available Bundles
+## 사용 가능한 번들
 
-| Bundle | Description | Nodes |
-|--------|-------------|-------|
-| `fullstack` | Frontend + Backend parallel, then review + QA | 5 |
-| `aidlc-standard` | Plan → Build → Review sequential | 3 |
+| 번들 | 설명 | 노드 수 |
+|------|------|---------|
+| `fullstack` | Frontend + Backend 병렬, 리뷰 + QA | 5 |
+| `aidlc-standard` | Plan → Build → Review 순차 실행 | 3 |
 | `aidlc-tdd` | Plan → Test → Build → Review (TDD) | 4 |
-| `advanced-fullstack` | Parallel with security audit | 7 |
-| `e2e-premium` | Full pipeline with design gates | 13 |
-| `lightweight` | Minimal: plan + parallel build | 3 |
+| `advanced-fullstack` | 보안 감사 포함 병렬 실행 | 7 |
+| `e2e-premium` | 설계 게이트 포함 전체 파이프라인 | 13 |
+| `lightweight` | 최소 구성: plan + 병렬 빌드 | 3 |
 
-## Architecture
+## 아키텍처
 
 ```
-catalog/              → Reusable components (source of truth)
-  agents/             → Agent definitions (backend-dev, frontend-dev, reviewer, ...)
-  skills/             → Domain skills (backend-node, testing, clean-code, ...)
-  commands/           → Slash commands (/crew:run, /crew:preflight, ...)
-  rules/              → Global rules (coding-standards, git-conventions, ...)
-  bundles/            → Team compositions (fullstack, aidlc-standard, ...)
+catalog/              → 재사용 가능한 컴포넌트 (소스 저장소)
+  agents/             → 에이전트 정의 (backend-dev, frontend-dev, reviewer, ...)
+  skills/             → 도메인 스킬 (backend-node, testing, clean-code, ...)
+  commands/           → 슬래시 커맨드 (/crew:run, /crew:preflight, ...)
+  rules/              → 전역 규칙 (coding-standards, git-conventions, ...)
+  bundles/            → 팀 구성 (fullstack, aidlc-standard, ...)
 
-ai-crew install       → Copies catalog items to project
-  .ai-crew/           → State, graph, rules, scratchpad
-  .claude/            → Agents, skills, commands (Claude Code reads these)
-  CLAUDE.md           → Project workflow config
+ai-crew install       → 카탈로그 항목을 프로젝트에 복사
+  .ai-crew/           → 상태, 그래프, 규칙, 스크래치패드
+  .claude/            → 에이전트, 스킬, 커맨드 (Claude Code가 읽는 경로)
+  CLAUDE.md           → 프로젝트 워크플로우 설정
 ```
 
-## Graph Execution Model
+## 그래프 실행 모델
 
-Each bundle defines a DAG (Directed Acyclic Graph) of work nodes:
+각 번들은 작업 노드의 DAG(방향 비순환 그래프)를 정의합니다:
 
 ```yaml
 # .ai-crew/graph.yaml
@@ -70,14 +70,14 @@ graph:
         isolation: worktree
 ```
 
-`/crew:run` executes nodes level-by-level:
-- **Level 0**: Root nodes (no dependencies) — run in parallel
-- **Level N**: Nodes whose dependencies are all complete
-- Each worker runs in an isolated git worktree on branch `crew/{node_id}`
+`/crew:run`은 노드를 레벨별로 실행합니다:
+- **Level 0**: 루트 노드 (의존성 없음) — 병렬 실행
+- **Level N**: 모든 의존성이 완료된 노드
+- 각 워커는 `crew/{node_id}` 브랜치의 격리된 git worktree에서 실행
 
-## Catalog Metadata
+## 카탈로그 메타데이터
 
-Every catalog item has a `plugin.json` with tier classification:
+모든 카탈로그 항목은 `plugin.json`에 티어 분류를 가집니다:
 
 ```json
 {
@@ -89,61 +89,61 @@ Every catalog item has a `plugin.json` with tier classification:
 }
 ```
 
-| Tier | Meaning |
-|------|---------|
-| `independent` | Works anywhere, no workflow dependency |
-| `aidlc` | Requires AI-DLC workflow (aidlc-docs/) |
-| `crew` | Graph orchestration internal |
+| 티어 | 의미 |
+|------|------|
+| `independent` | 어디서든 사용 가능, 워크플로우 의존성 없음 |
+| `aidlc` | AI-DLC 워크플로우 필요 (aidlc-docs/) |
+| `crew` | 그래프 오케스트레이션 내부용 |
 
-## Commands
+## CLI 명령어
 
-| Command | Description |
-|---------|-------------|
-| `ai-crew install --team <name> --target <path>` | Install a bundle |
-| `ai-crew list` | List available bundles |
-| `ai-crew status` | Show current state |
-| `ai-crew doctor` | Diagnose installation |
-| `ai-crew validate` | Validate config files |
-| `ai-crew uninstall` | Remove installation |
-| `ai-crew mcp` | Start MCP server |
+| 명령어 | 설명 |
+|--------|------|
+| `ai-crew install --team <name> --target <path>` | 번들 설치 |
+| `ai-crew list` | 사용 가능한 번들 목록 |
+| `ai-crew status` | 현재 상태 조회 |
+| `ai-crew doctor` | 설치 진단 |
+| `ai-crew validate` | 설정 파일 검증 |
+| `ai-crew uninstall` | 설치 제거 |
+| `ai-crew mcp` | MCP 서버 시작 |
 
-## Slash Commands (in Claude Code)
+## 슬래시 커맨드 (Claude Code 내)
 
-| Command | Phase | Description |
-|---------|-------|-------------|
-| `/crew:elaborate` | Inception | Define requirements and design |
-| `/crew:refine` | Inception | Iterative design refinement |
-| `/crew:preflight` | Setup | Validate graph, models, git, rules |
-| `/crew:run` | Construction | Execute graph (parallel agents) |
-| `/crew:integrate` | Construction | Merge branches, create PR |
-| `/crew:status` | Any | Show workflow state |
+| 커맨드 | 단계 | 설명 |
+|--------|------|------|
+| `/crew:elaborate` | Inception | 요구사항 정의 및 설계 |
+| `/crew:refine` | Inception | 반복적 설계 고도화 |
+| `/crew:preflight` | Setup | 그래프, 모델, git, 규칙 검증 |
+| `/crew:run` | Construction | 그래프 실행 (병렬 에이전트) |
+| `/crew:integrate` | Construction | 브랜치 병합 및 PR 생성 |
+| `/crew:status` | 전체 | 워크플로우 상태 조회 |
 
-## Multi-Session Continuity
+## 멀티 세션 연속성
 
-Previous runs are archived with descriptive IDs:
+이전 실행은 의미 있는 ID로 아카이브됩니다:
 
 ```
 .ai-crew/runs/
   initial-build-20260324-1/
-    manifest.json       # Intent, outcome, node summaries
-    scratchpad/         # Preserved agent outputs
+    manifest.json       # 의도, 결과, 노드별 요약
+    scratchpad/         # 에이전트 산출물 보존
   fix-auth-20260325-1/
     manifest.json
     scratchpad/
 ```
 
-Agents in subsequent runs receive context about what changed since the last run.
+후속 실행 시 에이전트는 이전 실행에서 무엇이 변경되었는지 컨텍스트를 받습니다.
 
-## Documentation
+## 문서
 
-See [docs/](./docs/) for detailed architecture documentation:
-- [Artifact Flow](./docs/artifact-flow.md) — Data ownership and lifecycle
-- [Graph Execution](./docs/graph-execution.md) — DAG execution model
-- [Preflight/Run Separation](./docs/preflight-run-separation.md) — Validation architecture
-- [Multi-Session Continuity](./docs/multi-session-continuity.md) — Run history system
-- [Catalog Architecture](./docs/catalog-architecture.md) — Plugin composition
-- [State Management](./docs/state-management.md) — All state files
+자세한 아키텍처 문서는 [docs/](./docs/)를 참고하세요:
+- [아티팩트 흐름](./docs/artifact-flow.md) — 데이터 소유권과 생명주기
+- [그래프 실행](./docs/graph-execution.md) — DAG 실행 모델
+- [Preflight/Run 역할 분리](./docs/preflight-run-separation.md) — 검증 아키텍처
+- [멀티 세션 연속성](./docs/multi-session-continuity.md) — Run 이력 시스템
+- [카탈로그 아키텍처](./docs/catalog-architecture.md) — 플러그인 조합
+- [상태 관리](./docs/state-management.md) — 전체 상태 파일
 
-## License
+## 라이선스
 
 MIT
