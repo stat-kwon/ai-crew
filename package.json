@@ -9,8 +9,6 @@
   "files": [
     "dist",
     "catalog",
-    "plugins",
-    "tools",
     ".claude-plugin"
   ],
   "scripts": {
