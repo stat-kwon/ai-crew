@@ -3,5 +3,11 @@
   "description": "MCP server for multi-provider agent chat (OpenAI, Google, Codex)",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "crew",
+  "requires": [],
+  "tags": [
+    "mcp",
+    "provider"
+  ]
 }

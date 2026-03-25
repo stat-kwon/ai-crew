@@ -3,5 +3,11 @@
   "description": "Backend developer agent - API and server-side implementation specialist",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "independent",
+  "requires": [],
+  "tags": [
+    "implementation",
+    "backend"
+  ]
 }

@@ -3,5 +3,11 @@
   "description": "Structured code review with severity ratings and categorized feedback",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "independent",
+  "requires": [],
+  "tags": [
+    "quality",
+    "review"
+  ]
 }

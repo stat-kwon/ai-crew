@@ -3,5 +3,11 @@
   "description": "Global rules applied to all agents - coding standards, git conventions, testing",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "independent",
+  "requires": [],
+  "tags": [
+    "constraints",
+    "core"
+  ]
 }

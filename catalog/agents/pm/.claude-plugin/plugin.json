@@ -3,5 +3,11 @@
   "description": "Project manager agent - coordinates team and tracks progress",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "crew",
+  "requires": [],
+  "tags": [
+    "coordination",
+    "monitoring"
+  ]
 }

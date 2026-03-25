@@ -3,5 +3,11 @@
   "description": "Quality gate hooks - run tests after code changes to ensure quality",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "crew",
+  "requires": [],
+  "tags": [
+    "quality",
+    "validation"
+  ]
 }

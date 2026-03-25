@@ -1,5 +1,14 @@
 {
   "name": "crew-preflight",
   "description": "Pre-flight check - dynamic bundle setup, model auth, git readiness",
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "tier": "crew",
+  "requires": [
+    "graph",
+    "state"
+  ],
+  "tags": [
+    "validation",
+    "setup"
+  ]
 }

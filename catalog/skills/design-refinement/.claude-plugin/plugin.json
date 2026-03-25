@@ -3,5 +3,15 @@
   "description": "Iterative design refinement using ouroboros MCP ontological analysis engine",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "aidlc",
+  "requires": [
+    "aidlc-docs",
+    "ouroboros"
+  ],
+  "tags": [
+    "inception",
+    "construction",
+    "refinement"
+  ]
 }

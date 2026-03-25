@@ -3,5 +3,11 @@
   "description": "Tracks multi-agent execution — updates state.json on agent spawn/completion and verifies scratchpad output",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "crew",
+  "requires": [],
+  "tags": [
+    "monitoring",
+    "orchestration"
+  ]
 }

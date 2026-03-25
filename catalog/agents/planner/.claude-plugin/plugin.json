@@ -3,5 +3,13 @@
   "description": "Planning agent - analyzes tasks and creates implementation plans",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "aidlc",
+  "requires": [
+    "aidlc-docs"
+  ],
+  "tags": [
+    "inception",
+    "construction"
+  ]
 }

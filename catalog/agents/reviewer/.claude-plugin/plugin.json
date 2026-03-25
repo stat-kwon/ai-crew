@@ -3,5 +3,11 @@
   "description": "Reviewer agent - validates code quality, runs tests and lint",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "independent",
+  "requires": [],
+  "tags": [
+    "quality",
+    "review"
+  ]
 }

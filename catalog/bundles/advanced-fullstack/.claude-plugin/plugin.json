@@ -6,5 +6,12 @@
     "name": "ai-crew"
   },
   "category": "bundle",
-  "tags": ["fullstack", "tdd", "security", "advanced"]
+  "tier": "aidlc",
+  "requires": [
+    "aidlc-docs"
+  ],
+  "tags": [
+    "fullstack",
+    "premium"
+  ]
 }

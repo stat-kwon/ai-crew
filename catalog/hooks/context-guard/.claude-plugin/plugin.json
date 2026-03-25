@@ -3,5 +3,11 @@
   "description": "Prevents work loss on context compression — saves progress before compaction and on unexpected stop",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "crew",
+  "requires": [],
+  "tags": [
+    "safety",
+    "context"
+  ]
 }

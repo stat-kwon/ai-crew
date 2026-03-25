@@ -3,5 +3,11 @@
   "description": "AI-DLC methodology workflow - Inception, Construction, Integration phases",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "aidlc",
+  "requires": [],
+  "tags": [
+    "workflow",
+    "sdlc"
+  ]
 }

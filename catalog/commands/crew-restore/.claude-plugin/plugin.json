@@ -3,5 +3,14 @@
   "description": "Restore AI-Crew state from a previously saved checkpoint",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "crew",
+  "requires": [
+    "state",
+    "runs"
+  ],
+  "tags": [
+    "state-management",
+    "recovery"
+  ]
 }

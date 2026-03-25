@@ -3,5 +3,11 @@
   "description": "Frontend developer agent - React/UI implementation specialist",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "independent",
+  "requires": [],
+  "tags": [
+    "implementation",
+    "frontend"
+  ]
 }

@@ -3,5 +3,11 @@
   "description": "Security audit skill covering OWASP top 10, dependency scanning, and secure coding practices",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "independent",
+  "requires": [],
+  "tags": [
+    "quality",
+    "security"
+  ]
 }

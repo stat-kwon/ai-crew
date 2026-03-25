@@ -3,5 +3,14 @@
   "description": "Design document refinement - ouroboros-based iterative quality gate between design and implementation",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "aidlc",
+  "requires": [
+    "aidlc-docs",
+    "ouroboros"
+  ],
+  "tags": [
+    "inception",
+    "refinement"
+  ]
 }

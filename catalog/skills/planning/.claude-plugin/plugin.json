@@ -3,5 +3,13 @@
   "description": "Planning skill - structured approach to analyzing requirements and creating implementation plans",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "aidlc",
+  "requires": [
+    "aidlc-docs"
+  ],
+  "tags": [
+    "inception",
+    "construction"
+  ]
 }

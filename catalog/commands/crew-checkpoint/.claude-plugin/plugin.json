@@ -3,5 +3,12 @@
   "description": "Create a manual checkpoint snapshot of state and git context",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "crew",
+  "requires": [
+    "state"
+  ],
+  "tags": [
+    "state-management"
+  ]
 }

@@ -3,5 +3,11 @@
   "description": "QA engineer agent - end-to-end testing and quality assurance",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "independent",
+  "requires": [],
+  "tags": [
+    "quality",
+    "testing"
+  ]
 }

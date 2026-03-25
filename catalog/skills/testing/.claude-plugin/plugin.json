@@ -3,5 +3,12 @@
   "description": "Test writing and TDD skill with coverage tracking",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "independent",
+  "requires": [],
+  "tags": [
+    "quality",
+    "testing",
+    "tdd"
+  ]
 }

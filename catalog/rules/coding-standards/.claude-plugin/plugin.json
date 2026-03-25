@@ -3,5 +3,11 @@
   "description": "Coding standards rules - style, naming, documentation conventions",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "independent",
+  "requires": [],
+  "tags": [
+    "quality",
+    "standards"
+  ]
 }

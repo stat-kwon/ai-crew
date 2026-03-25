@@ -3,5 +3,12 @@
   "description": "Node.js backend development patterns, API design, and database integration",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "independent",
+  "requires": [],
+  "tags": [
+    "implementation",
+    "backend",
+    "nodejs"
+  ]
 }

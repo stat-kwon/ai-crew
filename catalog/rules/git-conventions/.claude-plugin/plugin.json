@@ -3,5 +3,11 @@
   "description": "Git workflow rules - commit messages, branching, merge strategy",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "independent",
+  "requires": [],
+  "tags": [
+    "git",
+    "standards"
+  ]
 }

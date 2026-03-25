@@ -3,5 +3,14 @@
   "description": "Integration phase - merge branches, run quality gates, verify completion",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "aidlc",
+  "requires": [
+    "aidlc-docs",
+    "scratchpad"
+  ],
+  "tags": [
+    "construction",
+    "integration"
+  ]
 }

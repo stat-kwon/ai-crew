@@ -3,5 +3,12 @@
   "description": "Tester agent - writes tests first following TDD approach",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "independent",
+  "requires": [],
+  "tags": [
+    "quality",
+    "testing",
+    "tdd"
+  ]
 }

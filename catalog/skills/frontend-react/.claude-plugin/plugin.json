@@ -3,5 +3,12 @@
   "description": "React frontend development patterns, component design, and state management",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "independent",
+  "requires": [],
+  "tags": [
+    "implementation",
+    "frontend",
+    "react"
+  ]
 }

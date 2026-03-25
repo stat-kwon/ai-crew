@@ -3,5 +3,13 @@
   "description": "Graph 기반 워크플로우 자동 조합 - catalog registry를 읽어 agents/skills/hooks를 추천하고 node 구조(DAG)와 bundle.yaml을 생성합니다",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "crew",
+  "requires": [
+    "catalog"
+  ],
+  "tags": [
+    "orchestration",
+    "composition"
+  ]
 }

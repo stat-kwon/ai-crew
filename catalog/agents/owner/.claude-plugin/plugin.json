@@ -3,5 +3,11 @@
   "description": "Owner Agent - drives AI-DLC Inception in auto mode, stopping only at mandatory approval gates",
   "author": {
     "name": "ai-crew"
-  }
+  },
+  "tier": "crew",
+  "requires": [],
+  "tags": [
+    "orchestration",
+    "decision"
+  ]
 }
