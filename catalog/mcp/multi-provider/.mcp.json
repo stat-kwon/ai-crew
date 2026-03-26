@@ -1,7 +1,6 @@
 {
   "ai-crew": {
-    "command": "python3",
-    "args": ["-m", "mcp_server"],
-    "cwd": "__AI_CREW_ROOT__"
+    "command": "node",
+    "args": ["__AI_CREW_ROOT__/dist/mcp/server.js"]
   }
 }
