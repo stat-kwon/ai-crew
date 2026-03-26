@@ -54,10 +54,10 @@ Follow each step below precisely. Report progress as you go.
 
 For each node with a worktree branch, in dependency-sorted order:
 
-1. Identify the branch: `crew/{node_id}`.
-2. Check if the branch exists: `git branch --list crew/{node_id}`.
+1. Identify the branch: `crew/{runId}/{node_id}`.
+2. Check if the branch exists: `git branch --list crew/{runId}/{node_id}`.
 3. If the branch exists:
-   - Run: `git merge crew/{node_id} --no-ff -m "integrate: merge {node_id}"`
+   - Run: `git merge crew/{runId}/{node_id} --no-ff -m "chore(integrate): merge {node_id}"`
 4. **If the merge succeeds**: report and move on.
 5. **If there are merge conflicts**:
    a. List conflicted files.
@@ -90,10 +90,10 @@ For each node with a worktree branch, in dependency-sorted order:
 ## Step 4: Clean Up Worktrees and Branches
 
 1. For each node that used worktree isolation:
-   a. Check if a worktree exists for `crew/{node_id}`.
+   a. Check if a worktree exists for `crew/{runId}/{node_id}`.
    b. If exists: `git worktree remove <path> --force`
 2. Delete merged branches:
-   - `git branch -d crew/{node_id}` for each merged branch.
+   - `git branch -d crew/{runId}/{node_id}` for each merged branch.
 3. Display cleanup summary:
    ```
    Cleanup:

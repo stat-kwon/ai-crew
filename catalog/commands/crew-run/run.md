@@ -166,7 +166,7 @@ Before spawning ANY worktree agent:
 2. **Stage and commit** all `.ai-crew/` changes:
    ```bash
    git add .ai-crew/
-   git commit -m "crew: prepare L{N} — {node_ids}"
+   git commit -m "chore(crew): prepare L{N} — {node_ids}"
    ```
 3. Working tree is now **clean** — safe to create worktrees.
 
@@ -230,13 +230,13 @@ For each node:
 
 After all nodes in a level complete:
 
-1. For worktree agents: collect scratchpad from agent branches via `git show crew/{node_id}:.ai-crew/scratchpad/L{level}-{node_id}.md`, or read directly if written to main.
+1. For worktree agents: collect scratchpad from agent branches via `git show crew/{runId}/{node_id}:.ai-crew/scratchpad/L{level}-{node_id}.md`, or read directly if written to main.
 2. Update `state.json`: mark nodes as `completed`/`failed` with `completedAt` timestamp.
 3. **Update `aidlc-docs/aidlc-state.md`**: update the CONSTRUCTION PHASE section with level completion status and timestamps. This file is mandatory when native AI-DLC is detected — create it if it does not exist.
 4. Commit state updates:
    ```bash
    git add .ai-crew/ aidlc-docs/aidlc-state.md
-   git commit -m "crew: complete L{N} — {node_ids}"
+   git commit -m "chore(crew): complete L{N} — {node_ids}"
    ```
 5. Display level completion summary:
 
@@ -348,7 +348,7 @@ Schema field names (`## What`, `## How`, `## Result`, `## Downstream Context`) r
    Be specific, actionable, and concise.}
    ```
 
-3. Commit all changes on branch `crew/{node_id}`.
+3. Commit all changes on branch `crew/{runId}/{node_id}`.
 
 ## Constraints
 - You are in an ISOLATED worktree. Only modify files relevant to your task.
@@ -393,7 +393,7 @@ Run `/crew:integrate` to merge all branches, run quality checks, and create a PR
 
 ### Handoff (Context Limit)
 If a node agent writes a handoff note to `.ai-crew/scratchpad/L{level}-{node_id}-handoff.md`:
-1. Re-spawn a continuation agent on the same branch (`crew/{node_id}`)
+1. Re-spawn a continuation agent on the same branch (`crew/{runId}/{node_id}`)
 2. Include the handoff note in the new agent's prompt
 3. The new agent continues from where the previous one stopped
 
@@ -434,6 +434,6 @@ If `Agent(isolation: "worktree")` fails:
 13. **Agents read aidlc-docs/ (read-only), write .ai-crew/scratchpad/** — during Construction, design artifacts in `aidlc-docs/` are the frozen SSOT from Inception. Agents must not modify them. All agent output goes to `.ai-crew/scratchpad/`.
 14. **Only pm_review and design_gate nodes may patch aidlc-docs/inception/** — these special nodes use `ouroboros_evaluate` to propose design amendments. No other node type may write to `aidlc-docs/inception/`.
 15. **No rebase** — agents use merge only.
-16. **Branch naming** — `crew/{node_id}` for graph executor branches.
+16. **Branch naming** — `crew/{runId}/{node_id}` for graph executor branches.
 17. **Previous run context is graph-scoped** — inject only for same node ID re-execution and failed nodes. Do NOT inject full run history table or unrelated node scratchpad into agent prompts.
 18. **Graph validation uses hash-based trust** — if `preflight.graphHash` matches current graph, skip validation. Re-validate only as fallback when graph changed or preflight was skipped.

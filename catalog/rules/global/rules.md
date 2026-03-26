@@ -5,8 +5,9 @@
 
 ## Git Constraints
 - **Rebase 금지** — Agent는 `git rebase`를 사용하지 않는다. merge만 사용.
-- Branch merge는 Team Lead(`/crew:integrate`)가 담당. Agent는 merge하지 않는다.
-- Agent는 자신의 `crew/{node_id}` 브랜치에서만 작업한다.
+- Branch merge는 `/crew:integrate`가 담당. Agent는 merge하지 않는다.
+- Agent는 자신의 `crew/{runId}/{node_id}` 브랜치에서만 작업한다.
+- 커밋 형식과 브랜치 네이밍은 `git-conventions` 규칙을 따른다 (SSOT).
 
 ## AI-DLC Integration
 - `aidlc-docs/`는 설계의 source of truth이다.
@@ -20,7 +21,7 @@
 
 ## Context Limit Handoff
 Agent가 context window 한계에 접근하여 작업을 완료하지 못할 경우:
-1. 현재까지 진행 상황을 커밋한다: `wip: {node_id} handoff - {요약}`
+1. 현재까지 진행 상황을 커밋한다: `chore({node_id}): handoff — {요약}`
 2. `.ai-crew/scratchpad/L{level}-{node_id}-handoff.md`에 handoff 노트를 작성한다
 3. `state.json`을 `in-progress` 상태로 유지한다 (complete로 표시하지 않음)
 4. 다음 Agent가 같은 branch에서 이어받을 수 있도록 깔끔하게 종료한다

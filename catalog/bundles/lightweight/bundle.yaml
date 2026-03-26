@@ -9,7 +9,7 @@ workflow: aidlc
 defaults:
   model: claude-sonnet-4
   isolation: worktree
-  rules: [global]
+  rules: [global, git-conventions]
   mcp: [multi-provider]
   locale: ko
 includes:

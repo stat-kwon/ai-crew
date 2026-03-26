@@ -12,7 +12,7 @@ aidlc:
 defaults:
   model: claude-sonnet-4
   isolation: worktree
-  rules: [global]
+  rules: [global, git-conventions]
   mcp: [multi-provider, ouroboros]
   locale: ko
 includes:
