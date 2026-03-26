@@ -4,7 +4,7 @@ You are executing a **pre-flight check** before graph-based construction. This c
 
 **Purpose**: Dynamic bundle setup + model authentication + git readiness verification.
 
-**Non-destructive principle**: This command NEVER modifies `aidlc-docs/`, `.claude/agents/`, `.claude/skills/`, `CLAUDE.md`, or `.aidlc-rule-details/`. Only `.ai-crew/graph.yaml`, `.ai-crew/state.json`, `.ai-crew/config.yaml` (bundle name only), `.ai-crew/runs.json`, and `.ai-crew/runs/` (archiving) may be changed. `.ai-crew/scratchpad/` and `.ai-crew/checkpoints/` are moved (not deleted) to `.ai-crew/runs/{runId}/` during archiving.
+**Non-destructive principle**: This command NEVER modifies `aidlc-docs/`, `CLAUDE.md`, or `.aidlc-rule-details/`. It MAY add new files to `.claude/agents/` and `.claude/skills/` (provisioning from catalog). Only `.ai-crew/graph.yaml`, `.ai-crew/state.json`, `.ai-crew/config.yaml`, `.ai-crew/runs.json`, `.ai-crew/runs/` (archiving), and `.ai-crew/rules/` (sync) may be changed. `.ai-crew/scratchpad/` and `.ai-crew/checkpoints/` are moved (not deleted) to `.ai-crew/runs/{runId}/` during archiving.
 
 ---
 
@@ -84,151 +84,96 @@ If no completed/failed nodes exist (fresh state): set `runId` in state.json and 
 
 ---
 
-## Step 1: Bundle Decision
+## Step 1: Dynamic Graph Setup
 
-Present the current state and four options:
+This step analyzes design artifacts and dynamically provisions the execution graph.
 
-```
-Pre-flight: Bundle Configuration
+### 1.1: Detect Installation Mode
 
-Current bundle: {bundle name from config.yaml}
-Current graph: {N nodes across M levels} (or "no graph defined")
+Read `.ai-crew/config.yaml`:
+- If `bundle: "none"` → **Dynamic mode** (minimal install, proceed to 1.2)
+- If `bundle: "<name>"` → **Bundle mode** (full install with existing graph)
 
-How would you like to configure the execution graph?
+**Bundle mode**: Check if `.ai-crew/graph.yaml` exists and is valid.
+  - If valid: display graph summary, ask user:
+    - **Keep**: Proceed to Step 3 (Model Check)
+    - **Regenerate**: Continue to 1.2 (treat as dynamic mode)
+  - If missing/invalid: Continue to 1.2
 
-A) Use existing bundle as-is
-   Keep current graph.yaml. Proceed to model check.
+### 1.2: Scan Design Artifacts
 
-B) Customize graph based on design artifacts
-   Read aidlc-docs/ to propose a modified graph. Agents/skills stay within what's installed.
-
-C) Create temporary graph (project-local)
-   Auto-generate a fresh graph from design. Only .ai-crew/graph.yaml is modified.
-   Not saved to catalog — only used for this project.
-
-D) Create official bundle (add to catalog)
-   Use workflow-composer skill to create catalog/bundles/{name}/bundle.yaml.
-   Extract graph into .ai-crew/graph.yaml (no re-install needed).
-   Reusable across projects.
-```
-
-Wait for user selection before proceeding.
-
-### Option A: Use as-is
-- Skip Step 2 (Graph Proposal), but **still validate**: run the validation rules from Step 2.4 against the existing graph.yaml.
-  If validation fails, display errors and offer to switch to Option B (customize) or Option C (recreate).
-- Compute and display levels using the algorithm from Step 2.5.
-- Display current graph as ASCII for confirmation.
-- Proceed to Step 3 (Model Check).
-
-### Option B: Customize graph
-- Proceed to Step 2 with **modification mode** (read current graph as base, propose changes).
-
-### Option C: Temporary graph
-- Proceed to Step 2 with **creation mode** (generate fresh graph from design).
-- After approval: update `.ai-crew/config.yaml` bundle field to `"local-{YYYYMMDD}"`.
-
-### Option D: Official bundle
-1. Invoke the **workflow-composer** skill (read `.claude/skills/workflow-composer/SKILL.md`).
-2. The skill creates `catalog/bundles/{name}/bundle.yaml`.
-3. After bundle creation, **extract graph** from the new bundle.yaml:
-   - Parse `graph.nodes` from the generated bundle.yaml.
-   - Write to `.ai-crew/graph.yaml`.
-   - Update `.ai-crew/config.yaml` bundle field to the new bundle name.
-   - Rebuild `.ai-crew/state.json` with new node list (all `"pending"`).
-4. **Check for missing agents/skills**:
-   - Compare bundle's `includes.agents` with files in `.claude/agents/`.
-   - Compare bundle's `includes.skills` with files in `.claude/skills/`.
-   - If all present: proceed normally.
-   - If missing:
-     ```
-     The following are required by the new bundle but not installed:
-       Agents: {missing list}
-       Skills: {missing list}
-
-     Options:
-       1) Adjust graph to use only installed agents/skills
-       2) Run ai-crew install --team {name} --target . --force
-          WARNING: This resets .ai-crew/state.json and scratchpad/
-       3) Manually copy missing files and continue
-     ```
-5. Do NOT run `ai-crew install` automatically.
-
----
-
-## Step 2: Graph Proposal (Design-Based)
-
-**Executes for Option B and C only.**
-
-### 2.1: Read Design Artifacts
-
-Scan for design documents (read-only):
-- `aidlc-docs/inception/application-design/tasks.md` — `## Node: {id}` sections with agent, skills, tasks
+Read design documents (read-only):
+- `aidlc-docs/inception/application-design/tasks.md` — `## Node: {id}` sections
 - `aidlc-docs/inception/application-design/unit-of-work.md` — unit definitions
 - `aidlc-docs/inception/application-design/unit-of-work-dependency.md` — dependency matrix
-- If no aidlc-docs: check `.ai-crew/specs/` for lightweight specs.
+- If no aidlc-docs: check `.ai-crew/specs/` for lightweight specs
 
-### 2.2: Discover Installed Agents & Skills
+If no design artifacts found:
+- "No design artifacts found. Run `/crew:elaborate` first."
+- Stop.
 
-```bash
-ls .claude/agents/    # Available agent definitions
-ls .claude/skills/    # Available skill definitions
+### 1.3: Scan Available Catalog
+
+Read `.ai-crew/catalog-manifest.json`:
+- List available agents with names
+- List available skills with names
+- List available bundle presets
+
+If manifest is missing:
+- "catalog-manifest.json not found. Re-run `ai-crew install --target .` to regenerate."
+- Stop.
+
+Display:
+```
+Available from catalog:
+  Agents: planner, frontend-dev, backend-dev, reviewer, qa-engineer, ...
+  Skills: planning, frontend-react, backend-node, testing, code-review, ...
+  Bundle presets: fullstack, lightweight, aidlc-standard, ...
 ```
 
-Only propose nodes using installed agents and skills.
-
-### 2.3: Generate Graph Nodes
+### 1.4: Generate Graph Proposal
 
 For each unit-of-work from the design:
-
-1. **id**: snake_case from unit name.
-2. **type**: `worker` (default), `aggregator` for review/gate nodes.
-3. **agent**: Match unit domain to installed agents:
+1. **id**: snake_case from unit name
+2. **type**: `worker` (default), `aggregator` for review/gate nodes
+3. **agent**: Match unit domain to available agents (from manifest):
    - frontend/UI/React → `frontend-dev`
    - backend/API/Node → `backend-dev`
    - database/schema → `backend-dev`
    - test/TDD → `tester`
    - review/quality → `reviewer`
    - plan/design → `planner`
-   - security → `reviewer`
-4. **skills**: Match unit technology to installed skills.
-5. **depends_on**: From design dependency chain.
-6. **config.isolation**: `worktree` for workers, `none` for planners/routers.
-7. **config.model**: Use bundle defaults unless design specifies otherwise.
+4. **skills**: Match unit technology to available skills
+5. **depends_on**: From design dependency chain
+6. **config.isolation**: `worktree` for workers, `none` for planners/routers
+7. **config.model**: Use defaults from config.yaml
 
-### 2.4: Validate Graph (Canonical Validation Point)
+If a matching bundle preset exists, mention it:
+```
+Tip: This graph resembles the "fullstack" bundle preset.
+```
 
-This step is the **single source of truth (SSOT)** for graph validation. The `/crew:run` command trusts this validation via `graphHash` and only re-validates as a fallback when the graph changes after preflight.
+### 1.5: Validate Graph (SSOT)
 
-Apply all rules from `src/graph.ts::validateGraph()` plus file existence checks:
+This step is the **single source of truth** for graph validation. `/crew:run` trusts this via `graphHash`.
 
-**Structural rules** (same as `src/graph.ts::validateGraph()`):
+Apply all rules from `src/graph.ts::validateGraph()`:
 - No duplicate node IDs
 - No dangling depends_on references
 - No cycles (Kahn's algorithm)
-- At least one root node (empty depends_on)
-- `verify` field must be string[] if present
-- `config.retry` must be integer 0-3 if present
-
-**Semantic rules**:
+- At least one root node
 - Router nodes have `config.isolation: none`
 - Aggregator nodes have `wait: all | any`
 
-**File existence checks**:
-- All referenced agents exist in `.claude/agents/`
-- All referenced skills exist in `.claude/skills/`
+Plus: All referenced agents and skills exist in catalog-manifest.json.
 
-### 2.5: Display & Approve
+### 1.6: Display & Approve
 
-**Level computation** (Kahn's topological sort — same algorithm as `src/graph.ts::computeLevels()`):
-1. Level 0: All nodes with empty `depends_on` (root nodes)
-2. Level N: Nodes whose ALL dependencies are assigned to levels < N
-3. Nodes at the same level can execute in parallel
-
-This is identical to the algorithm used by `/crew:run` Step 1 for execution ordering.
+**Level computation** (Kahn's topological sort — `src/graph.ts::computeLevels()`):
+1. Level 0: All nodes with empty `depends_on`
+2. Level N: Nodes whose ALL dependencies are in levels < N
 
 Show proposed graph as ASCII diagram:
-
 ```
 Proposed Graph ({N} nodes, {M} levels):
 
@@ -238,25 +183,50 @@ Level 2: [node_e]                     (depends on b,c,d)
 Level 3: [review]                     (aggregator, wait: all)
 ```
 
-Show full node details in a table:
-
+Show full node details table:
 ```
 | Node | Type | Agent | Skills | Depends On | Model |
 |------|------|-------|--------|------------|-------|
-| ... | ... | ... | ... | ... | ... |
 ```
 
 Ask user:
-- **Approve**: Write graph.yaml + rebuild state.json
-- **Modify**: Let user describe changes, regenerate
-- **Cancel**: Return to Step 1
+- **Approve**: Proceed to 1.7
+- **Modify**: User describes changes, regenerate from 1.4
+- **Cancel**: Stop
 
-### 2.6: Write Files
+### 1.7: Provision Agents & Skills
 
-On approval:
-1. Write `.ai-crew/graph.yaml` with the proposed graph.
-2. Rebuild `.ai-crew/state.json`: keep `version` and `bundleName`, replace `nodes` with new set (all `"pending"`).
-3. If Option C: update `.ai-crew/config.yaml` bundle field to `"local-{YYYYMMDD}"`.
+On approval, copy needed agents and skills from catalog to project.
+Read `catalog-manifest.json` for source paths.
+
+For each agent referenced in the graph:
+```bash
+if [ ! -f ".claude/agents/{agent-name}.md" ]; then
+  mkdir -p .claude/agents/
+  cp {sourcePath}/{agent-name}.md .claude/agents/{agent-name}.md
+fi
+```
+
+For each skill referenced in the graph:
+```bash
+if [ ! -d ".claude/skills/{skill-name}" ]; then
+  mkdir -p .claude/skills/{skill-name}/
+  cp {sourcePath}/SKILL.md .claude/skills/{skill-name}/SKILL.md
+fi
+```
+
+Display:
+```
+Provisioned from catalog:
+  Agents: planner, frontend-dev, backend-dev, reviewer (4 new)
+  Skills: planning, frontend-react, backend-node, testing (4 new)
+```
+
+### 1.8: Write Files
+
+1. Write `.ai-crew/graph.yaml` with the approved graph
+2. Rebuild `.ai-crew/state.json`: set nodes from graph (all `"pending"`)
+3. Update `.ai-crew/config.yaml` bundle field to `"dynamic-{YYYYMMDD}"`
 
 ---
 

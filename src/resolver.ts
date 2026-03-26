@@ -10,6 +10,9 @@ import type {
   ResolvedFiles,
   HooksResolution,
   McpResolution,
+  CatalogManifest,
+  CatalogManifestAgent,
+  CatalogManifestSkill,
 } from "./types.js";
 
 export function getCatalogDir(): string {
@@ -386,4 +389,80 @@ export async function parseAgentFrontmatter(
   }
 
   return result;
+}
+
+// ============================================================
+// Catalog Manifest Generation
+// ============================================================
+
+/**
+ * Scan the catalog directory and produce a manifest of all available
+ * agents, skills, and bundles. Used by `installMinimal()` to write
+ * `.ai-crew/catalog-manifest.json` so that preflight can dynamically
+ * provision agents/skills without TypeScript access.
+ */
+export async function generateCatalogManifest(
+  catalogDir?: string,
+): Promise<CatalogManifest> {
+  const catDir = catalogDir ?? getCatalogDir();
+
+  // Scan agents
+  const agentsDir = join(catDir, "agents");
+  const agents: CatalogManifestAgent[] = [];
+  if (existsSync(agentsDir)) {
+    for (const name of await readdir(agentsDir)) {
+      if (name.startsWith(".") || name.startsWith("_")) continue;
+      const agentPath = join(agentsDir, name);
+      const s = await stat(agentPath);
+      if (s.isDirectory()) {
+        agents.push({ name, sourcePath: agentPath });
+      }
+    }
+  }
+
+  // Scan skills
+  const skillsDir = join(catDir, "skills");
+  const skills: CatalogManifestSkill[] = [];
+  if (existsSync(skillsDir)) {
+    for (const name of await readdir(skillsDir)) {
+      if (name.startsWith(".") || name.startsWith("_")) continue;
+      const skillPath = join(skillsDir, name);
+      const s = await stat(skillPath);
+      if (s.isDirectory()) {
+        skills.push({ name, sourcePath: skillPath });
+      }
+    }
+  }
+
+  // Scan bundles (lightweight)
+  const bundlesDir = join(catDir, "bundles");
+  const bundles: { name: string; description: string }[] = [];
+  if (existsSync(bundlesDir)) {
+    for (const name of await readdir(bundlesDir)) {
+      if (name.startsWith(".") || name.startsWith("_")) continue;
+      const bundlePath = join(bundlesDir, name, "bundle.yaml");
+      if (existsSync(bundlePath)) {
+        try {
+          const raw = await readFile(bundlePath, "utf-8");
+          const parsed = parse(raw) as Record<string, unknown>;
+          const plugin = parsed.plugin as Record<string, unknown> | undefined;
+          bundles.push({
+            name,
+            description: (plugin?.description as string) ?? name,
+          });
+        } catch {
+          bundles.push({ name, description: name });
+        }
+      }
+    }
+  }
+
+  return {
+    version: "1.0",
+    generatedAt: new Date().toISOString(),
+    catalogDir: catDir,
+    agents,
+    skills,
+    bundles,
+  };
 }

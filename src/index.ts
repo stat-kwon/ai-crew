@@ -43,6 +43,10 @@ export type {
   RunIndexEntry,
   RunRegistry,
   RunsConfig,
+  // Catalog Manifest Types
+  CatalogManifest,
+  CatalogManifestAgent,
+  CatalogManifestSkill,
   // Session Context Types
   ProjectContext,
 } from "./types.js";
@@ -77,10 +81,11 @@ export {
   resolveIncludes,
   getCatalogDir,
   parseAgentFrontmatter,
+  generateCatalogManifest,
 } from "./resolver.js";
 
 // -- Installer --------------------------------------------------------
-export { install } from "./installer.js";
+export { install, installMinimal } from "./installer.js";
 
 // -- Install State ----------------------------------------------------
 export {

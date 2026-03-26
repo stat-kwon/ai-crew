@@ -19,34 +19,46 @@ program
 program
   .command("install")
   .description("Install a bundle into a target project")
-  .requiredOption("--team <name>", "Bundle name (e.g., aidlc-standard, fullstack)")
+  .option("--team <name>", "Bundle preset (e.g., fullstack). Omit for minimal install.")
   .requiredOption("--target <path>", "Target project path")
   .option("--force", "Overwrite existing configuration", false)
   .action(async (options) => {
     try {
-      const result = await install(options.team, options.target, {
-        force: options.force,
-      });
+      let result;
+      if (options.team) {
+        result = await install(options.team, options.target, {
+          force: options.force,
+        });
+      } else {
+        const { installMinimal } = await import("./installer.js");
+        result = await installMinimal(options.target, {
+          force: options.force,
+        });
+      }
 
       console.log(
         chalk.green(
-          `\u2713 Installed bundle "${result.bundleName}" to ${result.targetPath}`,
+          result.mode === "minimal"
+            ? `\u2713 Installed minimal infrastructure to ${result.targetPath}`
+            : `\u2713 Installed bundle "${result.bundleName}" to ${result.targetPath}`,
         ),
       );
       console.log();
       console.log("Created:");
       console.log(
-        `  ${chalk.cyan(".ai-crew/")}          \u2014 config, state, graph, workflow`,
+        `  ${chalk.cyan(".ai-crew/")}          \u2014 config, state, catalog manifest`,
       );
       console.log(
         `  ${chalk.cyan(".claude/commands/")}   \u2014 slash commands`,
       );
-      console.log(
-        `  ${chalk.cyan(".claude/agents/")}     \u2014 agent definitions`,
-      );
-      console.log(
-        `  ${chalk.cyan(".claude/skills/")}     \u2014 skill definitions`,
-      );
+      if (result.mode === "full") {
+        console.log(
+          `  ${chalk.cyan(".claude/agents/")}     \u2014 agent definitions`,
+        );
+        console.log(
+          `  ${chalk.cyan(".claude/skills/")}     \u2014 skill definitions`,
+        );
+      }
       console.log();
       console.log(`Files installed: ${result.filesInstalled}`);
       if (result.graphNodes > 0) {
@@ -56,9 +68,15 @@ program
         console.log(`Workflow: ${result.workflowSource}`);
       }
       console.log();
-      console.log(
-        `Start with: ${chalk.yellow("/crew:elaborate <your intent>")}`,
-      );
+      if (result.mode === "minimal") {
+        console.log(
+          `Next: Run ${chalk.yellow("/crew:preflight")} to generate a graph from your design.`,
+        );
+      } else {
+        console.log(
+          `Start with: ${chalk.yellow("/crew:elaborate <your intent>")}`,
+        );
+      }
     } catch (err) {
       console.error(chalk.red(`Error: ${(err as Error).message}`));
       process.exit(1);

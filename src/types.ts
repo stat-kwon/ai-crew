@@ -140,6 +140,30 @@ export interface InstallResult {
   filesInstalled: number;
   graphNodes: number;
   workflowSource: string | null;
+  mode: "full" | "minimal";
+}
+
+// ============================================================
+// Catalog Manifest Types (for dynamic provisioning)
+// ============================================================
+
+export interface CatalogManifestAgent {
+  name: string;
+  sourcePath: string;
+}
+
+export interface CatalogManifestSkill {
+  name: string;
+  sourcePath: string;
+}
+
+export interface CatalogManifest {
+  version: "1.0";
+  generatedAt: string;
+  catalogDir: string;
+  agents: CatalogManifestAgent[];
+  skills: CatalogManifestSkill[];
+  bundles: { name: string; description: string }[];
 }
 
 // ============================================================

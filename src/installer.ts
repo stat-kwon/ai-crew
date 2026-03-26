@@ -2,7 +2,7 @@ import { mkdir, writeFile, readFile, copyFile } from "node:fs/promises";
 import { join, dirname, relative } from "node:path";
 import { existsSync } from "node:fs";
 import { stringify } from "yaml";
-import { loadBundle, resolveIncludes, getCatalogDir } from "./resolver.js";
+import { loadBundle, resolveIncludes, getCatalogDir, generateCatalogManifest } from "./resolver.js";
 import { validateGraph } from "./graph.js";
 import { fetchWorkflow } from "./workflow-fetcher.js";
 import { recordInstall } from "./install-state.js";
@@ -136,6 +136,12 @@ export async function install(
   );
   installedFiles.push(configPath);
 
+  // 8.5. Write catalog-manifest.json (for preflight dynamic provisioning)
+  const catalogManifest = await generateCatalogManifest(catalogDir);
+  const manifestPath = join(crewDir, "catalog-manifest.json");
+  await writeFile(manifestPath, JSON.stringify(catalogManifest, null, 2), "utf-8");
+  installedFiles.push(manifestPath);
+
   // 9. Write empty state.json
   const initialState: GraphState = {
     version: "3.0",
@@ -170,11 +176,124 @@ export async function install(
     filesInstalled,
     graphNodes: bundle.graph.nodes.length,
     workflowSource,
+    mode: "full",
   };
 
   // Record install state for doctor/uninstall
   await recordInstall(targetPath, result, installedFiles);
 
+  return result;
+}
+
+/**
+ * Minimal install: commands, rules, hooks, workflow, MCP only.
+ * No agents or skills — those are provisioned dynamically by preflight.
+ * Writes catalog-manifest.json so preflight knows what's available.
+ */
+export async function installMinimal(
+  targetPath: string,
+  options?: InstallOptions,
+): Promise<InstallResult> {
+  const force = options?.force ?? false;
+  const crewDir = join(targetPath, ".ai-crew");
+  const claudeDir = join(targetPath, ".claude");
+  const catalogDir = getCatalogDir();
+
+  if (!force && existsSync(crewDir)) {
+    throw new Error(".ai-crew/ already exists. Use --force to overwrite.");
+  }
+
+  const installedFiles: string[] = [];
+
+  // 1. Create directories (no agents/skills dirs)
+  await mkdir(crewDir, { recursive: true });
+  await mkdir(join(crewDir, "rules"), { recursive: true });
+  await mkdir(claudeDir, { recursive: true });
+  await mkdir(join(claudeDir, "commands", "crew"), { recursive: true });
+
+  // 2. Resolve commands, rules, hooks, MCP (no agents/skills)
+  const resolved = await resolveIncludes(
+    {
+      agents: [],
+      skills: [],
+      commands: [
+        "crew-elaborate", "crew-preflight", "crew-run",
+        "crew-status", "crew-integrate", "crew-checkpoint",
+        "crew-restore", "crew-refine", "crew-auto",
+      ],
+      hooks: [],
+    },
+    {
+      model: "claude-sonnet-4",
+      isolation: "worktree",
+      rules: ["global", "git-conventions"],
+      mcp: ["multi-provider"],
+      locale: "ko",
+    },
+    "aidlc",
+    catalogDir,
+  );
+
+  // 3. Copy commands and rules only
+  let filesInstalled = 0;
+  filesInstalled += await copyFilesTracked(targetPath, resolved.commands, installedFiles);
+  filesInstalled += await copyFilesTracked(targetPath, resolved.rules, installedFiles);
+
+  // 4. Install AI-DLC workflow (native mode)
+  const workflowPath = await fetchWorkflow("aidlc", catalogDir);
+  if (workflowPath) {
+    filesInstalled += await installAidlcNative(targetPath, workflowPath, catalogDir);
+  }
+
+  // 5. Write catalog-manifest.json
+  const catalogManifest = await generateCatalogManifest(catalogDir);
+  const manifestPath = join(crewDir, "catalog-manifest.json");
+  await writeFile(manifestPath, JSON.stringify(catalogManifest, null, 2), "utf-8");
+  installedFiles.push(manifestPath);
+
+  // 6. Write config.yaml (bundle: "none")
+  const configPath = join(crewDir, "config.yaml");
+  await writeFile(
+    configPath,
+    stringify({
+      version: "3.0",
+      bundle: "none",
+      workflow: "aidlc",
+      defaults: {
+        model: "claude-sonnet-4",
+        isolation: "worktree",
+        rules: ["global", "git-conventions"],
+        mcp: ["multi-provider"],
+        locale: "ko",
+      },
+    }),
+    "utf-8",
+  );
+  installedFiles.push(configPath);
+
+  // 7. Write empty state.json (no nodes — preflight generates graph)
+  const statePath = join(crewDir, "state.json");
+  await writeFile(
+    statePath,
+    JSON.stringify({ version: "3.0", bundleName: "none", nodes: {} }, null, 2),
+    "utf-8",
+  );
+  installedFiles.push(statePath);
+
+  // 8. Merge settings.json
+  await mergeSettings(claudeDir, resolved, catalogDir);
+  installedFiles.push(join(claudeDir, "settings.json"));
+
+  const result: InstallResult = {
+    bundleName: "none",
+    targetPath,
+    filesInstalled,
+    graphNodes: 0,
+    workflowSource: "aidlc",
+    mode: "minimal",
+  };
+
+  await recordInstall(targetPath, result, installedFiles);
   return result;
 }
 
