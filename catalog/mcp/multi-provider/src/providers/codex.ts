@@ -18,11 +18,16 @@ const CODEX_API_URL = "https://chatgpt.com/backend-api/codex/responses";
 const JWT_CLAIM_PATH = "https://api.openai.com/auth";
 
 const MODELS: ModelInfo[] = [
-  { id: "codex-mini-latest", provider: "codex", description: "Codex Mini - lightweight code model (latest)" },
-  { id: "gpt-5.2-codex", provider: "codex", description: "GPT-5.2 Codex - advanced code generation" },
+  { id: "gpt-5.4", provider: "codex", description: "GPT-5.4 - latest flagship model" },
+  { id: "gpt-5.3-codex", provider: "codex", description: "GPT-5.3 Codex - advanced code generation" },
+  { id: "gpt-5.3-codex-spark", provider: "codex", description: "GPT-5.3 Codex Spark - with reasoning/thinking" },
+  { id: "gpt-5.2-codex", provider: "codex", description: "GPT-5.2 Codex - code generation" },
+  { id: "gpt-5.2", provider: "codex", description: "GPT-5.2 - general purpose" },
   { id: "gpt-5.1-codex", provider: "codex", description: "GPT-5.1 Codex - code generation" },
-  { id: "gpt-5.1-codex-mini", provider: "codex", description: "GPT-5.1 Codex Mini - efficient code generation" },
 ];
+
+// Models that support reasoning/thinking tokens
+const REASONING_MODELS = new Set(["gpt-5.4", "gpt-5.3-codex", "gpt-5.3-codex-spark", "gpt-5.2-codex", "gpt-5.1-codex"]);
 
 // ── Credential Loading ──────────────────────────────────────
 
@@ -50,9 +55,24 @@ function extractAccountId(token: string): string {
     Buffer.from(payload64, "base64url").toString("utf-8"),
   );
   const authClaim = payload[JWT_CLAIM_PATH] ?? {};
-  const accountId = authClaim.chatgpt_account_id;
-  if (!accountId) throw new Error("No chatgpt_account_id in token");
+  // Try chatgpt_account_user_id first (used by openclaw), then chatgpt_account_id
+  const accountId = authClaim.chatgpt_account_user_id ?? authClaim.chatgpt_account_id;
+  if (!accountId) throw new Error("No account ID in token");
   return accountId;
+}
+
+function extractChatgptAccountId(token: string): string {
+  const parts = token.split(".");
+  if (parts.length !== 3) return "";
+
+  let payload64 = parts[1];
+  const padding = 4 - (payload64.length % 4);
+  if (padding !== 4) payload64 += "=".repeat(padding);
+
+  const payload = JSON.parse(
+    Buffer.from(payload64, "base64url").toString("utf-8"),
+  );
+  return payload[JWT_CLAIM_PATH]?.chatgpt_account_id ?? "";
 }
 
 function readKeychainCredentials(): CodexCredentials | null {
@@ -129,7 +149,7 @@ function loadCredentials(): CodexCredentials {
   const keychainCreds = readKeychainCredentials();
   if (keychainCreds) return keychainCreds;
 
-  // 2. File fallback
+  // 2. File fallback (~/.codex/auth.json)
   const fileCreds = readFileCredentials();
   if (fileCreds) return fileCreds;
 
@@ -181,6 +201,7 @@ function convertMessages(messages: ProviderMessage[]): CodexMessage[] {
 
 interface ParsedResponse {
   content: string;
+  thinkingContent: string;
   model: string;
   inputTokens: number;
   outputTokens: number;
@@ -193,6 +214,7 @@ async function parseSSEResponse(response: Response): Promise<ParsedResponse> {
   const decoder = new TextDecoder();
   let buffer = "";
   let content = "";
+  let thinkingContent = "";
   let model = "";
   let inputTokens = 0;
   let outputTokens = 0;
@@ -223,6 +245,9 @@ async function parseSSEResponse(response: Response): Promise<ParsedResponse> {
 
       if (eventType === "response.output_text.delta") {
         content += event.delta ?? "";
+      } else if (eventType === "response.reasoning.delta") {
+        // Thinking/reasoning tokens (spark models)
+        thinkingContent += event.delta ?? "";
       } else if (
         eventType === "response.completed" ||
         eventType === "response.done"
@@ -244,7 +269,40 @@ async function parseSSEResponse(response: Response): Promise<ParsedResponse> {
     }
   }
 
-  return { content, model, inputTokens, outputTokens };
+  return { content, thinkingContent, model, inputTokens, outputTokens };
+}
+
+// ── Non-Streaming Response Parsing ─────────────────────────
+
+function parseDirectResponse(data: Record<string, any>): ParsedResponse {
+  let content = "";
+  let thinkingContent = "";
+
+  const outputs = data.output ?? [];
+  for (const output of outputs) {
+    if (output.type === "message") {
+      for (const item of output.content ?? []) {
+        if (item.type === "output_text") {
+          content += item.text ?? "";
+        }
+      }
+    } else if (output.type === "reasoning") {
+      for (const item of output.content ?? []) {
+        thinkingContent += item.text ?? "";
+      }
+    }
+  }
+
+  const usage = data.usage ?? {};
+  const cached = usage.input_tokens_details?.cached_tokens ?? 0;
+
+  return {
+    content,
+    thinkingContent,
+    model: data.model ?? "",
+    inputTokens: (usage.input_tokens ?? 0) - cached,
+    outputTokens: usage.output_tokens ?? 0,
+  };
 }
 
 // ── Provider Implementation ─────────────────────────────────
@@ -265,7 +323,9 @@ export class CodexProvider implements Provider {
     options?: ChatOptions,
   ): Promise<ProviderResponse> {
     const creds = this.getCredentials();
-    const model = options?.model ?? "codex-mini-latest";
+    const model = options?.model ?? "gpt-5.4";
+    // ChatGPT backend API requires streaming — non-streaming returns 400
+    const useStreaming = true;
 
     // Extract system prompt
     const systemMessages = messages.filter((m) => m.role === "system");
@@ -274,25 +334,37 @@ export class CodexProvider implements Provider {
     // Convert messages to Codex format
     const convertedMessages = convertMessages(messages);
 
+    // Determine ChatGPT-Account-Id header
+    const chatgptAccountId = extractChatgptAccountId(creds.accessToken);
+
     const headers: Record<string, string> = {
       Authorization: `Bearer ${creds.accessToken}`,
-      "chatgpt-account-id": creds.accountId,
       "OpenAI-Beta": "responses=experimental",
-      originator: "pi",
       "User-Agent": `ai-crew (${platform()} ${release()}; ${arch()})`,
-      Accept: "text/event-stream",
       "Content-Type": "application/json",
     };
+
+    // Add ChatGPT-Account-Id if available
+    if (chatgptAccountId) {
+      headers["ChatGPT-Account-Id"] = chatgptAccountId;
+    }
+
+    if (useStreaming) {
+      headers["Accept"] = "text/event-stream";
+    }
 
     const body: Record<string, unknown> = {
       model,
       store: false,
-      stream: true,
+      stream: useStreaming,
       instructions: systemPrompt,
       input: convertedMessages,
-      text: { verbosity: "medium" },
-      include: ["reasoning.encrypted_content"],
     };
+
+    // Add reasoning support for compatible models
+    if (options?.reasoning && REASONING_MODELS.has(model)) {
+      body.reasoning = { effort: options.reasoning.effort };
+    }
 
     if (options?.temperature != null) {
       body.temperature = options.temperature;
@@ -325,16 +397,29 @@ export class CodexProvider implements Provider {
           let errMsg: string;
           try {
             const errData = JSON.parse(errorText);
-            errMsg = errData.error?.message ?? errorText;
+            errMsg = errData.detail ?? errData.error?.message ?? errorText;
           } catch {
             errMsg = errorText;
           }
           throw new Error(`Codex API error (${response.status}): ${errMsg}`);
         }
 
-        const parsed = await parseSSEResponse(response);
+        let parsed: ParsedResponse;
+        if (useStreaming) {
+          parsed = await parseSSEResponse(response);
+        } else {
+          const data = await response.json();
+          parsed = parseDirectResponse(data);
+        }
+
+        // Include thinking content as prefix if present
+        let finalContent = parsed.content;
+        if (parsed.thinkingContent) {
+          finalContent = `<thinking>\n${parsed.thinkingContent}\n</thinking>\n\n${parsed.content}`;
+        }
+
         return {
-          content: parsed.content,
+          content: finalContent,
           model: parsed.model || model,
           usage: {
             inputTokens: parsed.inputTokens,

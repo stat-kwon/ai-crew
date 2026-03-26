@@ -18,6 +18,9 @@ export interface ModelInfo {
 export interface ChatOptions {
   model?: string;
   temperature?: number;
+  reasoning?: {
+    effort: "low" | "medium" | "high";
+  };
 }
 
 export interface Provider {
