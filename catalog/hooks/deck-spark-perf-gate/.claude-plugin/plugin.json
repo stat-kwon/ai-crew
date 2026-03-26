@@ -1,0 +1,1 @@
+{"name":"deck-spark-perf-gate","description":"Deck Spark 코드 저장 후 collect/repartition 안티패턴을 탐지하는 훅","version":"1.0.0","author":{"name":"ai-crew"},"category":"hook","tags":["deck","hook","spark","performance"]}

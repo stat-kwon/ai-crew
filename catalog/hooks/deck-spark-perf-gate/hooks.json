@@ -1,0 +1,17 @@
+{
+  "description": "Deck Spark 성능 게이트 - Python 저장 후 collect/repartition 안티패턴 탐지",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/run-check.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

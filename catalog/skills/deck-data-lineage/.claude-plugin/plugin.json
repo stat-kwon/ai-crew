@@ -1,0 +1,1 @@
+{"name":"deck-data-lineage","description":"Deck 데이터 lineage 문서화와 OpenLineage 확장 고려사항","version":"1.0.0","author":{"name":"ai-crew"},"category":"skill","tags":["deck","lineage","openlineage","airflow"]}

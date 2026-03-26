@@ -1,0 +1,1 @@
+{"name":"deck-data-quality","description":"Deck 데이터 품질 검증 패턴과 Trino/Airflow 품질 게이트 가이드","version":"1.0.0","author":{"name":"ai-crew"},"category":"skill","tags":["deck","data-quality","trino","airflow"]}

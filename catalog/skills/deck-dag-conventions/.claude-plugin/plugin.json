@@ -1,0 +1,1 @@
+{"name":"deck-dag-conventions","description":"Deck Airflow DAG 작성 규칙과 DeckSparkKubernetesOperator 사용 패턴","version":"1.0.0","author":{"name":"ai-crew"},"category":"skill","tags":["deck","airflow","dag"]}

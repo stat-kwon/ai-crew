@@ -1,0 +1,17 @@
+{
+  "description": "Deck DAG 규칙 가드 - DAG 저장 시 인라인 SQL을 차단",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/run-check.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

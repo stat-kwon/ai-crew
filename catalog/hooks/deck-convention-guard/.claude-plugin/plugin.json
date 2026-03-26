@@ -1,0 +1,1 @@
+{"name":"deck-convention-guard","description":"Deck DAG 저장 시 인라인 SQL을 차단하는 훅","version":"1.0.0","author":{"name":"ai-crew"},"category":"hook","tags":["deck","hook","dag","sql"]}
