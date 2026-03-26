@@ -1,6 +1,6 @@
 {
   "name": "ai-crew",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "Catalog-based Plugin Composition Platform for Claude Code",
   "type": "module",
   "bin": {
