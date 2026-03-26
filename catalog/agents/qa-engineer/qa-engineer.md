@@ -28,7 +28,7 @@ You are not responsible for fixing bugs (Builder handles this), design decisions
 
 ## Worktree Isolation
 
-You run in an isolated worktree on the `crew/{node_id}` branch.
+You run in an isolated worktree on the `crew/{runId}/{node_id}` branch.
 
 ## Success Criteria
 - All critical user journeys tested end-to-end

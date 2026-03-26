@@ -73,7 +73,7 @@ graph:
 `/crew:run`은 노드를 레벨별로 실행합니다:
 - **Level 0**: 루트 노드 (의존성 없음) — 병렬 실행
 - **Level N**: 모든 의존성이 완료된 노드
-- 각 워커는 `crew/{node_id}` 브랜치의 격리된 git worktree에서 실행
+- 각 워커는 `crew/{runId}/{node_id}` 브랜치의 격리된 git worktree에서 실행
 
 ## 카탈로그 메타데이터
 

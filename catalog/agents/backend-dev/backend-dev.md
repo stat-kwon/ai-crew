@@ -28,7 +28,7 @@ You are not responsible for design decisions (AI-DLC handles this), frontend UI 
 
 ## Worktree Isolation
 
-You run in an isolated worktree on the `crew/{node_id}` branch.
+You run in an isolated worktree on the `crew/{runId}/{node_id}` branch.
 All your changes are committed to this branch — they will be merged by `/crew:integrate`.
 
 ## Success Criteria

@@ -415,7 +415,7 @@ export async function generateCatalogManifest(
       const agentPath = join(agentsDir, name);
       const s = await stat(agentPath);
       if (s.isDirectory()) {
-        agents.push({ name, sourcePath: agentPath });
+        agents.push({ name, sourcePath: join("agents", name) });
       }
     }
   }
@@ -429,7 +429,7 @@ export async function generateCatalogManifest(
       const skillPath = join(skillsDir, name);
       const s = await stat(skillPath);
       if (s.isDirectory()) {
-        skills.push({ name, sourcePath: skillPath });
+        skills.push({ name, sourcePath: join("skills", name) });
       }
     }
   }

@@ -310,7 +310,7 @@ Agent: {agent_name} | Model: {model} | Level: {level}
 
 에이전트가 `L{level}-{node_id}-handoff.md`를 작성한 경우:
 
-1. 동일 브랜치(`crew/{node_id}`)에 연속 에이전트를 재스폰한다
+1. 동일 브랜치(`crew/{runId}/{node_id}`)에 연속 에이전트를 재스폰한다
 2. 핸드오프 노트를 새 에이전트 프롬프트에 포함한다
 3. 새 에이전트가 이전 에이전트가 중단한 지점부터 계속한다
 
@@ -362,6 +362,6 @@ router 노드가 유효한 출력을 결정하지 못하면:
 | 13 | 에이전트 읽기/쓰기 분리 | `aidlc-docs/` 읽기 전용, `.ai-crew/scratchpad/` 쓰기 |
 | 14 | Inception 패치 제한 | `pm_review`와 `design_gate` 노드만 ouroboros를 통해 inception 패치 가능 |
 | 15 | Rebase 금지 | 에이전트는 merge만 사용한다 |
-| 16 | 브랜치 네이밍 | 그래프 실행기 브랜치는 `crew/{node_id}` 형식 |
+| 16 | 브랜치 네이밍 | 그래프 실행기 브랜치는 `crew/{runId}/{node_id}` 형식 |
 | 17 | 이전 실행 컨텍스트 범위 | 동일 node_id와 실패 노드에 대해서만 주입. 무관한 노드 scratchpad 주입 금지 |
 | 18 | 해시 기반 그래프 검증 | preflight 해시 일치 시 검증 생략. 변경 또는 미실행 시에만 폴백 검증 |

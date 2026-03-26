@@ -113,13 +113,16 @@ export async function diagnose(
 
     for (const absPath of actualFiles) {
       const relPath = relative(targetPath, absPath);
-      // Skip install-state.json itself and runtime files (state.json, scratchpad/*)
+      // Skip install-state.json itself and runtime files
       if (
         relPath === join(AI_CREW_DIR, INSTALL_STATE_FILE) ||
         relPath === join(AI_CREW_DIR, "state.json") ||
+        relPath === join(AI_CREW_DIR, "catalog-manifest.json") ||
+        relPath === join(AI_CREW_DIR, "runs.json") ||
         relPath.startsWith(join(AI_CREW_DIR, "scratchpad")) ||
         relPath.startsWith(join(AI_CREW_DIR, "sessions")) ||
-        relPath.startsWith(join(AI_CREW_DIR, "checkpoints"))
+        relPath.startsWith(join(AI_CREW_DIR, "checkpoints")) ||
+        relPath.startsWith(join(AI_CREW_DIR, "runs"))
       ) {
         continue;
       }

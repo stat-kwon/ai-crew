@@ -59,7 +59,11 @@ export function validateConfigYaml(data: unknown): ValidationResult {
   }
 
   requireString(data, "version", "", errors);
-  requireString(data, "bundle", "", errors);
+
+  // bundle: required string. Accepts bundle names, "none" (minimal install), "dynamic-YYYYMMDD"
+  if (typeof data.bundle !== "string" || (data.bundle as string).length === 0) {
+    errors.push(err(".bundle", '"bundle" is required and must be a non-empty string'));
+  }
 
   // defaults object
   const defaults = requireObject(data, "defaults", "", errors);

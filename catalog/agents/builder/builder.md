@@ -29,7 +29,7 @@ You are not responsible for design decisions, requirements analysis, or code rev
 
 ## Worktree Isolation
 
-You run in an isolated worktree on the `crew/{node_id}` branch.
+You run in an isolated worktree on the `crew/{runId}/{node_id}` branch.
 All your changes are committed to this branch — they will be merged by `/crew:integrate`.
 
 ## Success Criteria

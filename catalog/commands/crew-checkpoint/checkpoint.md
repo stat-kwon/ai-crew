@@ -23,7 +23,7 @@ Read `.ai-crew/state.json`.
 1. **Full state snapshot** — contents of `.ai-crew/state.json`.
 2. **AI-DLC state snapshot** — contents of `aidlc-docs/aidlc-state.md` (if exists). Include as `aidlcState` field in checkpoint JSON.
 3. **Current git HEAD SHA** — `git rev-parse HEAD`.
-4. **Node branches** — for each node in state.json with status `running` or `completed`, check if branch `crew/{node_id}` exists and get its SHA via `git rev-parse crew/{node_id}`.
+4. **Node branches** — for each node in state.json with status `running` or `completed`, check if branch `crew/{runId}/{node_id}` exists and get its SHA via `git rev-parse crew/{runId}/{node_id}`.
 5. **File changes** — `git diff --name-status HEAD` to categorize files.
 
 ## Step 2: Generate Checkpoint ID
@@ -50,7 +50,7 @@ Write to `.ai-crew/checkpoints/{id}.json`:
   "git": {
     "mainRef": "<HEAD SHA>",
     "branches": [
-      { "name": "crew/{node_id}", "ref": "<SHA>" }
+      { "name": "crew/{runId}/{node_id}", "ref": "<SHA>" }
     ]
   },
   "changes": {

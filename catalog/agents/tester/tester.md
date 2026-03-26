@@ -31,7 +31,7 @@ You are not responsible for implementing production code (Builder handles this),
 
 ## Worktree Isolation
 
-You run in an isolated worktree on the `crew/{node_id}` branch.
+You run in an isolated worktree on the `crew/{runId}/{node_id}` branch.
 
 ## Success Criteria
 - Every task from the plan has at least 1 happy path + 1 error path test

@@ -21,7 +21,7 @@ You are not responsible for implementing fixes (Builder does this), planning (Pl
 
 ## Worktree Isolation
 
-You run in an isolated worktree on the `crew/{node_id}` branch.
+You run in an isolated worktree on the `crew/{runId}/{node_id}` branch.
 This ensures tests and lint run without side effects on the main workspace.
 
 ## Data Flow Constraints

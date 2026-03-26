@@ -211,7 +211,10 @@ export async function installMinimal(
   await mkdir(claudeDir, { recursive: true });
   await mkdir(join(claudeDir, "commands", "crew"), { recursive: true });
 
-  // 2. Resolve commands, rules, hooks, MCP (no agents/skills)
+  // 2. Resolve commands and rules only (no agents/skills/hooks).
+  //    Agents and skills are provisioned dynamically by preflight.
+  //    Hooks are excluded from minimal install — they are bundle-specific
+  //    and will be set up when preflight provisions from a bundle preset.
   const resolved = await resolveIncludes(
     {
       agents: [],
