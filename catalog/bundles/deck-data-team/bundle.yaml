@@ -27,6 +27,7 @@ includes:
   commands:
     - crew-auto
     - crew-elaborate
+    - crew-preflight
     - crew-run
     - crew-integrate
     - crew-status

@@ -281,15 +281,21 @@ Parse all model references from the graph:
 
 For each non-Claude model, check in order:
 
-**Codex**:
+**Codex** (checks must match `catalog/mcp/multi-provider/src/providers/codex.ts` credential resolution):
 ```bash
-# Check env var (do NOT echo the value)
+# 1. Check env var (highest priority)
 [ -n "$CODEX_ACCESS_TOKEN" ] && echo "CODEX_ACCESS_TOKEN: set" || echo "CODEX_ACCESS_TOKEN: not set"
-# Check macOS Keychain
-security find-generic-password -s "codex" -w 2>/dev/null && echo "Keychain: found" || echo "Keychain: not found"
-# Fallback: check OPENAI_API_KEY
-[ -n "$OPENAI_API_KEY" ] && echo "OPENAI_API_KEY: set" || echo "OPENAI_API_KEY: not set"
+
+# 2. Check macOS Keychain (must match exact service name used by codex CLI)
+CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
+CODEX_HASH=$(echo -n "$CODEX_HOME" | shasum -a 256 | cut -c1-16)
+security find-generic-password -s "Codex Auth" -a "cli|${CODEX_HASH}" -w 2>/dev/null && echo "Keychain (Codex Auth): found" || echo "Keychain (Codex Auth): not found"
+
+# 3. Check file credential (~/.codex/auth.json)
+[ -f "${CODEX_HOME}/auth.json" ] && echo "auth.json: found" || echo "auth.json: not found"
 ```
+
+**Important**: If none of the above succeed, Codex nodes will fail at runtime. Do NOT fall back to `OPENAI_API_KEY` — that is for OpenAI provider, not Codex. If user has `codex auth` configured, one of the three checks above must pass.
 
 **OpenAI (gpt-\*)**:
 ```bash
