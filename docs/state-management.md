@@ -62,6 +62,7 @@ interface NodeState {
 번들 설정과 기본값. 설치 시 생성되며, preflight에서 번들명만 수정할 수 있다.
 
 ```yaml
+# 번들 설치 시
 version: "3.0"
 bundle: aidlc-standard
 workflow: aidlc
@@ -71,7 +72,18 @@ defaults:
   rules: [global]
   mcp: [multi-provider]
   locale: "en"
+
+# 미니멀 설치 시 (--team 생략)
+version: "3.0"
+bundle: "none"
+defaults:
+  model: claude-sonnet-4
+  isolation: worktree
+  rules: [global]
+  locale: "en"
 ```
+
+`bundle: "none"`은 미니멀 설치를 나타낸다. 이 경우 에이전트/스킬은 설치되지 않으며, `/crew:preflight`가 `catalog-manifest.json`을 기반으로 동적 프로비저닝한다.
 
 ```typescript
 interface BundleDefaults {
@@ -309,4 +321,5 @@ async function writeJsonAtomic(filePath: string, data: unknown): Promise<void> {
 | memory.json | `.ai-crew/memory.json` | 노드 간 공유 메모리 | 에이전트 (`writeNodeOutput`) | run 단위 (아카이브 시 이동) |
 | level-NNN.json | `.ai-crew/checkpoints/level-NNN.json` | 레벨별 상태 스냅샷 | `/crew:run` (레벨 완료 시) | run 단위 (아카이브 시 이동) |
 | state-snapshot.json | `.ai-crew/runs/{runId}/state-snapshot.json` | 아카이브된 state.json 복사본 | `/crew:preflight` (아카이브 시) | 보관 정책에 따라 삭제 |
+| catalog-manifest.json | `.ai-crew/catalog-manifest.json` | 카탈로그 컴포넌트 인덱스 (에이전트, 스킬, 번들) | `ai-crew install` | 프로젝트 전체 |
 | install-state.json | `.ai-crew/install-state.json` | 설치 기록 (doctor/uninstall용) | `ai-crew install` | 프로젝트 전체 |

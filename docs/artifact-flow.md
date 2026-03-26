@@ -32,6 +32,7 @@ project root/        -> 코드 산출물 (최종 결과물)
 | `.ai-crew/scratchpad/` | 에이전트 간 실행 핸드오프 | `/crew:run` 실행 시 |
 | `.ai-crew/runs/` | 과거 실행 이력 아카이브 (scratchpad, state 스냅샷) | `/crew:preflight` 실행 시 |
 | `.ai-crew/runs.json` | 전체 실행 레지스트리 (현재/과거 run 색인) | `/crew:preflight` 실행 시 |
+| `.ai-crew/catalog-manifest.json` | 카탈로그에서 사용 가능한 에이전트/스킬/번들 목록 | `ai-crew install` 실행 시 |
 | 프로젝트 루트 | 실제 코드 파일 | Construction 단계 |
 
 ---
@@ -65,6 +66,7 @@ project root/        -> 코드 산출물 (최종 결과물)
        |
 /crew:preflight  ->  Step 0.5: .ai-crew/runs/{runId}/ (이전 scratchpad 아카이브)
        |              Step 0.6: 번들 규칙 동기화 (rules sync)
+       |              Step 1: 동적 그래프 셋업 (catalog-manifest.json → 에이전트/스킬 프로비저닝)
        |
 /crew:run        ->  .ai-crew/scratchpad/ (에이전트: aidlc-docs/ 읽기, scratchpad 쓰기)
        |              +-- pm_review: ooo를 통해 inception/ 패치 가능
@@ -84,6 +86,7 @@ project root/        -> 코드 산출물 (최종 결과물)
 | `.ai-crew/state.json` | 그래프 노드 상태 | `/crew:run` | 실행 단위 |
 | `.ai-crew/runs.json` | Run 레지스트리 (전체 실행 색인, 통계) | `/crew:preflight`, archiveRun | 프로젝트 전체 |
 | `.ai-crew/runs/{runId}/manifest.json` | 개별 Run 스냅샷 (intent, 결과, 타임라인) | archiveRun | 아카이브 후 영구 |
+| `.ai-crew/catalog-manifest.json` | 사용 가능한 카탈로그 컴포넌트 목록 | `ai-crew install` | 프로젝트 전체 |
 | `aidlc-docs/audit.md` | 모든 상호작용 로그 | 모든 명령어 | 프로젝트 전체 |
 
 ---
@@ -105,7 +108,7 @@ project root/        -> 코드 산출물 (최종 결과물)
 
 1. **`/crew:elaborate`** — AI-DLC Inception 실행. 요구사항 분석부터 유닛 분해까지 설계 문서를 생성한다.
 2. **`/crew:refine`** — ouroboros를 통해 설계를 반복 개선한다. 수렴할 때까지 evaluate/evolve 사이클을 실행한다.
-3. **`/crew:preflight`** — 실행 전 환경을 준비한다. 이전 run의 scratchpad를 `.ai-crew/runs/{runId}/`에 아카이브하고, 번들 규칙을 동기화한다.
+3. **`/crew:preflight`** — 실행 전 환경을 준비한다. 이전 run의 scratchpad를 `.ai-crew/runs/{runId}/`에 아카이브하고, 번들 규칙을 동기화하며, `catalog-manifest.json`을 기반으로 설계 문서에 맞는 그래프를 동적 생성하고 에이전트/스킬을 프로비저닝한다.
 4. **`/crew:run`** — 그래프 실행기를 시작한다. 각 유닛이 독립 worktree에서 병렬로 구현된다. 에이전트는 inception 문서를 읽고 scratchpad에 결과를 기록한다.
 5. **`/crew:status`** — 현재 실행 상태를 모니터링한다. 노드별 진행 상황과 전체 그래프 상태를 표시한다.
 6. **`/crew:integrate`** — scratchpad를 construction 문서로 변환하고, worktree 브랜치를 main에 병합한다.

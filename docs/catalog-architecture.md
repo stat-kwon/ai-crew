@@ -20,7 +20,7 @@ catalog/
 └── bundles/      # 번들 — 위 컴포넌트의 조합
 ```
 
-각 컴포넌트는 `.claude-plugin/plugin.json`을 가지며, 이름, 설명, tier, 의존성, 태그를 선언한다.
+각 컴포넌트는 `.claude-plugin/plugin.json`을 가지며, 이름, 설명, tier, 의존성, 태그를 선언한다. 설치 시 모든 카탈로그 컴포넌트를 스캔하여 `catalog-manifest.json`을 생성하며, preflight가 이를 읽어 동적 프로비저닝에 사용한다.
 
 ---
 
@@ -103,6 +103,34 @@ AI-DLC Inception/Construction 워크플로우를 전제로 하는 컴포넌트.
 
 ## 5. 설치 파이프라인
 
+설치는 두 가지 모드를 지원한다:
+
+### 미니멀 모드 (기본값)
+
+`ai-crew install --target <path>` 실행 시 (`--team` 생략):
+
+```
+[1] 커맨드 복사          commands/ -> .claude/commands/crew/
+    |
+[2] 규칙 복사            rules/   -> .ai-crew/rules/
+    |
+[3] 훅 복사              hooks/   -> .ai-crew/hooks/ + settings.json 병합
+    |
+[4] 워크플로우 설치       workflows/ -> CLAUDE.md + .aidlc-rule-details/
+    |
+[5] catalog-manifest.json 생성   카탈로그 전체 스캔 → .ai-crew/catalog-manifest.json
+    |
+[6] config.yaml 쓰기     bundle: "none", defaults 설정
+    |
+[7] settings.json 병합   permissions, hooks, mcpServers
+    |
+[8] recordInstall()       .ai-crew/install-state.json (설치 기록)
+```
+
+에이전트와 스킬은 설치하지 않는다. 이들은 `/crew:preflight` Step 1.7에서 `catalog-manifest.json`을 기반으로 동적 프로비저닝된다.
+
+### 번들 모드 (프리셋)
+
 `ai-crew install --team <bundle> --target <path>` 실행 시:
 
 ```
@@ -130,6 +158,8 @@ bundle.yaml
 [7] config.yaml 쓰기      .ai-crew/config.yaml (번들명, defaults, locale)
     |
 [8] state.json 쓰기       .ai-crew/state.json (모든 노드 "pending")
+    |
+[8.5] catalog-manifest.json 생성   카탈로그 전체 스캔 → .ai-crew/catalog-manifest.json
     |
 [9] settings.json 병합    .claude/settings.json (permissions, hooks, mcpServers)
     |
@@ -220,7 +250,30 @@ graph:
 
 ---
 
-## 7. Rules Sync
+## 7. catalog-manifest.json
+
+설치 시 생성되는 카탈로그 인덱스 파일. 카탈로그의 모든 에이전트, 스킬, 번들을 스캔하여 `.ai-crew/catalog-manifest.json`에 기록한다.
+
+```typescript
+interface CatalogManifest {
+  agents: CatalogEntry[];   // 사용 가능한 에이전트 목록
+  skills: CatalogEntry[];   // 사용 가능한 스킬 목록
+  bundles: CatalogEntry[];  // 사용 가능한 번들 목록
+}
+
+interface CatalogEntry {
+  name: string;             // 컴포넌트 이름
+  sourcePath: string;       // 카탈로그 내 소스 경로
+}
+```
+
+이 파일은 preflight의 동적 프로비저닝 단계(Step 1.3)에서 사용된다. preflight는 설계 문서의 유닛을 분석한 후 `catalog-manifest.json`을 읽어 적절한 에이전트와 스킬을 매칭하고, 승인 후 카탈로그에서 프로젝트로 복사한다.
+
+미니멀 설치(`ai-crew install --target .`)와 번들 설치(`--team`) 모두에서 생성된다.
+
+---
+
+## 8. Rules Sync
 
 `/crew:preflight` Step 0.6에서 실행된다. 카탈로그의 규칙 파일과 설치된 규칙 파일을 비교하여 동기화한다.
 
@@ -239,7 +292,7 @@ graph:
 
 ---
 
-## 8. 의존성 매트릭스
+## 9. 의존성 매트릭스
 
 전체 카탈로그 컴포넌트를 tier별로 요약한다:
 

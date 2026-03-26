@@ -8,10 +8,12 @@
 
 ai-crew의 실행 파이프라인은 두 명령어로 분리된다:
 
-- **`/crew:preflight`** — 준비와 검증의 SSOT(Single Source of Truth). 번들 구성, 그래프 검증, 모델 인증, git 정리, 이전 run 아카이브를 모두 처리한다.
+- **`/crew:preflight`** — 준비와 검증의 SSOT(Single Source of Truth). 동적 그래프 셋업, 에이전트/스킬 프로비저닝, 그래프 검증, 모델 인증, git 정리, 이전 run 아카이브를 모두 처리한다.
 - **`/crew:run`** — 실행에만 집중한다. preflight의 검증 결과를 신뢰하되, 그래프가 변경된 경우 fallback 검증을 수행한다.
 
 이 분리의 핵심 원칙: preflight가 한 번 검증하면 run은 재검증하지 않는다. Hash 기반 신뢰 메커니즘이 이를 보장한다.
+
+v3.1에서 preflight는 **동적 프로비저너** 역할을 추가로 수행한다. `catalog-manifest.json`을 읽어 설계 문서에 맞는 에이전트/스킬을 카탈로그에서 프로비저닝하고, 그래프를 자동 생성한다.
 
 ---
 
@@ -28,7 +30,10 @@ ai-crew의 실행 파이프라인은 두 명령어로 분리된다:
 | git 워킹 트리 정리 | O | - |
 | 이전 run 아카이브 (Step 0.5) | O | - |
 | 번들 규칙 동기화 (Step 0.6) | O | - |
-| graph.yaml 수정 (번들 결정) | O | - |
+| catalog-manifest.json 스캔 (Step 1.3) | O | - |
+| 설계 문서 기반 그래프 생성 (Step 1.4) | O | - |
+| 에이전트/스킬 프로비저닝 (Step 1.7) | O | - |
+| graph.yaml 쓰기 (Step 1.8) | O | - |
 | state.json graphHash 기록 | O | - |
 | 노드 실행 (Agent 스폰) | - | O |
 | scratchpad 수집 | - | O |
@@ -75,15 +80,15 @@ Step 0.6: 번들 규칙 동기화
   카탈로그 rules와 설치된 rules 비교
   변경 있으면 사용자 선택 후 동기화
      |
-Step 1: 번들 결정
-  A) 기존 그래프 유지 (검증만 실행)
-  B) 설계 문서 기반 그래프 커스터마이즈
-  C) 임시 로컬 그래프 생성
-  D) 공식 번들 생성 (카탈로그 추가)
-     |
-Step 2: 그래프 제안 (B/C만)
-  설계 문서 읽기 → 에이전트/스킬 매핑 → 노드 생성
-  → 구조/의미 검증 → 레벨 계산 → 사용자 승인 → 파일 쓰기
+Step 1: 동적 그래프 셋업 (Step 1.1 ~ 1.8)
+  1.1 설치 모드 감지 (bundle: "none" → dynamic, bundle: "<name>" → bundle mode)
+  1.2 설계 문서 스캔 (aidlc-docs/inception/ 읽기)
+  1.3 카탈로그 스캔 (catalog-manifest.json에서 사용 가능한 에이전트/스킬 조회)
+  1.4 그래프 제안 생성 (유닛 → 노드 매핑, 에이전트/스킬 할당)
+  1.5 그래프 검증 (SSOT — 중복 ID, 순환, 댕글링 참조 등)
+  1.6 사용자 승인 (레벨별 실행 계획 표시 → Approve/Modify/Cancel)
+  1.7 에이전트/스킬 프로비저닝 (카탈로그 → .claude/agents/, .claude/skills/ 복사)
+  1.8 파일 쓰기 (graph.yaml, state.json, config.yaml 갱신)
      |
 Step 3: 모델 확인
   그래프의 모든 모델 참조 추출 → 제공자별 인증 확인

@@ -13,17 +13,24 @@ npm install -g ai-crew
 ## 빠른 시작
 
 ```bash
-# 사용 가능한 팀 번들 목록
-ai-crew list
-
-# 프로젝트에 팀 설치
-ai-crew install --team fullstack --target ./my-project
+# 미니멀 설치 (커맨드, 규칙, 워크플로우만 — 기본값)
+ai-crew install --target ./my-project
 
 # Claude Code에서 워크플로우 실행
 /crew:elaborate "React와 Node.js로 투두 앱 만들기"
-/crew:preflight
+/crew:preflight    # 설계 문서 기반으로 그래프 + 에이전트/스킬 자동 프로비저닝
 /crew:run
 /crew:integrate
+```
+
+프리셋 번들을 사용하려면 `--team` 옵션을 추가한다:
+
+```bash
+# 사용 가능한 팀 번들 목록
+ai-crew list
+
+# 번들 프리셋으로 설치 (에이전트/스킬/그래프 포함)
+ai-crew install --team fullstack --target ./my-project
 ```
 
 ## 사용 가능한 번들
@@ -48,7 +55,9 @@ catalog/              → 재사용 가능한 컴포넌트 (소스 저장소)
   bundles/            → 팀 구성 (fullstack, aidlc-standard, ...)
 
 ai-crew install       → 카탈로그 항목을 프로젝트에 복사
-  .ai-crew/           → 상태, 그래프, 규칙, 스크래치패드
+  --target .          → 미니멀 설치 (커맨드/규칙/워크플로우 + catalog-manifest.json)
+  --team <name>       → 번들 프리셋 설치 (에이전트/스킬/그래프 포함)
+  .ai-crew/           → 상태, 그래프, 규칙, 카탈로그 매니페스트, 스크래치패드
   .claude/            → 에이전트, 스킬, 커맨드 (Claude Code가 읽는 경로)
   CLAUDE.md           → 프로젝트 워크플로우 설정
 ```
@@ -99,7 +108,8 @@ graph:
 
 | 명령어 | 설명 |
 |--------|------|
-| `ai-crew install --team <name> --target <path>` | 번들 설치 |
+| `ai-crew install --target <path>` | 미니멀 설치 (기본값) |
+| `ai-crew install --team <name> --target <path>` | 번들 프리셋 설치 |
 | `ai-crew list` | 사용 가능한 번들 목록 |
 | `ai-crew status` | 현재 상태 조회 |
 | `ai-crew doctor` | 설치 진단 |
@@ -113,7 +123,7 @@ graph:
 |--------|------|------|
 | `/crew:elaborate` | Inception | 요구사항 정의 및 설계 |
 | `/crew:refine` | Inception | 반복적 설계 고도화 |
-| `/crew:preflight` | Setup | 그래프, 모델, git, 규칙 검증 |
+| `/crew:preflight` | Setup | 동적 그래프 셋업, 에이전트/스킬 프로비저닝, 모델/git 검증 |
 | `/crew:run` | Construction | 그래프 실행 (병렬 에이전트) |
 | `/crew:integrate` | Construction | 브랜치 병합 및 PR 생성 |
 | `/crew:status` | 전체 | 워크플로우 상태 조회 |
