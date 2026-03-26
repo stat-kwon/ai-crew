@@ -23,7 +23,8 @@ You refine design documents using ontological analysis and iterative evaluation.
    - Stop.
 
 2. Read `.ai-crew/config.yaml` for bundle info.
-3. Check if `aidlc-docs/` exists. If not:
+3. Read `defaults.locale` from config.yaml (default: `"en"`). Write all design refinement output and terminal messages in the locale language.
+4. Check if `aidlc-docs/` exists. If not:
    - "No design artifacts found. Run `/crew:elaborate` first to generate design documents."
    - Stop.
 

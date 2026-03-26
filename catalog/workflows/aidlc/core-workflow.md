@@ -539,6 +539,18 @@ WRONG:
 
 ---
 
+## Language Policy
+
+The `defaults.locale` field in `.ai-crew/config.yaml` determines the output language for all user-facing artifacts:
+
+- **User-facing artifacts** (`aidlc-docs/`, `.ai-crew/scratchpad/`, terminal output): MUST be written in the locale language (e.g., Korean for `"ko"`, English for `"en"`).
+- **Schema field names** (`## What`, `## How`, `## Result`, `## Downstream Context`): Always in English (for machine parsing).
+- **File names and directory names**: Always in English.
+- **catalog/ source files** (skills, rules, agents, commands): Always in English (token efficiency).
+- **Machine-readable files** (state.json, config.yaml, runs.json, manifest.json): Always in English.
+
+---
+
 ## AI-Crew Graph Integration
 
 This project was installed with ai-crew. For multi-agent parallel execution during the AI-DLC Construction Phase:

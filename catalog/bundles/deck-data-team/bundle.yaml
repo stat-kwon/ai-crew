@@ -1,0 +1,92 @@
+plugin:
+  id: plugin.deck-data-team
+  name: Deck Data Team
+  description: "Deck DataPlatform 팀: scaffold → dag + spark 병렬 → optimize → review"
+  version: "1.0.0"
+
+workflow: aidlc
+
+aidlc:
+  install: native
+
+defaults:
+  model: claude-sonnet-4
+  isolation: worktree
+  rules: [global]
+  mcp: [multi-provider]
+  locale: ko
+includes:
+  skills:
+    - deck-pipeline-scaffold
+    - deck-dag-conventions
+    - deck-spark-patterns
+    - deck-spark-performance
+    - deck-data-quality
+    - deck-data-lineage
+    - deck-team-conventions
+  commands:
+    - crew-auto
+    - crew-elaborate
+    - crew-run
+    - crew-integrate
+    - crew-status
+    - crew-checkpoint
+    - crew-restore
+    - crew-refine
+  agents:
+    - dag-engineer
+    - spark-engineer
+    - spark-optimizer
+    - data-reviewer
+  hooks:
+    - deck-convention-guard
+    - deck-spark-perf-gate
+
+graph:
+  nodes:
+    - id: scaffold
+      type: worker
+      agent: spark-engineer
+      skills: [deck-pipeline-scaffold]
+      hooks: []
+      depends_on: []
+      config:
+        isolation: none
+
+    - id: build_dag
+      type: worker
+      agent: dag-engineer
+      skills: [deck-dag-conventions, deck-data-quality, deck-data-lineage]
+      hooks: [deck-convention-guard]
+      depends_on: [scaffold]
+      config:
+        isolation: worktree
+
+    - id: build_spark
+      type: worker
+      agent: spark-engineer
+      skills: [deck-spark-patterns, deck-data-quality]
+      hooks: [deck-spark-perf-gate]
+      depends_on: [scaffold]
+      config:
+        isolation: worktree
+
+    - id: optimize_spark
+      type: aggregator
+      agent: spark-optimizer
+      skills: [deck-spark-performance, deck-data-quality, deck-data-lineage]
+      hooks: []
+      depends_on: [build_dag, build_spark]
+      wait: all
+      config:
+        isolation: worktree
+
+    - id: review_data_team
+      type: aggregator
+      agent: data-reviewer
+      skills: [deck-team-conventions, deck-data-quality, deck-data-lineage]
+      hooks: []
+      depends_on: [optimize_spark]
+      wait: all
+      config:
+        isolation: worktree

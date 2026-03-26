@@ -17,6 +17,7 @@ Display the current status of the AI-Crew Graph workflow. Read state and graph f
 3. Read `.ai-crew/config.yaml` (if exists).
 4. Read `aidlc-docs/aidlc-state.md` (if exists) — this tracks AI-DLC stage progression across Inception and Construction phases.
 5. Read `.ai-crew/runs.json` (if exists) — run history registry.
+6. Read `defaults.locale` from `.ai-crew/config.yaml` (default: `"en"`). Display all status output in the locale language.
 
 ---
 

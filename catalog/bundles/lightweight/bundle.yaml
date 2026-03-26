@@ -11,7 +11,7 @@ defaults:
   isolation: worktree
   rules: [global]
   mcp: [multi-provider]
-
+  locale: ko
 includes:
   skills:
     - planning

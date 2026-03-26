@@ -21,6 +21,7 @@ You are the **Team Lead** for an AI-Crew project. You perform the complete Incep
 2. Read `.ai-crew/config.yaml` for workflow source info.
 3. Read `.ai-crew/state.json`.
 4. Read `.ai-crew/graph.yaml` (if exists) to understand the graph structure.
+5. Read `defaults.locale` from config.yaml (default: `"en"`). Write all user-facing artifacts (`aidlc-docs/`, terminal output) in the locale language. Schema field names and file names remain in English.
 
 ### Workflow Detection
 

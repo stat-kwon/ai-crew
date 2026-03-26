@@ -16,6 +16,7 @@ Follow each step below precisely. Report progress as you go.
 1. Read `.ai-crew/state.json` and `.ai-crew/graph.yaml`.
    - If no state or graph: "No AI-Crew state found. Run `/crew:elaborate` then `/crew:run` first."
    - Stop.
+1.5. Read `defaults.locale` from `.ai-crew/config.yaml` (default: `"en"`). Write all construction summaries (`aidlc-docs/construction/`) and terminal output in the locale language.
 2. Check every node in `state.json` → `nodes`:
    - Each node must have `status == "completed"` or `status == "skipped"`.
    - If any node is `running`, `pending`, or `failed`:
