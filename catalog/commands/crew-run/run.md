@@ -163,10 +163,10 @@ For each level, starting from Level 0:
 Before spawning ANY worktree agent:
 
 1. Update `state.json`: mark all nodes in this level as `running` with `startedAt` timestamp.
-2. **Stage and commit** all `.ai-crew/` changes:
+2. **Stage and commit** all `.ai-crew/` changes (commit description in locale language per `git-conventions` rule):
    ```bash
    git add .ai-crew/
-   git commit -m "chore(crew): prepare L{N} — {node_ids}"
+   git commit -m "chore(crew): L{N} 준비 — {node_ids}"   # locale: ko
    ```
 3. Working tree is now **clean** — safe to create worktrees.
 
@@ -236,7 +236,7 @@ After all nodes in a level complete:
 4. Commit state updates:
    ```bash
    git add .ai-crew/ aidlc-docs/aidlc-state.md
-   git commit -m "chore(crew): complete L{N} — {node_ids}"
+   git commit -m "chore(crew): L{N} 완료 — {node_ids}"   # locale: ko
    ```
 5. Display level completion summary:
 

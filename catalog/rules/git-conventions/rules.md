@@ -11,6 +11,12 @@
 type(scope): description
 ```
 
+`description`은 `defaults.locale`에 따라 해당 언어로 작성한다.
+- `locale: ko` → `feat(backend): 사용자 인증 API 추가`
+- `locale: en` → `feat(backend): add user auth API`
+
+`type`과 `scope`는 항상 영어 (기계 파싱용).
+
 ### Types
 
 | Type | 용도 |
@@ -30,22 +36,22 @@ type(scope): description
 | `crew` | 그래프 오케스트레이션 | `chore(crew): prepare L0` |
 | `integrate` | 브랜치 통합 | `chore(integrate): merge backend` |
 
-### Examples
+### Examples (locale: ko)
 
 ```bash
 # 에이전트 작업 커밋
-feat(backend): add user auth API
-fix(frontend): resolve hydration mismatch
-test(backend): add integration tests for auth
-refactor(db_design): normalize schema
+feat(backend): 사용자 인증 API 추가
+fix(frontend): 하이드레이션 불일치 수정
+test(backend): 인증 통합 테스트 추가
+refactor(db_design): 스키마 정규화
 
 # 오케스트레이션 커밋
-chore(crew): prepare L0 — foundation, hook_profiling
-chore(crew): complete L1 — backend, frontend
+chore(crew): L0 준비 — foundation, hook_profiling
+chore(crew): L1 완료 — backend, frontend
 
 # 통합 커밋
-chore(integrate): merge backend
-chore(integrate): merge frontend
+chore(integrate): backend 병합
+chore(integrate): frontend 병합
 ```
 
 ---
