@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI-Crew Studio | 번들 목록</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-container": "#fffbff",
+                        "surface-container-low": "#f3f3f4",
+                        "on-surface": "#1a1c1c",
+                        "primary-fixed": "#e1e0ff",
+                        "surface-container-highest": "#e2e2e2",
+                        "on-secondary-fixed": "#13144a",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "on-tertiary": "#ffffff",
+                        "on-background": "#1a1c1c",
+                        "surface": "#f9f9f9",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "surface-bright": "#f9f9f9",
+                        "secondary-container": "#bdbefe",
+                        "on-primary-fixed": "#07006c",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#301400",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "outline": "#767586",
+                        "outline-variant": "#c7c4d7",
+                        "primary-container": "#6063ee",
+                        "background": "#f9f9f9",
+                        "tertiary-fixed": "#ffdcc5",
+                        "surface-dim": "#dadada",
+                        "on-secondary-container": "#494b83",
+                        "secondary": "#575992",
+                        "tertiary": "#904900",
+                        "primary": "#4648d4",
+                        "surface-container-high": "#e8e8e8",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#fffbff",
+                        "inverse-surface": "#2f3131",
+                        "secondary-fixed": "#e1e0ff",
+                        "surface-variant": "#e2e2e2",
+                        "on-secondary-fixed-variant": "#404178",
+                        "inverse-primary": "#c0c1ff",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#c0c1ff",
+                        "on-surface-variant": "#464554",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#eeeeee",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "inverse-on-surface": "#f0f1f1",
+                        "surface-tint": "#494bd6",
+                        "tertiary-container": "#b55d00"
+                    },
+                    fontFamily: {
+                        "headline": ["Public Sans"],
+                        "body": ["Public Sans"],
+                        "label": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; background-color: #f9f9f9; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .active-glow { box-shadow: 0px 12px 32px -4px rgba(70, 72, 212, 0.15); }
+        .card-hover:hover { box-shadow: 0px 12px 32px -4px rgba(70, 72, 212, 0.08); transform: translateY(-2px); transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- SideNavBar (Execution from JSON) -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-6 h-screen w-64 bg-[#f3f3f4] dark:bg-slate-900 font-public-sans text-sm font-medium z-50">
+<div class="mb-10 flex items-center gap-3">
+<div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+</div>
+<div>
+<h1 class="text-xl font-bold text-[#1a1c1c] dark:text-slate-100 tracking-tight">Crew Studio</h1>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest opacity-70">Editorial Intelligence</p>
+</div>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-[#464554] dark:text-slate-400 hover:text-[#1a1c1c] dark:hover:text-slate-100 hover:bg-[#ffffff]/30 transition-colors" href="#">
+<span class="material-symbols-outlined">storefront</span>
+<span>마켓플레이스</span>
+</a>
+<!-- Active Tab: 번들 목록 -->
+<a class="flex items-center gap-3 px-4 py-3 text-[#4648d4] dark:text-[#818cf8] font-semibold bg-[#ffffff]/50 dark:bg-slate-800/50 rounded-lg scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">package_2</span>
+<span>📦 번들 목록</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#464554] dark:text-slate-400 hover:text-[#1a1c1c] dark:hover:text-slate-100 hover:bg-[#ffffff]/30 transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>나의 크루</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#464554] dark:text-slate-400 hover:text-[#1a1c1c] dark:hover:text-slate-100 hover:bg-[#ffffff]/30 transition-colors" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span>분석</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-[#464554] dark:text-slate-400 hover:text-[#1a1c1c] dark:hover:text-slate-100 hover:bg-[#ffffff]/30 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>설정</span>
+</a>
+</nav>
+<button class="mt-auto bg-primary text-on-primary py-3 px-4 rounded-lg font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">add_circle</span>
+<span>새 크루 만들기</span>
+</button>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 min-h-screen bg-surface p-12">
+<!-- TopAppBar (Execution from JSON) -->
+<header class="flex justify-between items-center mb-12 w-full">
+<div class="flex-1 max-w-xl relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-full py-3 pl-12 pr-6 focus:ring-2 focus:ring-primary/20 transition-all outline-none text-sm" placeholder="Search marketplace..." type="text"/>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-on-surface-variant">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined">notifications</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined">help_outline</span></button>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden border-2 border-surface-container-high">
+<img alt="User profile" data-alt="professional headshot of a creative director in a minimalist studio setting with soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChhssgGCHw3X4aoqoQToxXIxjj0kSg8_5T55RzliXDjTUrQcLSvZIF6zeB-IZnS9YRohkcgsg0ga9Hsf1b3wM_sVMFjZ5ZesAcSBxVt9MYjOZTUEVWlNYTCQk_WoxFvQkGSSNekVIhBsnAPbWG1f-TKqGAf-w5rf9aKy-cNOYFoWotKOpzCul4Zsn7PL6lfe_prQ3UshyweNobaY3kotBTSucYItyACe6r-P_nEiStv4qCDFGMFcxOZK9b_WaJJA9AQDMnkAydkN4"/>
+</div>
+</div>
+</header>
+<!-- Editorial Header -->
+<section class="mb-14">
+<h2 class="text-4xl font-extrabold text-on-surface tracking-tight mb-2">번들 목록</h2>
+<p class="text-lg text-on-surface-variant font-medium">프로젝트에 맞는 에이전트 팀 구성을 선택하세요</p>
+</section>
+<!-- Bundle Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Card 1: 풀스택 팀 (ACTIVE) -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-8 card-hover relative overflow-hidden active-glow border-primary/30">
+<div class="absolute top-0 left-0 w-1.5 h-full bg-primary"></div>
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="bg-primary-fixed text-on-primary-fixed-variant px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 inline-block">Active</span>
+<h3 class="text-2xl font-bold text-on-surface">풀스택 팀</h3>
+</div>
+<div class="text-right">
+<span class="text-primary font-bold block text-lg leading-none">5 Nodes</span>
+<span class="text-[10px] text-outline font-bold uppercase">Workflow: aidlc</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-8 py-4 px-3 bg-surface rounded-lg">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<div class="flex-1 h-px bg-outline-variant/30"></div>
+<span class="w-3 h-3 rounded-full bg-primary/60"></span>
+<div class="flex-1 h-px bg-outline-variant/30"></div>
+<span class="w-3 h-3 rounded-full bg-primary/40"></span>
+<div class="flex-1 h-px bg-outline-variant/30"></div>
+<span class="w-3 h-3 rounded-full bg-primary/20"></span>
+</div>
+<p class="text-on-surface-variant text-sm mb-10 leading-relaxed h-12">
+                    기획 <span class="mx-1 text-primary">→</span> 프론트+백엔드 병렬 <span class="mx-1 text-primary">→</span> 리뷰 <span class="mx-1 text-primary">→</span> QA
+                </p>
+<button class="w-full bg-primary text-on-primary py-4 rounded-lg font-bold flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                    현재 사용중
+                </button>
+</div>
+<!-- Card 2: 표준 개발 -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-8 card-hover relative overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 inline-block">Standard</span>
+<h3 class="text-2xl font-bold text-on-surface">표준 개발</h3>
+</div>
+<div class="text-right">
+<span class="text-on-surface-variant font-bold block text-lg leading-none">3 Nodes</span>
+<span class="text-[10px] text-outline font-bold uppercase">AIDLC-STANDARD</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-8 py-4 px-3 bg-surface rounded-lg">
+<span class="w-3 h-3 rounded-full bg-outline"></span>
+<div class="flex-1 h-px bg-outline-variant/30"></div>
+<span class="w-3 h-3 rounded-full bg-outline/60"></span>
+<div class="flex-1 h-px bg-outline-variant/30"></div>
+<span class="w-3 h-3 rounded-full bg-outline/20"></span>
+</div>
+<p class="text-on-surface-variant text-sm mb-10 leading-relaxed h-12">
+                    기획 <span class="mx-1 text-outline">→</span> 구현 <span class="mx-1 text-outline">→</span> 리뷰 순차 실행
+                </p>
+<button class="w-full bg-transparent border-2 border-outline-variant text-on-surface py-3.5 rounded-lg font-bold hover:bg-surface-container-low transition-colors">
+                    적용하기
+                </button>
+</div>
+<!-- Card 3: TDD 개발 -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-8 card-hover relative overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 inline-block">테스트 주도</span>
+<h3 class="text-2xl font-bold text-on-surface">TDD 개발</h3>
+</div>
+<div class="text-right">
+<span class="text-on-surface-variant font-bold block text-lg leading-none">4 Nodes</span>
+<span class="text-[10px] text-outline font-bold uppercase">AIDLC-TDD</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-8 py-4 px-3 bg-surface rounded-lg">
+<span class="material-symbols-outlined text-secondary text-sm">science</span>
+<div class="flex-1 h-px bg-outline-variant/30"></div>
+<span class="material-symbols-outlined text-secondary/70 text-sm">code</span>
+<div class="flex-1 h-px bg-outline-variant/30"></div>
+<span class="material-symbols-outlined text-secondary/40 text-sm">verified</span>
+</div>
+<p class="text-on-surface-variant text-sm mb-10 leading-relaxed h-12">
+                    기획 <span class="mx-1 text-secondary">→</span> 테스트 먼저 <span class="mx-1 text-secondary">→</span> 구현 <span class="mx-1 text-secondary">→</span> 리뷰
+                </p>
+<button class="w-full bg-transparent border-2 border-outline-variant text-on-surface py-3.5 rounded-lg font-bold hover:bg-surface-container-low transition-colors">
+                    적용하기
+                </button>
+</div>
+<!-- Card 4: 고급 풀스택 -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-8 card-hover relative overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 inline-block">보안 포함</span>
+<h3 class="text-2xl font-bold text-on-surface">고급 풀스택</h3>
+</div>
+<div class="text-right">
+<span class="text-on-surface-variant font-bold block text-lg leading-none">7 Nodes</span>
+<span class="text-[10px] text-outline font-bold uppercase">ADVANCED-FULLSTACK</span>
+</div>
+</div>
+<div class="flex items-center justify-around mb-8 py-4 px-3 bg-surface rounded-lg">
+<span class="material-symbols-outlined text-rose-500">security</span>
+<span class="material-symbols-outlined text-rose-400">layers</span>
+<span class="material-symbols-outlined text-rose-300">hub</span>
+</div>
+<p class="text-on-surface-variant text-sm mb-10 leading-relaxed h-12">
+                    풀스택 개발 환경에 엔터프라이즈급 보안 감사 모듈이 자동 포함됩니다.
+                </p>
+<button class="w-full bg-transparent border-2 border-outline-variant text-on-surface py-3.5 rounded-lg font-bold hover:bg-surface-container-low transition-colors">
+                    적용하기
+                </button>
+</div>
+<!-- Card 5: 경량 팀 -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-8 card-hover relative overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 inline-block">빠른 시작</span>
+<h3 class="text-2xl font-bold text-on-surface">경량 팀</h3>
+</div>
+<div class="text-right">
+<span class="text-on-surface-variant font-bold block text-lg leading-none">3 Nodes</span>
+<span class="text-[10px] text-outline font-bold uppercase">LIGHTWEIGHT</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mb-8 py-4 px-3 bg-surface rounded-lg">
+<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+<div class="flex-1 h-px bg-outline-variant/30"></div>
+<span class="material-symbols-outlined text-amber-500 text-sm">bolt</span>
+<div class="flex-1 h-px bg-outline-variant/30"></div>
+<span class="w-2 h-2 rounded-full bg-amber-500"></span>
+</div>
+<p class="text-on-surface-variant text-sm mb-10 leading-relaxed h-12">
+                    빠른 병렬 구현을 지향하며, AI-DLC 프로세스 없이 즉각적인 코드 생성을 지원합니다.
+                </p>
+<button class="w-full bg-transparent border-2 border-outline-variant text-on-surface py-3.5 rounded-lg font-bold hover:bg-surface-container-low transition-colors">
+                    적용하기
+                </button>
+</div>
+<!-- Card 6: E2E 프리미엄 -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 p-8 card-hover relative overflow-hidden">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="bg-slate-800 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-3 inline-block">엔터프라이즈</span>
+<h3 class="text-2xl font-bold text-on-surface">E2E 프리미엄</h3>
+</div>
+<div class="text-right">
+<span class="text-on-surface-variant font-bold block text-lg leading-none">13 Nodes</span>
+<span class="text-[10px] text-outline font-bold uppercase">E2E-PREMIUM</span>
+</div>
+</div>
+<div class="flex items-center justify-between mb-8 py-4 px-3 bg-surface rounded-lg text-slate-400">
+<span class="material-symbols-outlined text-xs">account_tree</span>
+<span class="material-symbols-outlined text-xs">schema</span>
+<span class="material-symbols-outlined text-xs">rebase_edit</span>
+<span class="material-symbols-outlined text-xs">troubleshoot</span>
+<span class="material-symbols-outlined text-xs">release_alert</span>
+</div>
+<p class="text-on-surface-variant text-sm mb-10 leading-relaxed h-12">
+                    설계 게이트와 다중 리뷰어 풀을 포함한 완벽한 CI/CD 파이프라인.
+                </p>
+<button class="w-full bg-transparent border-2 border-outline-variant text-on-surface py-3.5 rounded-lg font-bold hover:bg-surface-container-low transition-colors">
+                    적용하기
+                </button>
+</div>
+</div>
+<!-- Featured Banner / Visual Section -->
+<section class="mt-20 rounded-2xl bg-gradient-to-br from-primary to-primary-container p-12 text-on-primary flex flex-col md:flex-row items-center gap-12 overflow-hidden relative">
+<div class="relative z-10 flex-1">
+<h3 class="text-3xl font-extrabold mb-4">나만의 맞춤형 번들이 필요하신가요?</h3>
+<p class="text-lg opacity-90 mb-8 max-w-lg">에이전트 노드 구성부터 워크플로우 로직까지, 당신의 프로젝트에 최적화된 AI 팀을 직접 설계해보세요.</p>
+<button class="bg-surface-container-lowest text-primary px-8 py-4 rounded-lg font-bold hover:scale-105 transition-transform">
+                    커스텀 스튜디오 열기
+                </button>
+</div>
+<div class="relative z-10 w-full md:w-1/3 aspect-square rounded-xl overflow-hidden shadow-2xl">
+<img alt="Tech workspace" class="object-cover w-full h-full" data-alt="high-tech neon lit server room with glowing blue fiber optic cables and digital interface overlay" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBb-QUFdEceAL5tXbWFCiwhjkIaOvuD7zJKVsNXpQYBKM3qOu1asTJKyegmA3JUCd4XQ6WLPBY3SB9gawUfPLr2XJO74HWFiqZyPIRZ5dkvWecAuHGDIeM9LiTvdjFwjSRoxH34axAlifD4Dmqz0RaQM5vhyEbqlm5-_Y7WBfkYBdztcnSFGMTMR4Z3426qXjeAMWZSdQv9KwjMJG1xpHS55mIRTgqFhdtfEPCp0-_sjYlFSPabzWFZ5Dgv8GK1olS23qMEcOc3lyQ"/>
+</div>
+<!-- Decorative background element -->
+<div class="absolute -right-20 -bottom-20 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+</section>
+</main>
+</body></html>

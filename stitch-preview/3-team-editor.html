@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#dfe3e7",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "on-secondary": "#ffffff",
+                        "secondary-fixed-dim": "#4edea3",
+                        "primary-container": "#4f46e5",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#07006c",
+                        "surface-container-high": "#e4e9ed",
+                        "on-tertiary-container": "#d9d8ff",
+                        "surface-bright": "#f6fafe",
+                        "background": "#f6fafe",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#dfe3e7",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#464555",
+                        "surface-container": "#eaeef2",
+                        "inverse-primary": "#c3c0ff",
+                        "on-secondary-fixed": "#002113",
+                        "inverse-on-surface": "#edf1f5",
+                        "outline-variant": "#c7c4d8",
+                        "secondary": "#006c49",
+                        "secondary-container": "#6cf8bb",
+                        "inverse-surface": "#2c3134",
+                        "tertiary-container": "#4b4dd8",
+                        "surface-container-low": "#f0f4f8",
+                        "tertiary-fixed": "#e1e0ff",
+                        "on-secondary-container": "#00714d",
+                        "primary-fixed": "#e2dfff",
+                        "on-background": "#171c1f",
+                        "outline": "#777587",
+                        "surface-tint": "#4d44e3",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#3130c0",
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#171c1f",
+                        "on-primary-fixed": "#0f0069",
+                        "secondary-fixed": "#6ffbbe",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "on-primary-container": "#dad7ff",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "surface-dim": "#d6dade",
+                        "surface": "#f6fafe",
+                        "primary": "#3525cd"
+                    },
+                    fontFamily: {
+                        "headline": ["Public Sans", "sans-serif"],
+                        "body": ["Public Sans", "sans-serif"],
+                        "label": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .dot-grid {
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .curved-path {
+            fill: none;
+            stroke: #94a3b8;
+            stroke-width: 2;
+            stroke-dasharray: 4;
+        }
+    </style>
+</head>
+<body class="bg-[#F1F5F9] font-body text-on-surface">
+<!-- SideNavBar Shell -->
+<aside class="flex flex-col w-[256px] h-screen fixed left-0 top-0 z-40 bg-white dark:bg-slate-900 shadow-[4px_0_24px_rgba(0,0,0,0.02)] border-r border-slate-200/50 dark:border-slate-800/50">
+<div class="p-6">
+<h1 class="text-lg font-bold text-slate-900 dark:text-slate-100 font-headline leading-tight">The Digital Architect</h1>
+<p class="text-xs text-slate-500 font-medium">AI Orchestration Studio</p>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-lg font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                대시보드
+            </a>
+<a class="flex items-center gap-3 px-3 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-lg font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="architecture">architecture</span>
+                설계 단계
+            </a>
+<a class="flex items-center gap-3 px-3 py-3 text-indigo-600 dark:text-indigo-400 font-bold border-r-4 border-indigo-600 bg-slate-50 dark:bg-slate-800/50 transition-colors rounded-l-lg text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+                팀 편집
+            </a>
+<a class="flex items-center gap-3 px-3 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-lg font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="fact_check">fact_check</span>
+                환경 점검
+            </a>
+<a class="flex items-center gap-3 px-3 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-lg font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+                개발 진행
+            </a>
+<a class="flex items-center gap-3 px-3 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-lg font-medium text-sm" href="#">
+<span class="material-symbols-outlined" data-icon="schema">schema</span>
+                팀 템플릿
+            </a>
+<a class="flex items-center gap-3 px-3 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors rounded-lg font-medium text-sm mt-auto" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                설정
+            </a>
+</nav>
+<div class="p-4 mt-auto border-t border-slate-100">
+<button class="w-full py-2.5 px-4 bg-primary text-white font-bold rounded-xl text-sm transition-all hover:opacity-90 active:scale-[0.98]">
+                + 역할 추가
+            </button>
+<div class="mt-4 flex items-center gap-3 px-3 py-2 text-slate-600">
+<span class="material-symbols-outlined text-indigo-500" data-icon="group">group</span>
+<span class="text-xs font-semibold">풀스택 팀 (5명)</span>
+</div>
+</div>
+</aside>
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 right-0 left-[256px] h-16 flex justify-between items-center px-8 w-full z-30 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold text-slate-900 dark:text-slate-100 font-headline">에이전트 팀 편집</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-3">
+<button class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+</div>
+<div class="h-6 w-px bg-slate-200"></div>
+<div class="flex items-center gap-4">
+<button class="text-indigo-600 font-semibold hover:opacity-80 transition-opacity">+ 역할 추가</button>
+<button class="bg-indigo-600 text-white px-6 py-2 rounded-xl font-bold hover:opacity-90 transition-all active:scale-[0.98]">저장</button>
+<img alt="User Avatar" class="w-10 h-10 rounded-full border-2 border-white shadow-sm" data-alt="minimalist professional user profile portrait of a software architect in a clean studio setting with soft lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArCNXcVAKWkdzRVOrfu-zvWggafvjuGiVllHoNAqWpYS8RmqDItOn-Ib-3DUP3YEFVsMtY6FcSkcYOSBHpvSrLNOy0nt1YwjAKmufodC-B_SlKCNlGdyp0oom86YtUBGRRkXlq5QsYh6HIX6Wuw9BbuCVcC3-nnet7uRCFgYYYajcylO1cJ1aRsmWCCnLBn5qtfTYrkud10c9V5ONrVinTlt_B8QZ0hlPcRX8IbjThumaMPRiDgsXOl2HSHYdL2YTgo3ZaDASvcvc"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="ml-[256px] pt-24 px-8 pb-12 min-h-screen">
+<div class="grid grid-cols-12 gap-8 h-full">
+<!-- Column 1: DAG Canvas (65%) -->
+<section class="col-span-8 flex flex-col h-full">
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col h-[calc(100vh-160px)] relative overflow-hidden">
+<div class="px-6 py-4 border-b border-slate-50 flex justify-between items-center">
+<h2 class="text-title-md font-bold text-slate-800">작업 흐름 캔버스</h2>
+<div class="flex gap-2">
+<span class="flex items-center gap-1 text-xs text-slate-400 font-medium bg-slate-50 px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-sm" data-icon="grid_on">grid_on</span>
+                                Grid Active
+                            </span>
+</div>
+</div>
+<div class="flex-1 dot-grid relative p-12 overflow-auto flex flex-col items-center">
+<!-- 1단계 -->
+<div class="flex flex-col items-center mb-16 relative">
+<span class="text-xs font-bold text-slate-400 mb-3 tracking-widest uppercase">1단계</span>
+<div class="w-56 bg-white p-4 rounded-xl shadow-md border-l-4 border-primary">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-bold">작업자</span>
+<span class="material-symbols-outlined text-slate-300 text-lg" data-icon="person">person</span>
+</div>
+<h3 class="font-bold text-slate-900">[기획자]</h3>
+<p class="text-[11px] text-slate-500 mt-1 line-clamp-1">서비스 요구사항 정의 및 초안 작성</p>
+</div>
+<!-- Arrow SVG Container -->
+<svg class="absolute top-full left-1/2 -translate-x-1/2 w-48 h-16 pointer-events-none">
+<path class="curved-path" d="M96,0 C96,16 0,16 0,64 M96,0 C96,16 192,16 192,64"></path>
+</svg>
+</div>
+<!-- 2단계 Parallel -->
+<div class="flex gap-16 mb-20 relative">
+<div class="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap">
+<span class="text-xs font-bold text-slate-400 tracking-widest uppercase">2단계 (병렬)</span>
+</div>
+<!-- 프론트 -->
+<div class="w-56 bg-white p-4 rounded-xl shadow-md border-l-4 border-primary">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-bold">작업자</span>
+<span class="material-symbols-outlined text-slate-300 text-lg" data-icon="web">web</span>
+</div>
+<h3 class="font-bold text-slate-900">[프론트 개발자]</h3>
+<p class="text-[11px] text-slate-500 mt-1">UI 컴포넌트 개발 및 상태 관리</p>
+</div>
+<!-- 백엔드 -->
+<div class="w-56 bg-white p-4 rounded-xl shadow-md border-l-4 border-primary">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-bold">작업자</span>
+<span class="material-symbols-outlined text-slate-300 text-lg" data-icon="database">database</span>
+</div>
+<h3 class="font-bold text-slate-900">[백엔드 개발자]</h3>
+<p class="text-[11px] text-slate-500 mt-1">API 서버 및 DB 아키텍처 구현</p>
+</div>
+<!-- Arrow SVG to Stage 3 -->
+<svg class="absolute top-full left-1/2 -translate-x-1/2 w-48 h-16 pointer-events-none">
+<path class="curved-path" d="M0,0 C0,32 96,32 96,64 M192,0 C192,32 96,32 96,64"></path>
+</svg>
+</div>
+<!-- 3단계 Aggregator -->
+<div class="flex flex-col items-center mb-16 relative">
+<span class="text-xs font-bold text-slate-400 mb-3 tracking-widest uppercase">3단계</span>
+<div class="w-64 bg-white p-5 rounded-xl shadow-lg border-l-4 border-secondary ring-2 ring-indigo-500 ring-offset-4 ring-opacity-20">
+<div class="flex justify-between items-start mb-2">
+<div class="flex gap-1.5">
+<span class="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-bold">취합자</span>
+<span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">전체 대기</span>
+</div>
+<span class="material-symbols-outlined text-indigo-500 text-lg" data-icon="verified_user">verified_user</span>
+</div>
+<h3 class="font-bold text-slate-900">[코드 리뷰어]</h3>
+<p class="text-[11px] text-slate-500 mt-1">병합된 코드의 품질 및 로직 검증</p>
+<div class="mt-4 pt-3 border-t border-slate-50 flex gap-2">
+<div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+<span class="text-[10px] text-emerald-600 font-bold uppercase tracking-tight">Active Node Selection</span>
+</div>
+</div>
+<svg class="absolute top-full left-1/2 -translate-x-1/2 w-2 h-16 pointer-events-none">
+<line class="curved-path" x1="1" x2="1" y1="0" y2="64"></line>
+</svg>
+</div>
+<!-- 4단계 -->
+<div class="flex flex-col items-center">
+<span class="text-xs font-bold text-slate-400 mb-3 tracking-widest uppercase">4단계</span>
+<div class="w-56 bg-white p-4 rounded-xl shadow-md border-l-4 border-primary opacity-60">
+<div class="flex justify-between items-start mb-2">
+<span class="text-[10px] bg-slate-50 text-slate-500 px-2 py-0.5 rounded-full font-bold">작업자</span>
+<span class="material-symbols-outlined text-slate-300 text-lg" data-icon="bug_report">bug_report</span>
+</div>
+<h3 class="font-bold text-slate-900">[QA 엔지니어]</h3>
+<p class="text-[11px] text-slate-500 mt-1">통합 테스트 및 배포 승인</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Column 2: Role Editor (35%) -->
+<section class="col-span-4 h-full">
+<div class="bg-white rounded-xl border border-slate-200 shadow-xl p-6 flex flex-col gap-6 sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto">
+<div>
+<h2 class="text-xl font-bold text-slate-900">역할 편집 — 코드 리뷰어</h2>
+<p class="text-sm text-slate-400 mt-1 font-medium">에이전트 속성 및 워크플로우 제어</p>
+</div>
+<div class="space-y-5">
+<!-- Basic Info -->
+<div class="space-y-3">
+<div>
+<label class="text-[11px] font-bold text-slate-400 tracking-wider mb-1.5 block">ID</label>
+<input class="w-full bg-slate-50 border-0 rounded-lg text-sm text-slate-400 cursor-not-allowed px-4 py-2.5" disabled="" type="text" value="reviewer"/>
+</div>
+<div>
+<label class="text-[11px] font-bold text-slate-400 tracking-wider mb-1.5 block">역할명</label>
+<input class="w-full bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500 transition-all px-4 py-2.5" type="text" value="코드 리뷰어"/>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="text-[11px] font-bold text-slate-400 tracking-wider mb-1.5 block">타입</label>
+<div class="relative">
+<select class="w-full appearance-none bg-white border border-slate-200 rounded-lg text-sm text-slate-900 px-4 py-2.5 pr-10 focus:ring-2 focus:ring-indigo-500">
+<option>취합자</option>
+<option>작업자</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<div>
+<label class="text-[11px] font-bold text-slate-400 tracking-wider mb-1.5 block">대기 방식</label>
+<div class="relative">
+<select class="w-full appearance-none bg-white border border-slate-200 rounded-lg text-sm text-slate-900 px-4 py-2.5 pr-10 focus:ring-2 focus:ring-indigo-500">
+<option>전체 대기</option>
+<option>부분 대기</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Tags & Skills -->
+<div class="space-y-4">
+<div>
+<label class="text-[11px] font-bold text-slate-400 tracking-wider mb-2 block">스킬 (Skills)</label>
+<div class="flex flex-wrap gap-2">
+<span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]" data-icon="code">code</span>
+                                        code-review
+                                    </span>
+<span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]" data-icon="clean_hands">clean_hands</span>
+                                        clean-code
+                                    </span>
+<button class="bg-slate-50 text-slate-400 w-8 h-7 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="add">add</span>
+</button>
+</div>
+</div>
+<div>
+<label class="text-[11px] font-bold text-slate-400 tracking-wider mb-2 block">검증 (Validation)</label>
+<div class="flex">
+<span class="bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-100 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="rule">rule</span>
+                                        quality-gate
+                                    </span>
+</div>
+</div>
+</div>
+<!-- Logic / Radio -->
+<div>
+<label class="text-[11px] font-bold text-slate-400 tracking-wider mb-3 block">워크스페이스 모드</label>
+<div class="flex gap-6">
+<label class="flex items-center gap-2.5 cursor-pointer group">
+<div class="w-5 h-5 rounded-full border-2 border-indigo-600 flex items-center justify-center">
+<div class="w-2.5 h-2.5 rounded-full bg-indigo-600"></div>
+</div>
+<span class="text-sm font-semibold text-slate-900">독립 분리</span>
+</label>
+<label class="flex items-center gap-2.5 cursor-pointer group">
+<div class="w-5 h-5 rounded-full border-2 border-slate-200 group-hover:border-indigo-300 transition-colors"></div>
+<span class="text-sm font-medium text-slate-500">공유</span>
+</label>
+</div>
+</div>
+<!-- Dependencies -->
+<div>
+<label class="text-[11px] font-bold text-slate-400 tracking-wider mb-3 block">입력 의존성 (Dependencies)</label>
+<div class="space-y-2">
+<div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+<span class="material-symbols-outlined text-slate-400" data-icon="link">link</span>
+<div class="flex-1">
+<p class="text-xs font-bold text-slate-700">프론트 개발자</p>
+<p class="text-[10px] text-slate-400 uppercase">Worker Node</p>
+</div>
+<button class="material-symbols-outlined text-slate-300 hover:text-error transition-colors" data-icon="close">close</button>
+</div>
+<div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+<span class="material-symbols-outlined text-slate-400" data-icon="link">link</span>
+<div class="flex-1">
+<p class="text-xs font-bold text-slate-700">백엔드 개발자</p>
+<p class="text-[10px] text-slate-400 uppercase">Worker Node</p>
+</div>
+<button class="material-symbols-outlined text-slate-300 hover:text-error transition-colors" data-icon="close">close</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Buttons -->
+<div class="mt-auto pt-6 border-t border-slate-100 grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center gap-2 bg-slate-50 text-slate-600 font-bold py-3 rounded-xl hover:bg-error-container hover:text-on-error-container transition-all">
+<span class="material-symbols-outlined text-lg" data-icon="delete">delete</span>
+                            삭제
+                        </button>
+<button class="flex items-center justify-center gap-2 bg-primary text-white font-bold py-3 rounded-xl hover:opacity-90 active:scale-[0.98] transition-all shadow-lg shadow-indigo-100">
+<span class="material-symbols-outlined text-lg" data-icon="save">save</span>
+                            저장
+                        </button>
+</div>
+</div>
+</section>
+</div>
+</main>
+</body></html>
