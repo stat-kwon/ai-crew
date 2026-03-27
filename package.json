@@ -1,37 +1,14 @@
 {
-  "name": "ai-crew",
-  "version": "0.4.0",
-  "description": "Catalog-based Plugin Composition Platform for Claude Code",
-  "type": "module",
-  "bin": {
-    "ai-crew": "./dist/cli.js"
-  },
-  "files": [
-    "dist",
-    "catalog",
-    ".claude-plugin"
-  ],
+  "name": "ai-crew-monorepo",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "prepublishOnly": "npm run build"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.12.1",
-    "chalk": "^5.4.1",
-    "commander": "^13.1.0",
-    "yaml": "^2.7.1"
+    "build": "pnpm -r build",
+    "dev": "pnpm -r --parallel dev",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint"
   },
   "devDependencies": {
-    "@types/node": "^25.5.0",
-    "tsup": "^8.4.0",
-    "typescript": "^5.8.2",
-    "vitest": "^3.1.1"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "license": "MIT"
+    "typescript": "^5.8.2"
+  }
 }

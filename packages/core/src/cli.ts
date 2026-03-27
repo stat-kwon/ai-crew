@@ -306,4 +306,28 @@ program
     await startServer();
   });
 
+// -- ui -------------------------------------------------------------
+
+program
+  .command("ui")
+  .description("Launch the AI-Crew web UI")
+  .option("--target <path>", "Project path", process.cwd())
+  .option("--port <port>", "Port number", "3000")
+  .action(async (options) => {
+    const { resolve } = await import("node:path");
+    // Build package name dynamically to prevent TypeScript from resolving it at compile time
+    const uiPackage = ["@ai-crew", "ui", "server"].join("/");
+    try {
+      const uiModule = await import(uiPackage);
+      await uiModule.startUi({
+        targetDir: resolve(options.target),
+        port: parseInt(options.port, 10),
+      });
+    } catch {
+      console.error(chalk.red("@ai-crew/ui is not installed."));
+      console.error(chalk.dim("Install it with: pnpm add @ai-crew/ui"));
+      process.exit(1);
+    }
+  });
+
 program.parse();
