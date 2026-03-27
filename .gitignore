@@ -32,3 +32,6 @@ __pycache__/
 
 # Logs
 *.log
+ui/.next/
+ui/dist/
+ui/test-results/
