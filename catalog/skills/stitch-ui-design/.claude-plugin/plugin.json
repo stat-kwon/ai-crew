@@ -1,7 +1,7 @@
 {
   "name": "stitch-ui-design",
-  "description": "Google Stitch MCP 연동 UI 자동 생성 — stitch-kit 래퍼 skill",
-  "version": "1.0.0",
+  "description": "Google Stitch MCP 연동 UI 자동 생성 — 설계 문서, 요구사항 메모, 스크린샷 등 어떤 입력이든 화면 생성 가능한 범용 래퍼 skill",
+  "version": "1.1.0",
   "tier": "optional",
   "requires": [],
   "tags": ["ui", "design", "stitch", "mcp"]
