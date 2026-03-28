@@ -234,7 +234,7 @@ function TeamEditorContent() {
                 <div className="flex flex-col items-center justify-center h-full text-slate-400">
                   <span className="material-symbols-outlined text-6xl mb-4">account_tree</span>
                   <p className="text-lg font-medium">그래프가 없습니다</p>
-                  <p className="text-sm mt-1">번들을 선택하여 팀 구성을 시작하세요</p>
+                  <p className="text-sm mt-1">팀 템플릿을 선택하여 에이전트 팀 구성을 시작하세요</p>
                 </div>
               )}
             </div>

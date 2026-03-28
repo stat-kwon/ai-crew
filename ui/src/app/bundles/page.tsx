@@ -109,7 +109,7 @@ export default function BundlesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-4xl font-extrabold text-slate-900 tracking-tight mb-2 font-[var(--font-headline)]">
-            번들 목록
+            팀 템플릿
           </h2>
           <p className="text-lg text-slate-500 font-medium">프로젝트에 맞는 에이전트 팀 구성을 선택하세요</p>
         </div>
@@ -120,7 +120,7 @@ export default function BundlesPage() {
             </span>
             <Input
               className="pl-12 w-64"
-              placeholder="번들 검색..."
+              placeholder="팀 템플릿 검색..."
               value={filterText}
               onChange={(e) => setFilterText(e.target.value)}
             />
@@ -133,7 +133,7 @@ export default function BundlesPage() {
         <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="material-symbols-outlined text-emerald-600 filled">check_circle</span>
-            <p className="text-sm font-medium text-emerald-700">번들이 성공적으로 적용되었습니다.</p>
+            <p className="text-sm font-medium text-emerald-700">팀 템플릿이 성공적으로 적용되었습니다.</p>
           </div>
           <button onClick={() => setApplySuccess(false)} className="text-emerald-600 hover:text-emerald-700">
             <span className="material-symbols-outlined">close</span>
@@ -158,7 +158,7 @@ export default function BundlesPage() {
         {filteredBundles.length === 0 ? (
           <div className="col-span-full text-center py-16 text-slate-400">
             <span className="material-symbols-outlined text-6xl mb-4">inventory_2</span>
-            <p className="text-lg font-medium">사용 가능한 번들이 없습니다</p>
+            <p className="text-lg font-medium">사용 가능한 팀 템플릿이 없습니다</p>
           </div>
         ) : (
           filteredBundles.map((bundle) => {
@@ -247,7 +247,7 @@ export default function BundlesPage() {
               <p className="text-sm text-slate-500 mt-1">{bundleDetails.description}</p>
             </div>
             <Button onClick={() => handleApplyBundle(selectedBundle)} disabled={applying || selectedBundle === currentBundle}>
-              {selectedBundle === currentBundle ? "현재 사용중" : "이 번들 적용"}
+              {selectedBundle === currentBundle ? "현재 사용중" : "이 팀 템플릿 적용"}
             </Button>
           </div>
 
@@ -304,7 +304,7 @@ export default function BundlesPage() {
       {/* Featured Banner */}
       <div className="rounded-2xl bg-gradient-to-br from-primary to-primary-container p-12 text-white flex flex-col md:flex-row items-center gap-12 overflow-hidden relative">
         <div className="relative z-10 flex-1">
-          <h3 className="text-3xl font-extrabold mb-4">나만의 맞춤형 번들이 필요하신가요?</h3>
+          <h3 className="text-3xl font-extrabold mb-4">나만의 맞춤형 팀 템플릿이 필요하신가요?</h3>
           <p className="text-lg opacity-90 mb-8 max-w-lg">
             에이전트 노드 구성부터 워크플로우 로직까지, 당신의 프로젝트에 최적화된 AI 팀을 직접 설계해보세요.
           </p>

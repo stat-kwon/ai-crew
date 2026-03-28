@@ -129,14 +129,14 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-semibold text-slate-700 mb-2 block">번들</label>
+                  <label className="text-sm font-semibold text-slate-700 mb-2 block">팀 템플릿</label>
                   <Input
                     value={form.bundle || ""}
                     disabled
                     className="bg-slate-50 cursor-not-allowed"
-                    placeholder="번들 페이지에서 선택"
+                    placeholder="팀 템플릿 페이지에서 선택"
                   />
-                  <p className="text-xs text-slate-400 mt-1">번들 목록 페이지에서 변경</p>
+                  <p className="text-xs text-slate-400 mt-1">팀 템플릿 목록 페이지에서 변경</p>
                 </div>
               </div>
             </section>
