@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 interface StateData {
   bundleName: string;
   runId?: string;
+  intent?: { description?: string };
   nodes: Record<string, { status: string; startedAt?: string; completedAt?: string }>;
 }
 
@@ -21,6 +22,12 @@ interface AidlcStage {
   tasks: { text: string; done: boolean }[];
 }
 
+interface AidlcStateResponse {
+  stages: AidlcStage[];
+  found: boolean;
+  currentStage?: string;
+}
+
 interface RunEntry {
   runId: string;
   state: string;
@@ -29,6 +36,7 @@ interface RunEntry {
   nodesTotal: number;
   nodesCompleted: number;
   nodesFailed: number;
+  intentDescription?: string;
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.ok ? res.json() : null);
@@ -42,13 +50,15 @@ function getStatusCounts(nodes: Record<string, { status: string }>) {
   return counts;
 }
 
-function getDesignProgress(stages: AidlcStage[] | undefined) {
-  if (!stages || stages.length === 0) return { current: "시작 전", progress: 0 };
+function getDesignProgress(stages: AidlcStage[] | undefined, found?: boolean) {
+  if (found === false || !stages || stages.length === 0) {
+    return { current: "설계 데이터 없음", progress: 0 };
+  }
   const completed = stages.filter(s => s.status === "complete").length;
   const active = stages.find(s => s.status === "active");
   const progress = Math.round((completed / stages.length) * 100);
   return {
-    current: active?.name || (completed === stages.length ? "완료" : "시작 전"),
+    current: active?.name || (completed === stages.length ? "완료" : "설계 데이터 없음"),
     progress,
     phase: `${completed}/${stages.length}`,
   };
@@ -57,34 +67,31 @@ function getDesignProgress(stages: AidlcStage[] | undefined) {
 export default function DashboardPage() {
   const { data: state } = useSWR<StateData>("/api/state", fetcher, { refreshInterval: 5000 });
   const { data: graph } = useSWR<GraphData>("/api/graph", fetcher);
-  const { data: aidlc } = useSWR<{ stages: AidlcStage[] }>("/api/aidlc/state", fetcher);
+  const { data: aidlc } = useSWR<AidlcStateResponse>("/api/aidlc/state", fetcher);
   const { data: runsData } = useSWR<{ runs: RunEntry[] }>("/api/runs", fetcher);
 
   const statusCounts = state?.nodes ? getStatusCounts(state.nodes) : null;
-  const designProgress = getDesignProgress(aidlc?.stages);
+  const designProgress = getDesignProgress(aidlc?.stages, aidlc?.found);
   const nodeCount = graph?.nodes?.length || 0;
   const totalNodes = statusCounts ? Object.values(statusCounts).reduce((a, b) => a + b, 0) : 0;
 
   const recentRuns = runsData?.runs?.slice(0, 3) || [];
 
   const flowSteps = [
-    { id: "init", label: "설계 초안 작성", cmd: "/crew:init", icon: "edit_note" },
     { id: "elaborate", label: "설계 고도화", cmd: "/crew:elaborate", icon: "architecture" },
-    { id: "check", label: "환경 점검", cmd: "/crew:check", icon: "fact_check" },
+    { id: "preflight", label: "환경 점검", cmd: "/crew:preflight", icon: "fact_check" },
     { id: "run", label: "개발 실행", cmd: "/crew:run", icon: "play_circle" },
-    { id: "merge", label: "결과 통합", cmd: "/crew:merge", icon: "inventory_2" },
+    { id: "integrate", label: "결과 통합", cmd: "/crew:integrate", icon: "inventory_2" },
   ];
 
-  // Determine current step based on state (1-5)
+  // Determine current step based on state (1-4)
   const currentStep: number = statusCounts?.completed === totalNodes && totalNodes > 0
-    ? 5
-    : statusCounts?.running
-      ? 4
-      : statusCounts?.completed
-        ? 4
-        : aidlc?.stages?.some(s => s.status === "complete")
-          ? 2
-          : 1;
+    ? 4  // integrate
+    : statusCounts?.running || (statusCounts?.completed && statusCounts.completed > 0)
+      ? 3  // run
+      : aidlc?.stages?.some(s => s.status === "complete")
+        ? 2  // preflight
+        : 1; // elaborate
 
   return (
     <div className="space-y-8">
@@ -98,12 +105,12 @@ export default function DashboardPage() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {/* Card 1: Team */}
+        {/* Card 1: Agent Team */}
         <Card className="p-6 card-shadow flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">현재 팀 구성</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">현재 에이전트 팀</p>
             <p className="text-xl font-bold text-slate-900">{state?.bundleName || "미설정"}</p>
-            <p className="text-sm text-primary font-semibold mt-1">{nodeCount}명 활동 중</p>
+            <p className="text-sm text-primary font-semibold mt-1">{nodeCount}개 에이전트 활동 중</p>
           </div>
           <div className="p-3 bg-indigo-50 rounded-xl">
             <span className="material-symbols-outlined text-primary text-3xl filled">groups</span>
@@ -115,7 +122,9 @@ export default function DashboardPage() {
           <div>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">마지막 실행</p>
             <div className="flex items-center gap-2">
-              <p className="text-xl font-bold text-slate-900">{state?.runId || "없음"}</p>
+              <p className="text-xl font-bold text-slate-900">
+                {state?.intent?.description || state?.runId || "없음"}
+              </p>
               {statusCounts?.running ? (
                 <Badge variant="running" size="sm">진행 중</Badge>
               ) : statusCounts?.failed ? (
@@ -124,8 +133,11 @@ export default function DashboardPage() {
                 <Badge variant="completed" size="sm">완료</Badge>
               ) : null}
             </div>
+            {state?.runId && state?.intent?.description && (
+              <p className="text-xs text-slate-400 mt-0.5">{state.runId}</p>
+            )}
             <p className="text-sm text-slate-500 mt-1">
-              {totalNodes > 0 ? `${statusCounts?.completed || 0}/${totalNodes} 노드 완료` : "실행 기록 없음"}
+              {totalNodes > 0 ? `${statusCounts?.completed || 0}/${totalNodes} 노드 완료` : "아직 실행된 작업이 없습니다"}
             </p>
           </div>
           <div className="p-3 bg-slate-50 rounded-xl">
@@ -133,9 +145,9 @@ export default function DashboardPage() {
           </div>
         </Card>
 
-        {/* Card 3: Node Status */}
+        {/* Card 3: Agent Status */}
         <Card className="p-6 card-shadow">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">팀원 현황</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">에이전트 현황</p>
           <p className="text-xl font-bold text-slate-900 mb-3">
             {statusCounts
               ? `${statusCounts.completed} 완료 / ${statusCounts.running} 진행 / ${statusCounts.pending} 대기`
@@ -255,11 +267,10 @@ export default function DashboardPage() {
             <div>
               <p className="text-xs font-bold text-slate-900">다음 단계</p>
               <p className="text-xs text-slate-500">
-                {currentStep === 1 && "설계 단계를 시작하려면 /crew:init 명령어를 실행하세요."}
-                {currentStep === 2 && "설계를 고도화하려면 /crew:elaborate 명령어를 실행하세요."}
+                {currentStep === 1 && "설계를 고도화하려면 /crew:elaborate 명령어를 실행하세요."}
+                {currentStep === 2 && "환경을 점검하려면 /crew:preflight 명령어를 실행하세요."}
                 {currentStep === 3 && "개발을 실행하려면 /crew:run 명령어를 실행하세요."}
-                {currentStep === 4 && "결과를 통합하려면 /crew:merge 명령어를 실행하세요."}
-                {currentStep === 5 && "모든 단계가 완료되었습니다!"}
+                {currentStep === 4 && "모든 단계가 완료되었습니다!"}
               </p>
             </div>
           </div>
@@ -283,7 +294,6 @@ export default function DashboardPage() {
               recentRuns.map((run) => {
                 const isRunning = run.state === "running";
                 const isFailed = run.state === "failed";
-                const isCompleted = run.state === "completed";
 
                 return (
                   <div
@@ -315,7 +325,12 @@ export default function DashboardPage() {
                         />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-slate-900">{run.runId}</p>
+                        <p className="text-sm font-bold text-slate-900">
+                          {run.intentDescription || run.runId}
+                        </p>
+                        {run.intentDescription && (
+                          <p className="text-[10px] text-slate-400">{run.runId}</p>
+                        )}
                         <p
                           className={`text-[10px] font-bold uppercase tracking-tight ${
                             isRunning
