@@ -18,11 +18,11 @@
     "dashboard-cards": { "status": "completed", "startedAt": "2026-03-28T09:46:00Z", "completedAt": "2026-03-28T09:51:58Z" },
     "design-page": { "status": "completed", "startedAt": "2026-03-28T09:46:00Z", "completedAt": "2026-03-28T09:57:21Z" },
     "remaining-pages": { "status": "completed", "startedAt": "2026-03-28T09:46:00Z", "completedAt": "2026-03-28T09:49:58Z" },
-    "test-all": { "status": "pending", "startedAt": null, "completedAt": null },
-    "code-review": { "status": "pending", "startedAt": null, "completedAt": null },
-    "improve-backend": { "status": "pending", "startedAt": null, "completedAt": null },
-    "improve-frontend": { "status": "pending", "startedAt": null, "completedAt": null },
-    "build-verify": { "status": "pending", "startedAt": null, "completedAt": null },
-    "qa-final": { "status": "pending", "startedAt": null, "completedAt": null }
+    "test-all": { "status": "completed", "startedAt": "2026-03-28T10:04:00Z", "completedAt": "2026-03-28T10:06:00Z" },
+    "code-review": { "status": "completed", "startedAt": "2026-03-28T10:06:00Z", "completedAt": "2026-03-28T10:08:00Z" },
+    "improve-backend": { "status": "skipped", "startedAt": null, "completedAt": null },
+    "improve-frontend": { "status": "completed", "startedAt": "2026-03-28T10:08:00Z", "completedAt": "2026-03-28T10:12:00Z" },
+    "build-verify": { "status": "completed", "startedAt": "2026-03-28T10:12:00Z", "completedAt": "2026-03-28T10:13:00Z" },
+    "qa-final": { "status": "completed", "startedAt": "2026-03-28T10:13:00Z", "completedAt": "2026-03-28T10:14:00Z" }
   }
 }

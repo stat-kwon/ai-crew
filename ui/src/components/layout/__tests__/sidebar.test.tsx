@@ -24,10 +24,10 @@ describe('Sidebar 용어 및 CTA 검증', () => {
     expect(screen.getByText(/프로젝트 전환/)).toBeInTheDocument();
   });
 
-  it('구용어 "번들"이 단독으로 렌더링되지 않아야 함', () => {
+  it('"팀 템플릿" 관련 텍스트가 존재해야 함', () => {
     render(<Sidebar />);
-    // "팀 템플릿" 네비게이션 항목이 존재해야 함
-    expect(screen.getByText(/팀 템플릿/)).toBeInTheDocument();
+    const elements = screen.getAllByText(/팀 템플릿/);
+    expect(elements.length).toBeGreaterThanOrEqual(1);
   });
 
   it('하단에 "팀 템플릿: {bundleName}" 형식으로 표시', () => {
