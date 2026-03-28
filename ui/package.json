@@ -25,7 +25,9 @@
     "dev": "next dev",
     "build": "next build && tsup src/server.ts --format esm --dts --tsconfig tsconfig.build.json",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@cloudscape-design/components": "^3.0.1251",
@@ -65,7 +67,8 @@
     "postcss": "^8.5.8",
     "tailwindcss": "^4.1.8",
     "tsup": "^8.4.0",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.1"
   },
   "engines": {
     "node": ">=18"
