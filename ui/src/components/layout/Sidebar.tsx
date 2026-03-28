@@ -47,8 +47,8 @@ export function Sidebar() {
           href="/bundles"
           className="w-full bg-gradient-to-br from-primary to-primary-container text-white py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg shadow-primary/20 hover:opacity-90"
         >
-          <span className="material-symbols-outlined text-lg">add</span>
-          신규 프로젝트
+          <span className="material-symbols-outlined text-lg">swap_horiz</span>
+          프로젝트 전환
         </Link>
       </div>
 
@@ -93,7 +93,7 @@ export function Sidebar() {
       <div className="mt-auto px-4 pt-4 border-t border-slate-100">
         <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-full">
           <span className="material-symbols-outlined text-primary">groups</span>
-          <span className="text-xs font-semibold text-slate-700">{bundleName}</span>
+          <span className="text-xs font-semibold text-slate-700">팀 템플릿: {bundleName}</span>
         </div>
       </div>
     </aside>
