@@ -2,18 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { readFile, readdir, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, relative } from "node:path";
+import { groupDocsByFolder, type DocFile } from "./helpers";
 
 function getTargetDir(): string {
   return process.env.AI_CREW_TARGET_DIR || process.cwd();
 }
 
-interface DocFile {
-  name: string;
-  path: string;
-  stage?: string;
-}
-
-async function listDocsRecursive(dir: string, base: string): Promise<DocFile[]> {
+async function listDocsRecursive(
+  dir: string,
+  base: string,
+): Promise<DocFile[]> {
   const docs: DocFile[] = [];
 
   if (!existsSync(dir)) {
@@ -59,14 +57,14 @@ export async function GET(request: NextRequest) {
       if (!fullPath.startsWith(docsDir)) {
         return NextResponse.json(
           { error: "Path traversal detected" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       if (!existsSync(fullPath)) {
         return NextResponse.json(
           { error: "File not found" },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -76,13 +74,14 @@ export async function GET(request: NextRequest) {
 
     // List all docs
     const docs = await listDocsRecursive(docsDir, docsDir);
+    const groups = groupDocsByFolder(docs);
 
-    return NextResponse.json({ docs });
+    return NextResponse.json({ docs, groups });
   } catch (error) {
     console.error("Error reading AIDLC docs:", error);
     return NextResponse.json(
       { error: "Failed to read AIDLC docs" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
