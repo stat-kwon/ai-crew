@@ -14,10 +14,21 @@ interface AidlcStage {
   tasks: { text: string; done: boolean }[];
 }
 
-interface DocFile {
+interface DocGroupFile {
   name: string;
+  label: string;
   path: string;
-  modifiedAt: string;
+}
+
+interface DocGroup {
+  folder: string;
+  label: string;
+  sortOrder: number;
+  files: DocGroupFile[];
+}
+
+interface DocsResponse {
+  groups: DocGroup[];
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => (res.ok ? res.json() : null));
@@ -42,18 +53,32 @@ const stageLabels: Record<string, string> = {
   "Task Decomposition": "작업 분해",
 };
 
+const folderIcons: Record<string, string> = {
+  "inception/requirements": "article",
+  "inception/user-stories": "account_tree",
+  "inception/plans": "assignment",
+  "inception/application-design": "architecture",
+  "construction": "build",
+  "operations": "deployed_code",
+};
+
+function getFolderIcon(folder: string): string {
+  return folderIcons[folder] || "folder";
+}
+
 export default function DesignPage() {
   const { data: aidlcData } = useSWR<{ stages: AidlcStage[]; raw?: string }>("/api/aidlc/state", fetcher, {
     refreshInterval: 5000,
   });
-  const { data: docsData } = useSWR<{ docs: DocFile[] }>("/api/aidlc/docs", fetcher);
+  const { data: docsData } = useSWR<DocsResponse>("/api/aidlc/docs", fetcher);
 
   const [selectedDoc, setSelectedDoc] = useState<string | null>(null);
   const [docContent, setDocContent] = useState<string>("");
   const [isLoadingDoc, setIsLoadingDoc] = useState(false);
 
   const stages = aidlcData?.stages || [];
-  const docs = docsData?.docs || [];
+  const groups = docsData?.groups || [];
+  const totalFiles = groups.reduce((sum, g) => sum + g.files.length, 0);
 
   const completedCount = stages.filter((s) => s.status === "complete").length;
   const progressPercent = stages.length > 0 ? Math.round((completedCount / stages.length) * 100) : 0;
@@ -148,7 +173,7 @@ export default function DesignPage() {
 
       {/* Two Column Layout */}
       <div className="grid grid-cols-12 gap-8 items-start">
-        {/* Left Column: Generated Documents */}
+        {/* Left Column: Generated Documents (grouped by folder) */}
         <div className="col-span-12 lg:col-span-7">
           <Card className="overflow-hidden">
             <div className="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
@@ -157,65 +182,75 @@ export default function DesignPage() {
                 생성된 문서
               </h3>
               <span className="text-xs font-medium text-slate-400 uppercase tracking-tighter">
-                {docs.length}개 문서
+                {totalFiles}개 문서
               </span>
             </div>
-            <div className="p-6 space-y-4">
-              {docs.length === 0 ? (
-                <div className="text-center py-8 text-slate-400">
+            <div className="p-6 space-y-6">
+              {groups.length === 0 ? (
+                <div className="text-center py-8 text-slate-400" data-testid="empty-state">
                   <span className="material-symbols-outlined text-4xl mb-2">folder_off</span>
                   <p className="text-sm">아직 생성된 문서가 없습니다</p>
                 </div>
               ) : (
-                docs.map((doc) => {
-                  const isSelected = selectedDoc === doc.path;
-                  const docIcon = doc.name.includes("requirements")
-                    ? "article"
-                    : doc.name.includes("stories") || doc.name.includes("scenario")
-                      ? "account_tree"
-                      : doc.name.includes("workflow") || doc.name.includes("plan")
-                        ? "assignment"
-                        : doc.name.includes("architecture") || doc.name.includes("design")
-                          ? "architecture"
-                          : "description";
-
-                  return (
-                    <div
-                      key={doc.path}
-                      onClick={() => handleDocSelect(doc.path)}
-                      className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors ${
-                        isSelected
-                          ? "bg-indigo-50/50 border-indigo-200 ring-2 ring-indigo-500/10"
-                          : "bg-slate-50/30 border-slate-100 hover:border-indigo-200"
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div
-                          className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                            isSelected ? "bg-indigo-100 text-indigo-600" : "bg-indigo-50 text-indigo-600"
-                          }`}
-                        >
-                          <span className="material-symbols-outlined">{docIcon}</span>
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-slate-900">
-                            {doc.name.replace(".md", "").replace(/-/g, " ")}
-                            <span className="text-slate-400 font-normal text-xs ml-1">({doc.name})</span>
-                          </h4>
-                          <div className="flex items-center gap-3 mt-1">
-                            <Badge variant="success" size="sm">
-                              완료
-                            </Badge>
-                            <span className="text-[10px] text-slate-400 font-medium">{doc.modifiedAt}</span>
-                          </div>
-                        </div>
+                groups.map((group) => (
+                  <div key={group.folder} className="space-y-3" data-testid={`group-${group.folder.replace(/\//g, "-")}`}>
+                    {/* Group Header */}
+                    <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
+                      <div className="w-7 h-7 rounded-md bg-indigo-50 flex items-center justify-center">
+                        <span className="material-symbols-outlined text-indigo-500 text-sm">
+                          {getFolderIcon(group.folder)}
+                        </span>
                       </div>
-                      <Button variant="ghost" size="sm" className="text-xs font-bold text-primary">
-                        {isSelected ? "선택됨" : "열기"}
-                      </Button>
+                      <h4 className="text-sm font-bold text-slate-700" data-testid={`group-label-${group.folder.replace(/\//g, "-")}`}>
+                        {group.label}
+                      </h4>
+                      <span className="text-[10px] text-slate-400 ml-auto">{group.files.length}개</span>
                     </div>
-                  );
-                })
+
+                    {/* Files in this group */}
+                    {group.files.length === 0 ? (
+                      <p className="text-xs text-slate-400 pl-9">파일 없음</p>
+                    ) : (
+                      <div className="space-y-2 pl-0">
+                        {group.files.map((file) => {
+                          const isSelected = selectedDoc === file.path;
+
+                          return (
+                            <div
+                              key={file.path}
+                              onClick={() => handleDocSelect(file.path)}
+                              data-testid={`file-item-${file.name}`}
+                              className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
+                                isSelected
+                                  ? "bg-indigo-50/50 border-indigo-200 ring-2 ring-indigo-500/10"
+                                  : "bg-slate-50/30 border-slate-100 hover:border-indigo-200"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                                    isSelected ? "bg-indigo-100 text-indigo-600" : "bg-indigo-50 text-indigo-600"
+                                  }`}
+                                >
+                                  <span className="material-symbols-outlined text-sm">description</span>
+                                </div>
+                                <div>
+                                  <h5 className="text-sm font-semibold text-slate-900">
+                                    {file.label}
+                                  </h5>
+                                  <span className="text-[10px] text-slate-400">{file.name}</span>
+                                </div>
+                              </div>
+                              <Button variant="ghost" size="sm" className="text-xs font-bold text-primary shrink-0">
+                                {isSelected ? "선택됨" : "열기"}
+                              </Button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ))
               )}
             </div>
           </Card>
