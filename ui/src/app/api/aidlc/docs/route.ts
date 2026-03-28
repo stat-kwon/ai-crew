@@ -2,15 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { readFile, readdir, stat } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join, relative } from "node:path";
+import { groupDocsByFolder, type DocFile } from "./helpers";
 
 function getTargetDir(): string {
   return process.env.AI_CREW_TARGET_DIR || process.cwd();
-}
-
-interface DocFile {
-  name: string;
-  path: string;
-  stage?: string;
 }
 
 async function listDocsRecursive(dir: string, base: string): Promise<DocFile[]> {
@@ -49,7 +44,7 @@ export async function GET(request: NextRequest) {
     const docsDir = join(targetDir, "aidlc-docs");
 
     const { searchParams } = new URL(request.url);
-    const filePath = searchParams.get("file");
+    const filePath = searchParams.get("file") || searchParams.get("path");
 
     if (filePath) {
       // Return specific file content
@@ -76,8 +71,9 @@ export async function GET(request: NextRequest) {
 
     // List all docs
     const docs = await listDocsRecursive(docsDir, docsDir);
+    const groups = groupDocsByFolder(docs);
 
-    return NextResponse.json({ docs });
+    return NextResponse.json({ docs, groups });
   } catch (error) {
     console.error("Error reading AIDLC docs:", error);
     return NextResponse.json(
