@@ -10,7 +10,6 @@ import Input from "@cloudscape-design/components/input";
 import Select, { SelectProps } from "@cloudscape-design/components/select";
 import Multiselect, { MultiselectProps } from "@cloudscape-design/components/multiselect";
 import TokenGroup from "@cloudscape-design/components/token-group";
-import Textarea from "@cloudscape-design/components/textarea";
 import ColumnLayout from "@cloudscape-design/components/column-layout";
 import Badge from "@cloudscape-design/components/badge";
 import Header from "@cloudscape-design/components/header";
@@ -41,9 +40,9 @@ interface NodeEditorDrawerProps {
 }
 
 const typeOptions: SelectProps.Option[] = [
-  { label: "Worker", value: "worker" },
-  { label: "Router", value: "router" },
-  { label: "Aggregator", value: "aggregator" },
+  { label: "작업자", value: "worker" },
+  { label: "분배자", value: "router" },
+  { label: "취합자", value: "aggregator" },
 ];
 
 const modelOptions: SelectProps.Option[] = [
@@ -53,14 +52,14 @@ const modelOptions: SelectProps.Option[] = [
 ];
 
 const isolationOptions: SelectProps.Option[] = [
-  { label: "None", value: "" },
+  { label: "없음", value: "" },
   { label: "Worktree", value: "worktree" },
-  { label: "Container", value: "container" },
+  { label: "컨테이너", value: "container" },
 ];
 
 const waitOptions: SelectProps.Option[] = [
-  { label: "All", value: "all" },
-  { label: "Any", value: "any" },
+  { label: "전체 대기", value: "all" },
+  { label: "부분 대기", value: "any" },
 ];
 
 export function NodeEditorDrawer({
@@ -156,7 +155,7 @@ export function NodeEditorDrawer({
       size="medium"
       header={
         <Header variant="h2">
-          {isNew ? "Add New Node" : `Edit Node: ${node?.id}`}
+          {isNew ? "새 노드 추가" : `노드 편집: ${node?.id}`}
         </Header>
       }
       footer={
@@ -164,14 +163,14 @@ export function NodeEditorDrawer({
           <SpaceBetween direction="horizontal" size="xs">
             {!isNew && onDelete && (
               <Button variant="normal" onClick={onDelete}>
-                Delete
+                삭제
               </Button>
             )}
             <Button variant="link" onClick={onClose}>
-              Cancel
+              취소
             </Button>
             <Button variant="primary" onClick={handleSave}>
-              {isNew ? "Add" : "Save"}
+              {isNew ? "추가" : "저장"}
             </Button>
           </SpaceBetween>
         </Box>
@@ -179,7 +178,7 @@ export function NodeEditorDrawer({
     >
       <SpaceBetween size="l">
         <ColumnLayout columns={2}>
-          <FormField label="Node ID">
+          <FormField label="노드 ID">
             <Input
               value={formData.id}
               onChange={({ detail }) =>
@@ -190,7 +189,7 @@ export function NodeEditorDrawer({
             />
           </FormField>
 
-          <FormField label="Type">
+          <FormField label="타입">
             <Select
               selectedOption={
                 typeOptions.find((o) => o.value === formData.type) || null
@@ -206,7 +205,7 @@ export function NodeEditorDrawer({
           </FormField>
         </ColumnLayout>
 
-        <FormField label="Agent">
+        <FormField label="에이전트">
           <Input
             value={formData.agent}
             onChange={({ detail }) =>
@@ -216,7 +215,7 @@ export function NodeEditorDrawer({
           />
         </FormField>
 
-        <FormField label="Model (optional)">
+        <FormField label="모델 (선택사항)">
           <Select
             selectedOption={
               modelOptions.find((o) => o.value === formData.model) || null
@@ -228,11 +227,11 @@ export function NodeEditorDrawer({
               })
             }
             options={modelOptions}
-            placeholder="Select model"
+            placeholder="모델 선택"
           />
         </FormField>
 
-        <FormField label="Dependencies">
+        <FormField label="의존성">
           <Multiselect
             selectedOptions={formData.depends_on.map((d) => ({
               label: d,
@@ -245,22 +244,22 @@ export function NodeEditorDrawer({
               })
             }
             options={dependencyOptions}
-            placeholder="Select dependencies"
+            placeholder="의존성 선택"
           />
         </FormField>
 
-        <FormField label="Skills">
+        <FormField label="스킬">
           <SpaceBetween size="xs">
             <SpaceBetween direction="horizontal" size="xs">
               <Input
                 value={newSkill}
                 onChange={({ detail }) => setNewSkill(detail.value)}
-                placeholder="Add skill"
+                placeholder="스킬 추가"
                 onKeyDown={({ detail }) => {
                   if (detail.key === "Enter") addSkill();
                 }}
               />
-              <Button onClick={addSkill}>Add</Button>
+              <Button onClick={addSkill}>추가</Button>
             </SpaceBetween>
             {formData.skills && formData.skills.length > 0 && (
               <TokenGroup
@@ -278,18 +277,18 @@ export function NodeEditorDrawer({
           </SpaceBetween>
         </FormField>
 
-        <FormField label="Hooks">
+        <FormField label="훅">
           <SpaceBetween size="xs">
             <SpaceBetween direction="horizontal" size="xs">
               <Input
                 value={newHook}
                 onChange={({ detail }) => setNewHook(detail.value)}
-                placeholder="Add hook"
+                placeholder="훅 추가"
                 onKeyDown={({ detail }) => {
                   if (detail.key === "Enter") addHook();
                 }}
               />
-              <Button onClick={addHook}>Add</Button>
+              <Button onClick={addHook}>추가</Button>
             </SpaceBetween>
             {formData.hooks && formData.hooks.length > 0 && (
               <TokenGroup
@@ -307,18 +306,18 @@ export function NodeEditorDrawer({
           </SpaceBetween>
         </FormField>
 
-        <FormField label="Tasks">
+        <FormField label="작업">
           <SpaceBetween size="xs">
             <SpaceBetween direction="horizontal" size="xs">
               <Input
                 value={newTask}
                 onChange={({ detail }) => setNewTask(detail.value)}
-                placeholder="Add task"
+                placeholder="작업 추가"
                 onKeyDown={({ detail }) => {
                   if (detail.key === "Enter") addTask();
                 }}
               />
-              <Button onClick={addTask}>Add</Button>
+              <Button onClick={addTask}>추가</Button>
             </SpaceBetween>
             {formData.tasks && formData.tasks.length > 0 && (
               <TokenGroup
@@ -337,7 +336,7 @@ export function NodeEditorDrawer({
         </FormField>
 
         <ColumnLayout columns={2}>
-          <FormField label="Isolation">
+          <FormField label="격리">
             <Select
               selectedOption={
                 isolationOptions.find(
@@ -357,7 +356,7 @@ export function NodeEditorDrawer({
             />
           </FormField>
 
-          <FormField label="Retry">
+          <FormField label="재시도">
             <Input
               type="number"
               value={String(formData.config?.retry || "")}
@@ -376,7 +375,7 @@ export function NodeEditorDrawer({
         </ColumnLayout>
 
         {formData.type === "aggregator" && (
-          <FormField label="Wait Mode">
+          <FormField label="대기 방식">
             <Select
               selectedOption={
                 waitOptions.find((o) => o.value === formData.wait) ||

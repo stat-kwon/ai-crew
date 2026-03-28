@@ -36,7 +36,7 @@ export function NodeEditor({ node, onClose }: NodeEditorProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <label className="text-sm font-medium">Type</label>
+          <label className="text-sm font-medium">타입</label>
           <div className="mt-1">
             <Badge
               variant={
@@ -53,13 +53,13 @@ export function NodeEditor({ node, onClose }: NodeEditorProps) {
         </div>
 
         <div>
-          <label className="text-sm font-medium">Agent</label>
+          <label className="text-sm font-medium">에이전트</label>
           <p className="mt-1 text-sm text-muted-foreground">{node.agent}</p>
         </div>
 
         {node.skills && node.skills.length > 0 && (
           <div>
-            <label className="text-sm font-medium">Skills</label>
+            <label className="text-sm font-medium">스킬</label>
             <div className="mt-1 flex flex-wrap gap-1">
               {node.skills.map((skill) => (
                 <Badge key={skill} variant="outline">
@@ -72,7 +72,7 @@ export function NodeEditor({ node, onClose }: NodeEditorProps) {
 
         {node.depends_on.length > 0 && (
           <div>
-            <label className="text-sm font-medium">Dependencies</label>
+            <label className="text-sm font-medium">의존성</label>
             <div className="mt-1 flex flex-wrap gap-1">
               {node.depends_on.map((dep) => (
                 <Badge key={dep} variant="secondary">
@@ -85,7 +85,7 @@ export function NodeEditor({ node, onClose }: NodeEditorProps) {
 
         {node.tasks && node.tasks.length > 0 && (
           <div>
-            <label className="text-sm font-medium">Tasks</label>
+            <label className="text-sm font-medium">작업</label>
             <ul className="mt-1 space-y-1">
               {node.tasks.map((task, i) => (
                 <li key={i} className="text-sm text-muted-foreground">
@@ -98,13 +98,13 @@ export function NodeEditor({ node, onClose }: NodeEditorProps) {
 
         {node.config && (
           <div>
-            <label className="text-sm font-medium">Config</label>
+            <label className="text-sm font-medium">설정</label>
             <div className="mt-1 space-y-1 text-sm text-muted-foreground">
               {node.config.isolation && (
-                <p>Isolation: {node.config.isolation}</p>
+                <p>격리: {node.config.isolation}</p>
               )}
               {node.config.retry !== undefined && (
-                <p>Retry: {node.config.retry}</p>
+                <p>재시도: {node.config.retry}</p>
               )}
             </div>
           </div>
@@ -112,7 +112,7 @@ export function NodeEditor({ node, onClose }: NodeEditorProps) {
 
         {node.wait && (
           <div>
-            <label className="text-sm font-medium">Wait Mode</label>
+            <label className="text-sm font-medium">대기 방식</label>
             <p className="mt-1 text-sm text-muted-foreground">{node.wait}</p>
           </div>
         )}

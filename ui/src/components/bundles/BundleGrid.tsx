@@ -32,7 +32,7 @@ export function BundleGrid({
       <Card>
         <CardContent className="p-8 text-center">
           <p className="text-muted-foreground">
-            No bundles found in the catalog.
+            카탈로그에 번들이 없습니다.
           </p>
         </CardContent>
       </Card>
@@ -62,7 +62,7 @@ export function BundleGrid({
           <CardContent>
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <GitBranch className="h-4 w-4" />
-              <span>Click to view details</span>
+              <span>클릭하여 상세 보기</span>
             </div>
           </CardContent>
         </Card>

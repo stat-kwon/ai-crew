@@ -33,7 +33,10 @@ interface BundleDetail {
   };
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then((res) => {
+  if (!res.ok) throw new Error("API 요청 실패");
+  return res.json();
+});
 
 interface BundlePreviewProps {
   bundleName: string;
@@ -50,13 +53,13 @@ export function BundlePreview({ bundleName, onClose }: BundlePreviewProps) {
     return (
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Error</CardTitle>
+          <CardTitle>오류</CardTitle>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">Failed to load bundle details</p>
+          <p className="text-muted-foreground">번들 상세 정보를 불러올 수 없습니다</p>
         </CardContent>
       </Card>
     );
@@ -66,7 +69,7 @@ export function BundlePreview({ bundleName, onClose }: BundlePreviewProps) {
     return (
       <Card>
         <CardContent className="p-8 text-center">
-          <p className="text-muted-foreground">Loading...</p>
+          <p className="text-muted-foreground">로딩 중...</p>
         </CardContent>
       </Card>
     );
@@ -90,11 +93,11 @@ export function BundlePreview({ bundleName, onClose }: BundlePreviewProps) {
 
         {data.defaults && (
           <div>
-            <h4 className="mb-2 text-sm font-medium">Defaults</h4>
+            <h4 className="mb-2 text-sm font-medium">기본값</h4>
             <div className="space-y-1 text-sm text-muted-foreground">
-              {data.defaults.model && <p>Model: {data.defaults.model}</p>}
+              {data.defaults.model && <p>모델: {data.defaults.model}</p>}
               {data.defaults.isolation && (
-                <p>Isolation: {data.defaults.isolation}</p>
+                <p>격리: {data.defaults.isolation}</p>
               )}
             </div>
           </div>
@@ -104,7 +107,7 @@ export function BundlePreview({ bundleName, onClose }: BundlePreviewProps) {
           <div>
             <h4 className="mb-2 flex items-center gap-2 text-sm font-medium">
               <Bot className="h-4 w-4" />
-              Agents ({data.includes.agents.length})
+              에이전트 ({data.includes.agents.length})
             </h4>
             <div className="flex flex-wrap gap-1">
               {data.includes.agents.map((agent) => (
@@ -120,7 +123,7 @@ export function BundlePreview({ bundleName, onClose }: BundlePreviewProps) {
           <div>
             <h4 className="mb-2 flex items-center gap-2 text-sm font-medium">
               <Zap className="h-4 w-4" />
-              Skills ({data.includes.skills.length})
+              스킬 ({data.includes.skills.length})
             </h4>
             <div className="flex flex-wrap gap-1">
               {data.includes.skills.map((skill) => (
@@ -136,7 +139,7 @@ export function BundlePreview({ bundleName, onClose }: BundlePreviewProps) {
           <div>
             <h4 className="mb-2 flex items-center gap-2 text-sm font-medium">
               <GitBranch className="h-4 w-4" />
-              Graph Nodes ({data.graph.nodes.length})
+              그래프 노드 ({data.graph.nodes.length})
             </h4>
             <div className="flex flex-wrap gap-1">
               {data.graph.nodes.map((node) => (

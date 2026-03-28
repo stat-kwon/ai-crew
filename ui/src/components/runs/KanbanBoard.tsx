@@ -20,10 +20,10 @@ interface KanbanBoardProps {
 }
 
 const columns = [
-  { id: "pending", label: "Pending", type: "pending" as const },
-  { id: "running", label: "Running", type: "in-progress" as const },
-  { id: "completed", label: "Completed", type: "success" as const },
-  { id: "failed", label: "Failed", type: "error" as const },
+  { id: "pending", label: "대기", type: "pending" as const },
+  { id: "running", label: "진행 중", type: "in-progress" as const },
+  { id: "completed", label: "완료", type: "success" as const },
+  { id: "failed", label: "실패", type: "error" as const },
 ];
 
 function formatDuration(startedAt?: string, completedAt?: string): string {
@@ -69,7 +69,7 @@ export function KanbanBoard({ nodes, onNodeClick }: KanbanBoardProps) {
           <SpaceBetween size="s">
             {nodesByStatus[column.id as keyof typeof nodesByStatus].length === 0 ? (
               <Box textAlign="center" color="text-status-inactive" padding="s">
-                No nodes
+                노드 없음
               </Box>
             ) : (
               nodesByStatus[column.id as keyof typeof nodesByStatus].map((nodeId) => {
@@ -111,7 +111,7 @@ export function KanbanBoard({ nodes, onNodeClick }: KanbanBoardProps) {
                           {formatDuration(node.startedAt, node.completedAt)}
                         </Box>
                         {node.status === "completed" && (
-                          <Badge color="green">Click to view scratchpad</Badge>
+                          <Badge color="green">작업 메모 보기</Badge>
                         )}
                       </SpaceBetween>
                     </div>

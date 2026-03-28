@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -32,7 +31,7 @@ export function RunList({ runs }: RunListProps) {
       <Card>
         <CardContent className="p-8 text-center">
           <p className="text-muted-foreground">
-            No runs yet. Execute a workflow to see run history.
+            실행 기록이 없습니다. 워크플로우를 실행하면 기록이 표시됩니다.
           </p>
         </CardContent>
       </Card>
@@ -42,7 +41,7 @@ export function RunList({ runs }: RunListProps) {
   return (
     <div className="space-y-4">
       {runs.map((run) => (
-        <Link key={run.id} href={`/runs/${run.id}`}>
+        <div key={run.id}>
           <Card className="cursor-pointer transition-all hover:shadow-md">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
@@ -64,7 +63,7 @@ export function RunList({ runs }: RunListProps) {
                 </Badge>
               </div>
               <CardDescription className="line-clamp-1">
-                {run.intent || "No intent specified"}
+                {run.intent || "의도 미설정"}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -92,14 +91,14 @@ export function RunList({ runs }: RunListProps) {
                   <div className="flex items-center gap-1">
                     <GitBranch className="h-4 w-4" />
                     <span>
-                      {run.nodesCompleted || 0}/{run.nodesTotal} nodes
+                      {run.nodesCompleted || 0}/{run.nodesTotal} 노드
                     </span>
                   </div>
                 )}
               </div>
             </CardContent>
           </Card>
-        </Link>
+        </div>
       ))}
     </div>
   );

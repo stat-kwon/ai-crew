@@ -3,6 +3,14 @@
   "version": "0.4.0",
   "description": "Catalog-based Plugin Composition Platform for Claude Code",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "bin": {
     "ai-crew": "./dist/cli.js"
   },
@@ -22,7 +30,8 @@
     "@modelcontextprotocol/sdk": "^1.12.1",
     "chalk": "^5.4.1",
     "commander": "^13.1.0",
-    "yaml": "^2.7.1"
+    "yaml": "^2.7.1",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
@@ -33,5 +42,11 @@
   "engines": {
     "node": ">=18"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "@esbuild/darwin-arm64"
+    ]
+  }
 }

@@ -85,12 +85,12 @@ export function ConfigForm({ config, onSave }: ConfigFormProps) {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Project Info</CardTitle>
+          <CardTitle>프로젝트 정보</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="project">Project</Label>
+              <Label htmlFor="project">프로젝트</Label>
               <Input
                 id="project"
                 value={localConfig.project || ""}
@@ -98,7 +98,7 @@ export function ConfigForm({ config, onSave }: ConfigFormProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="bundle">Bundle</Label>
+              <Label htmlFor="bundle">번들</Label>
               <Input
                 id="bundle"
                 value={localConfig.bundle || ""}
@@ -106,7 +106,7 @@ export function ConfigForm({ config, onSave }: ConfigFormProps) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="version">Version</Label>
+              <Label htmlFor="version">버전</Label>
               <Input
                 id="version"
                 value={localConfig.version || ""}
@@ -119,12 +119,12 @@ export function ConfigForm({ config, onSave }: ConfigFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Defaults</CardTitle>
+          <CardTitle>기본 설정</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <Label>Model</Label>
+              <Label>모델</Label>
               <Select
                 value={localConfig.defaults?.model || "claude-sonnet-4"}
                 onValueChange={(value) => updateDefaults("model", value)}
@@ -142,7 +142,7 @@ export function ConfigForm({ config, onSave }: ConfigFormProps) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Isolation</Label>
+              <Label>격리</Label>
               <Select
                 value={localConfig.defaults?.isolation || "none"}
                 onValueChange={(value) => updateDefaults("isolation", value)}
@@ -160,7 +160,7 @@ export function ConfigForm({ config, onSave }: ConfigFormProps) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="locale">Locale</Label>
+              <Label htmlFor="locale">언어</Label>
               <Input
                 id="locale"
                 value={localConfig.defaults?.locale || "en"}
@@ -173,11 +173,11 @@ export function ConfigForm({ config, onSave }: ConfigFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Workflow</CardTitle>
+          <CardTitle>워크플로우</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <Label htmlFor="workflow">Workflow</Label>
+            <Label htmlFor="workflow">워크플로우</Label>
             <Input
               id="workflow"
               value={localConfig.workflow || ""}
@@ -187,7 +187,7 @@ export function ConfigForm({ config, onSave }: ConfigFormProps) {
                   workflow: e.target.value,
                 }))
               }
-              placeholder="e.g., aidlc, ouroboros"
+              placeholder="예: aidlc, ouroboros"
             />
           </div>
         </CardContent>
@@ -195,7 +195,7 @@ export function ConfigForm({ config, onSave }: ConfigFormProps) {
 
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving}>
-          {saving ? "Saving..." : "Save Config"}
+          {saving ? "저장 중..." : "설정 저장"}
         </Button>
       </div>
     </div>

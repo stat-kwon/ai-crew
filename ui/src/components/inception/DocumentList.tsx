@@ -45,7 +45,7 @@ export function DocumentList({ stage }: DocumentListProps) {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-lg">{selectedDoc}</CardTitle>
-            <CardDescription>Document content</CardDescription>
+            <CardDescription>문서 내용</CardDescription>
           </div>
           <Button
             variant="ghost"
@@ -69,14 +69,14 @@ export function DocumentList({ stage }: DocumentListProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Documents</CardTitle>
+        <CardTitle className="text-lg">문서</CardTitle>
         <CardDescription>
-          {stage ? `Documents for ${stage}` : "All generated documents"}
+          {stage ? `${stage} 단계 문서` : "생성된 전체 문서"}
         </CardDescription>
       </CardHeader>
       <CardContent>
         {!filteredDocs || filteredDocs.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No documents found.</p>
+          <p className="text-sm text-muted-foreground">문서를 찾을 수 없습니다.</p>
         ) : (
           <ul className="space-y-2">
             {filteredDocs.map((doc) => (

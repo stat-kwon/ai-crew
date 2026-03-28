@@ -8,6 +8,7 @@ export default defineConfig({
   clean: true,
   dts: true,
   sourcemap: true,
+  external: ["zod"],
   banner: ({ format }) => {
     if (format === "esm") {
       return { js: "" };

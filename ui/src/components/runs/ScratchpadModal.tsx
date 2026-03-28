@@ -35,8 +35,8 @@ export function ScratchpadModal({ nodeId, onClose }: ScratchpadModalProps) {
       onDismiss={onClose}
       size="large"
       header={
-        <Header variant="h2" description="Node execution artifacts">
-          Scratchpad: {nodeId}
+        <Header variant="h2" description="노드 실행 산출물">
+          작업 메모: {nodeId}
         </Header>
       }
     >
@@ -46,7 +46,7 @@ export function ScratchpadModal({ nodeId, onClose }: ScratchpadModalProps) {
         </Box>
       ) : error ? (
         <Box color="text-status-error" padding="l">
-          Failed to load scratchpad content.
+          작업 메모를 불러올 수 없습니다.
         </Box>
       ) : data?.files && data.files.length > 0 ? (
         <Tabs
@@ -74,7 +74,7 @@ export function ScratchpadModal({ nodeId, onClose }: ScratchpadModalProps) {
         </Box>
       ) : (
         <Box textAlign="center" color="text-status-inactive" padding="l">
-          No scratchpad content available.
+          작업 메모 내용이 없습니다.
         </Box>
       )}
     </Modal>

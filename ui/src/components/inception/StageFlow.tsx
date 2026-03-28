@@ -38,7 +38,7 @@ export function StageFlow({
   if (stages.length === 0) {
     return (
       <Box textAlign="center" color="text-status-inactive" padding="l">
-        No AI-DLC stages found. Run the inception workflow to generate stages.
+        AI-DLC 단계를 찾을 수 없습니다. 인셉션 워크플로우를 실행하여 단계를 생성하세요.
       </Box>
     );
   }
@@ -84,7 +84,7 @@ export function StageFlow({
                     <>
                       <ProgressBar value={progress} />
                       <Box fontSize="body-s" color="text-status-inactive">
-                        {stage.tasks.filter((t) => t.done).length} / {stage.tasks.length} tasks
+                        {stage.tasks.filter((t) => t.done).length} / {stage.tasks.length} 작업
                       </Box>
                     </>
                   )}
@@ -118,7 +118,7 @@ export function StageFlow({
                       ))}
                       {stage.tasks.length > 3 && (
                         <Box fontSize="body-s" color="text-status-inactive">
-                          +{stage.tasks.length - 3} more
+                          +{stage.tasks.length - 3}개 더
                         </Box>
                       )}
                     </SpaceBetween>

@@ -67,7 +67,7 @@ export function GanttTimeline({ nodes, onNodeClick }: GanttTimelineProps) {
   if (!timeline || timeline.nodes.length === 0) {
     return (
       <Box textAlign="center" color="text-status-inactive" padding="l">
-        No timeline data available. Nodes must have started execution.
+        타임라인 데이터가 없습니다. 노드가 실행을 시작해야 표시됩니다.
       </Box>
     );
   }
@@ -92,7 +92,7 @@ export function GanttTimeline({ nodes, onNodeClick }: GanttTimelineProps) {
             {formatTime(timeline.minTime)}
           </Box>
           <Box fontSize="body-s" color="text-status-inactive">
-            Total: {formatDuration(timeline.totalDuration)}
+            총 소요: {formatDuration(timeline.totalDuration)}
           </Box>
           <Box fontSize="body-s" color="text-status-inactive">
             {formatTime(timeline.maxTime)}

@@ -1,11 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import Table from "@cloudscape-design/components/table";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import StatusIndicator from "@cloudscape-design/components/status-indicator";
-import Link from "@cloudscape-design/components/link";
 import Box from "@cloudscape-design/components/box";
 import Pagination from "@cloudscape-design/components/pagination";
 import TextFilter from "@cloudscape-design/components/text-filter";
@@ -28,7 +26,7 @@ function formatDate(dateStr: string): string {
 }
 
 function formatDuration(startedAt: string, completedAt?: string): string {
-  if (!completedAt) return "In progress...";
+  if (!completedAt) return "진행 중...";
   const start = new Date(startedAt).getTime();
   const end = new Date(completedAt).getTime();
   const duration = Math.round((end - start) / 1000);
@@ -39,7 +37,6 @@ function formatDuration(startedAt: string, completedAt?: string): string {
 }
 
 export function RunsHistoryTable({ runs }: RunsHistoryTableProps) {
-  const router = useRouter();
   const [filterText, setFilterText] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
@@ -62,37 +59,29 @@ export function RunsHistoryTable({ runs }: RunsHistoryTableProps) {
       header={
         <Header
           counter={`(${runs.length})`}
-          description="Past execution runs"
+          description="과거 실행 기록"
         >
-          Run History
+          실행 기록
         </Header>
       }
       columnDefinitions={[
         {
           id: "id",
-          header: "Run ID",
+          header: "실행 ID",
           cell: (item) => (
-            <Link
-              href={`/runs/${item.id}`}
-              onFollow={(e) => {
-                e.preventDefault();
-                router.push(`/runs/${item.id}`);
-              }}
-            >
-              {item.id}
-            </Link>
+            <Box fontWeight="bold">{item.id}</Box>
           ),
           sortingField: "id",
         },
         {
           id: "intent",
-          header: "Intent",
+          header: "의도",
           cell: (item) => item.intent || "-",
           sortingField: "intent",
         },
         {
           id: "status",
-          header: "Status",
+          header: "상태",
           cell: (item) => (
             <StatusIndicator
               type={
@@ -112,13 +101,13 @@ export function RunsHistoryTable({ runs }: RunsHistoryTableProps) {
         },
         {
           id: "startedAt",
-          header: "Started",
+          header: "시작 시간",
           cell: (item) => formatDate(item.startedAt),
           sortingField: "startedAt",
         },
         {
           id: "duration",
-          header: "Duration",
+          header: "소요 시간",
           cell: (item) => formatDuration(item.startedAt, item.completedAt),
         },
       ]}
@@ -126,8 +115,8 @@ export function RunsHistoryTable({ runs }: RunsHistoryTableProps) {
       filter={
         <TextFilter
           filteringText={filterText}
-          filteringPlaceholder="Find runs"
-          filteringAriaLabel="Filter runs"
+          filteringPlaceholder="실행 검색"
+          filteringAriaLabel="실행 필터"
           onChange={({ detail }) => setFilterText(detail.filteringText)}
         />
       }
@@ -143,9 +132,9 @@ export function RunsHistoryTable({ runs }: RunsHistoryTableProps) {
       empty={
         <Box textAlign="center" color="inherit" padding="l">
           <SpaceBetween size="m">
-            <Box variant="strong">No runs</Box>
+            <Box variant="strong">실행 기록 없음</Box>
             <Box variant="p" color="inherit">
-              No execution history available yet.
+              아직 실행 기록이 없습니다.
             </Box>
           </SpaceBetween>
         </Box>

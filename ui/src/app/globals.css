@@ -1,89 +1,269 @@
-/* Cloudscape global styles are imported via CloudscapeProvider */
-/* Minimal custom overrides */
+@import "tailwindcss";
 
-:root {
-  --node-worker: #0972d3;
-  --node-router: #f89256;
-  --node-aggregator: #037f0c;
+/* ============================================
+   Stitch Design System - CSS Variables
+   ============================================ */
+
+@theme {
+  /* Primary Colors */
+  --color-primary: #4648d4;
+  --color-primary-container: #6063ee;
+  --color-primary-fixed: #e1e0ff;
+  --color-primary-fixed-dim: #c0c1ff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #fffbff;
+  --color-on-primary-fixed: #07006c;
+  --color-on-primary-fixed-variant: #2f2ebe;
+  --color-inverse-primary: #c0c1ff;
+
+  /* Secondary Colors */
+  --color-secondary: #575992;
+  --color-secondary-container: #bdbefe;
+  --color-secondary-fixed: #e1e0ff;
+  --color-secondary-fixed-dim: #c0c1ff;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #494b83;
+  --color-on-secondary-fixed: #13144a;
+  --color-on-secondary-fixed-variant: #404178;
+
+  /* Tertiary Colors (Warning) */
+  --color-tertiary: #904900;
+  --color-tertiary-container: #b55d00;
+  --color-tertiary-fixed: #ffdcc5;
+  --color-tertiary-fixed-dim: #ffb783;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #fffbff;
+  --color-on-tertiary-fixed: #301400;
+  --color-on-tertiary-fixed-variant: #703700;
+
+  /* Error Colors */
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  /* Surface Colors */
+  --color-surface: #f6fafe;
+  --color-surface-dim: #d6dade;
+  --color-surface-bright: #f6fafe;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f0f4f8;
+  --color-surface-container: #eaeef2;
+  --color-surface-container-high: #e4e9ed;
+  --color-surface-container-highest: #dfe3e7;
+  --color-surface-variant: #dfe3e7;
+  --color-surface-tint: #494bd6;
+  --color-on-surface: #171c1f;
+  --color-on-surface-variant: #464554;
+  --color-inverse-surface: #2c3134;
+  --color-inverse-on-surface: #edf1f5;
+
+  /* Background */
+  --color-background: #f1f5f9;
+  --color-on-background: #171c1f;
+
+  /* Outline */
+  --color-outline: #767586;
+  --color-outline-variant: #c7c4d7;
+
+  /* Graph Node Colors */
+  --color-node-worker: #4648d4;
+  --color-node-router: #f89256;
+  --color-node-aggregator: #006c49;
+
+  /* Status Colors */
+  --color-success: #10b981;
+  --color-success-light: #d1fae5;
+  --color-warning: #f59e0b;
+  --color-warning-light: #fef3c7;
+  --color-info: #3b82f6;
+  --color-info-light: #dbeafe;
+
+  /* Fonts */
+  --font-headline: "Public Sans", "Manrope", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --shadow-card: 0 12px 40px -12px rgba(70, 72, 212, 0.08);
+  --shadow-primary: 0 4px 14px 0 rgba(70, 72, 212, 0.25);
+
+  /* Border Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   padding: 0;
-  font-family: "Open Sans", "Amazon Ember", "Helvetica Neue", Roboto, Arial, sans-serif;
+  font-family: var(--font-body);
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ReactFlow needs some custom styling to work with Cloudscape */
+/* ============================================
+   Typography
+   ============================================ */
+
+.font-headline {
+  font-family: var(--font-headline);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* ============================================
+   Material Icons
+   ============================================ */
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  display: inline-flex;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+.material-symbols-outlined.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ============================================
+   Custom Utilities
+   ============================================ */
+
+.card-shadow {
+  box-shadow: var(--shadow-card);
+}
+
+.ghost-border {
+  border: 1px solid rgba(199, 196, 215, 0.2);
+}
+
+.active-nav-border {
+  border-left: 3px solid var(--color-primary);
+}
+
+/* Gradient backgrounds */
+.bg-gradient-primary {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-container) 100%);
+}
+
+/* Status indicators */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot-pending { background-color: #94a3b8; }
+.status-dot-running { background-color: var(--color-primary); }
+.status-dot-completed { background-color: var(--color-success); }
+.status-dot-failed { background-color: var(--color-error); }
+
+/* ============================================
+   ReactFlow Customization
+   ============================================ */
+
 .react-flow__node {
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
 }
 
 .react-flow__minimap {
-  background-color: #fafafa;
+  background-color: var(--color-surface-container-lowest);
 }
 
-/* Custom node styling */
-.node-worker {
-  border-color: var(--node-worker);
-  background-color: #f4f8ff;
+.react-flow__controls button {
+  background-color: var(--color-surface-container-lowest);
+  border-color: var(--color-outline-variant);
 }
 
-.node-router {
-  border-color: var(--node-router);
-  background-color: #fff8f4;
+.react-flow__controls button:hover {
+  background-color: var(--color-surface-container-low);
 }
 
-.node-aggregator {
-  border-color: var(--node-aggregator);
-  background-color: #f4fff4;
+/* Dot grid background for canvas */
+.dot-grid {
+  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
-/* Gantt chart styling */
-.gantt-bar {
-  transition: all 0.2s ease;
-}
+/* ============================================
+   Markdown Viewer
+   ============================================ */
 
-.gantt-bar:hover {
-  filter: brightness(1.1);
-}
-
-/* Markdown viewer styling */
 .markdown-body {
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.7;
+  color: var(--color-on-surface);
 }
 
 .markdown-body h1 {
   font-size: 1.5rem;
+  font-weight: 700;
   margin-bottom: 1rem;
-  border-bottom: 1px solid #e9ebed;
+  border-bottom: 1px solid var(--color-outline-variant);
   padding-bottom: 0.5rem;
 }
 
 .markdown-body h2 {
   font-size: 1.25rem;
+  font-weight: 600;
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
 }
 
 .markdown-body h3 {
   font-size: 1.1rem;
+  font-weight: 600;
   margin-top: 1rem;
   margin-bottom: 0.5rem;
 }
 
+.markdown-body p {
+  margin-bottom: 1rem;
+}
+
 .markdown-body pre {
-  background-color: #f4f4f4;
+  background-color: var(--color-surface-container-low);
   padding: 1rem;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   overflow-x: auto;
+  margin-bottom: 1rem;
 }
 
 .markdown-body code {
-  background-color: #f4f4f4;
+  background-color: var(--color-surface-container-low);
   padding: 0.2rem 0.4rem;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   font-size: 0.9em;
+  font-family: var(--font-mono);
 }
 
 .markdown-body pre code {
@@ -96,18 +276,94 @@ body {
   margin-bottom: 1rem;
 }
 
+.markdown-body li {
+  margin-bottom: 0.25rem;
+}
+
 .markdown-body table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 1rem;
 }
 
-.markdown-body th, .markdown-body td {
-  border: 1px solid #e9ebed;
-  padding: 0.5rem;
+.markdown-body th,
+.markdown-body td {
+  border: 1px solid var(--color-outline-variant);
+  padding: 0.5rem 0.75rem;
   text-align: left;
 }
 
 .markdown-body th {
-  background-color: #fafafa;
+  background-color: var(--color-surface-container-low);
+  font-weight: 600;
+}
+
+.markdown-body blockquote {
+  border-left: 4px solid var(--color-primary);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--color-on-surface-variant);
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes bounce-dot {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-25%); }
+}
+
+.animate-bounce-dot {
+  animation: bounce-dot 1s ease-in-out infinite;
+}
+
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface-container-low);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-outline);
+}
+
+/* ============================================
+   Focus States
+   ============================================ */
+
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================
+   Selection
+   ============================================ */
+
+::selection {
+  background-color: var(--color-primary-fixed);
+  color: var(--color-on-primary-fixed);
 }

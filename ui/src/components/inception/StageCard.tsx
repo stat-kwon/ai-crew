@@ -56,7 +56,7 @@ export function StageCard({
           )}
         </div>
         <CardDescription>
-          {completedTasks} / {tasks.length} tasks
+          {completedTasks} / {tasks.length} 작업
         </CardDescription>
       </CardHeader>
       <CardContent>
