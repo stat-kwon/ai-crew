@@ -12,9 +12,9 @@
   "nodes": {
     "plan-backend": { "status": "completed", "startedAt": "2026-03-28T09:35:00Z", "completedAt": "2026-03-28T09:38:22Z" },
     "plan-frontend": { "status": "completed", "startedAt": "2026-03-28T09:35:00Z", "completedAt": "2026-03-28T09:40:18Z" },
-    "api-accuracy": { "status": "pending", "startedAt": null, "completedAt": null },
-    "sidebar-topnav": { "status": "pending", "startedAt": null, "completedAt": null },
-    "develop-page": { "status": "pending", "startedAt": null, "completedAt": null },
+    "api-accuracy": { "status": "running", "startedAt": "2026-03-28T09:41:00Z", "completedAt": null },
+    "sidebar-topnav": { "status": "running", "startedAt": "2026-03-28T09:41:00Z", "completedAt": null },
+    "develop-page": { "status": "running", "startedAt": "2026-03-28T09:41:00Z", "completedAt": null },
     "dashboard-cards": { "status": "pending", "startedAt": null, "completedAt": null },
     "design-page": { "status": "pending", "startedAt": null, "completedAt": null },
     "remaining-pages": { "status": "pending", "startedAt": null, "completedAt": null },
