@@ -40,6 +40,7 @@ interface RunEntry {
   nodesTotal: number;
   nodesCompleted: number;
   nodesFailed: number;
+  intentDescription?: string;
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => (res.ok ? res.json() : null));
@@ -234,7 +235,12 @@ export default function DevelopPage() {
                             )}
                           </div>
 
-                          <h4 className="font-bold text-slate-900 mb-2">{agent}</h4>
+                          <div className="mb-2">
+                            <p className="text-[10px] font-medium text-slate-400 uppercase tracking-wide mb-0.5">
+                              에이전트
+                            </p>
+                            <h4 className="font-bold text-slate-900">{agent}</h4>
+                          </div>
 
                           {col === "running" && (
                             <>
@@ -322,7 +328,12 @@ export default function DevelopPage() {
                         />
                       </div>
                       <div>
-                        <p className="font-bold text-slate-900">{run.runId}</p>
+                        <p className="font-bold text-slate-900">
+                          {run.intentDescription || run.runId}
+                        </p>
+                        {run.intentDescription && (
+                          <p className="text-[10px] text-slate-400 mt-0.5">{run.runId}</p>
+                        )}
                         <p className="text-xs text-slate-500">
                           {new Date(run.createdAt).toLocaleString("ko-KR")}
                         </p>
