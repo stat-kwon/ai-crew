@@ -3,6 +3,10 @@
     "ouroboros": {
       "command": "uvx",
       "args": ["--from", "ouroboros-ai", "ouroboros", "mcp", "serve"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp", "--headless"]
     }
   }
 }

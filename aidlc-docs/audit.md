@@ -194,3 +194,21 @@
 **Context**: Inception complete. Ready for /crew:preflight → /crew:run
 
 ---
+
+## Pre-flight Check (Cycle 2)
+**Timestamp**: 2026-03-29T10:30:00Z
+**User Input**: "UI에 동작하지 않은 기능이 같이 포함된 경우가 많이 있었어. 이부분을 (개발 > 코드리뷰 > 개선, 리팩토링) 반복적 개선을 통해 완벽하게 만들고 싶은데 이를 토대로 graph를 다시 구성해줘. 구현은 opus, 리뷰는 codex로해줘."
+**AI Response**: 그래프 재구성 — 2회 반복 개선 사이클. 13노드 9레벨. 개발(opus) → 테스트(codex) → 리뷰(codex) → 개선(opus) × 2회 → 빌드+QA(codex).
+**Bundle Decision**: Dynamic — 반복 개선 파이프라인 그래프 (사용자 요청: 개발>코드리뷰>개선 반복)
+**Graph**: 13 nodes, 9 levels
+**Pipeline**: 개발(opus, 5 worker) → 1차 test(codex) → 1차 review(codex) → 1차 improve(opus) → 2차 test(codex) → 2차 review(codex) → 2차 improve(opus) → build-verify(codex) + qa-final(codex)
+**Models Verified**: claude-opus-4-6 (built-in), codex (auth.json)
+**Models Skipped**: (none)
+**Agents Provisioned**: frontend-dev, tester, reviewer, builder, qa-engineer (5 — all pre-existing)
+**Skills Provisioned**: frontend-react, testing, clean-code, code-review (4 — all pre-existing)
+**Git Status**: clean (commit 273b741)
+**Run ID**: ui-redesign-20260329-1
+**User Input**: "진행해줘." (그래프 승인)
+**Context**: Pre-flight validation before /crew:run
+
+---

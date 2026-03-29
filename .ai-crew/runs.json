@@ -3,17 +3,28 @@
   "runs": [
     {
       "runId": "ui-improvement-20260328-1",
-      "state": "preparing",
+      "state": "archived",
       "createdAt": "2026-03-28T09:30:00Z",
-      "completedAt": null,
+      "completedAt": "2026-03-28T10:14:00Z",
       "nodesTotal": 14,
+      "nodesCompleted": 13,
+      "nodesFailed": 0,
+      "intentDescription": "UI 개선 — 용어 통일 및 대시보드 카드 정확도"
+    },
+    {
+      "runId": "ui-redesign-20260329-1",
+      "state": "preparing",
+      "createdAt": "2026-03-29T10:30:00Z",
+      "completedAt": null,
+      "nodesTotal": 13,
       "nodesCompleted": 0,
-      "nodesFailed": 0
+      "nodesFailed": 0,
+      "intentDescription": "UI 전면 리디자인 — 히스토리 중심 3페이지 구조"
     }
   ],
   "stats": {
-    "totalRuns": 1,
-    "archived": 0,
+    "totalRuns": 2,
+    "archived": 1,
     "active": 1
   }
 }
