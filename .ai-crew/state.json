@@ -1,28 +1,18 @@
 {
   "version": "3.1",
   "bundleName": "dynamic-20260328",
-  "runId": "ui-improvement-20260328-1",
-  "preflight": {
-    "completedAt": "2026-03-28T09:32:00Z",
-    "modelsVerified": ["claude-opus-4-6", "claude-sonnet-4-6", "codex"],
-    "modelsSkipped": [],
-    "gitClean": true,
-    "graphHash": "bfe96f44fc4499ffe006be5fe016733d69f154708687b1370548c7e9ea654aea"
-  },
+  "runId": null,
+  "preflight": null,
   "nodes": {
-    "plan-backend": { "status": "completed", "startedAt": "2026-03-28T09:35:00Z", "completedAt": "2026-03-28T09:38:22Z" },
-    "plan-frontend": { "status": "completed", "startedAt": "2026-03-28T09:35:00Z", "completedAt": "2026-03-28T09:40:18Z" },
-    "api-accuracy": { "status": "completed", "startedAt": "2026-03-28T09:41:00Z", "completedAt": "2026-03-28T09:44:57Z" },
-    "sidebar-topnav": { "status": "completed", "startedAt": "2026-03-28T09:41:00Z", "completedAt": "2026-03-28T09:43:44Z" },
-    "develop-page": { "status": "completed", "startedAt": "2026-03-28T09:41:00Z", "completedAt": "2026-03-28T09:44:47Z" },
-    "dashboard-cards": { "status": "completed", "startedAt": "2026-03-28T09:46:00Z", "completedAt": "2026-03-28T09:51:58Z" },
-    "design-page": { "status": "completed", "startedAt": "2026-03-28T09:46:00Z", "completedAt": "2026-03-28T09:57:21Z" },
-    "remaining-pages": { "status": "completed", "startedAt": "2026-03-28T09:46:00Z", "completedAt": "2026-03-28T09:49:58Z" },
-    "test-all": { "status": "completed", "startedAt": "2026-03-28T10:04:00Z", "completedAt": "2026-03-28T10:06:00Z" },
-    "code-review": { "status": "completed", "startedAt": "2026-03-28T10:06:00Z", "completedAt": "2026-03-28T10:08:00Z" },
-    "improve-backend": { "status": "skipped", "startedAt": null, "completedAt": null },
-    "improve-frontend": { "status": "completed", "startedAt": "2026-03-28T10:08:00Z", "completedAt": "2026-03-28T10:12:00Z" },
-    "build-verify": { "status": "completed", "startedAt": "2026-03-28T10:12:00Z", "completedAt": "2026-03-28T10:13:00Z" },
-    "qa-final": { "status": "completed", "startedAt": "2026-03-28T10:13:00Z", "completedAt": "2026-03-28T10:14:00Z" }
+    "layout-overhaul": { "status": "pending", "startedAt": null, "completedAt": null },
+    "page-cleanup": { "status": "pending", "startedAt": null, "completedAt": null },
+    "timeline-page": { "status": "pending", "startedAt": null, "completedAt": null },
+    "run-detail-page": { "status": "pending", "startedAt": null, "completedAt": null },
+    "docs-page": { "status": "pending", "startedAt": null, "completedAt": null },
+    "test-all": { "status": "pending", "startedAt": null, "completedAt": null },
+    "code-review": { "status": "pending", "startedAt": null, "completedAt": null },
+    "improve-frontend": { "status": "pending", "startedAt": null, "completedAt": null },
+    "build-verify": { "status": "pending", "startedAt": null, "completedAt": null },
+    "qa-final": { "status": "pending", "startedAt": null, "completedAt": null }
   }
 }
