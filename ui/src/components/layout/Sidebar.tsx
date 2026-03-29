@@ -13,7 +13,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/", label: "대시보드", icon: "dashboard" },
-  { href: "/design", label: "설계 단계", icon: "architecture" },
+  { href: "/docs", label: "설계 문서", icon: "architecture" },
   { href: "/team", label: "팀 편집", icon: "group_add" },
   { href: "/preflight", label: "환경 점검", icon: "fact_check" },
   { href: "/develop", label: "개발 진행", icon: "engineering" },

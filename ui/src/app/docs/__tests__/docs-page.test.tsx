@@ -5,11 +5,10 @@ import { resolve } from 'path';
 const pagePath = resolve(__dirname, '../page.tsx');
 const pageContent = readFileSync(pagePath, 'utf-8');
 
-// helpers.ts 검증 (폴더 매핑 로직)
 const helpersPath = resolve(__dirname, '../../api/aidlc/docs/helpers.ts');
 const helpersContent = readFileSync(helpersPath, 'utf-8');
 
-describe('design-page 폴더 매핑 뷰', () => {
+describe('docs-page 설계 문서 페이지', () => {
   it('페이지가 /api/aidlc/docs 엔드포인트를 호출', () => {
     expect(pageContent).toContain('/api/aidlc/docs');
   });
@@ -23,8 +22,34 @@ describe('design-page 폴더 매핑 뷰', () => {
   });
 
   it('빈 상태 메시지 포함', () => {
-    // 문서가 없을 때 표시할 메시지
     expect(pageContent).toMatch(/문서|없|empty/i);
+  });
+
+  it('페이지 제목이 "설계 문서"로 설정됨', () => {
+    expect(pageContent).toContain('설계 문서');
+  });
+
+  it('"/design" 참조가 없음 (라우트 이동 완료)', () => {
+    expect(pageContent).not.toContain('/design');
+  });
+
+  it('실행 버튼이 제거되고 CLI 안내 문구로 대체됨', () => {
+    expect(pageContent).toContain('CLI에서');
+    expect(pageContent).toContain('/crew:elaborate');
+    expect(pageContent).not.toContain('명령 실행');
+  });
+
+  it('col-span-4 / col-span-8 비율로 레이아웃 설정됨', () => {
+    expect(pageContent).toContain('col-span-4');
+    expect(pageContent).toContain('col-span-8');
+  });
+
+  it('max-w-screen-2xl로 전체 폭 대응', () => {
+    expect(pageContent).toContain('max-w-screen-2xl');
+  });
+
+  it('컴포넌트 이름이 DocsPage', () => {
+    expect(pageContent).toContain('function DocsPage');
   });
 });
 

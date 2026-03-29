@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 
 const pageTitles: Record<string, string> = {
   "/": "대시보드",
-  "/design": "설계 단계",
+  "/docs": "설계 문서",
   "/team": "팀 편집",
   "/preflight": "환경 점검",
   "/develop": "개발 진행",

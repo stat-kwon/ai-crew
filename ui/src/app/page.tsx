@@ -200,7 +200,7 @@ export default function DashboardPage() {
         <Card className="xl:w-[60%] overflow-hidden">
           <div className="p-6 border-b border-slate-50 flex justify-between items-center">
             <h3 className="text-lg font-bold text-slate-900">개발 흐름</h3>
-            <Link href="/design" className="text-primary text-xs font-bold hover:underline">
+            <Link href="/docs" className="text-primary text-xs font-bold hover:underline">
               자세히 보기
             </Link>
           </div>
