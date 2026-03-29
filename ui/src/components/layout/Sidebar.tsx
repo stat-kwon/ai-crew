@@ -2,98 +2,93 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import useSWR from "swr";
+import { Home, Activity, History, FileText, Settings, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
   href: string;
   label: string;
-  icon: string;
+  icon: React.ElementType;
+  description: string;
 }
 
 const navItems: NavItem[] = [
-  { href: "/", label: "대시보드", icon: "dashboard" },
-  { href: "/design", label: "설계 단계", icon: "architecture" },
-  { href: "/team", label: "팀 편집", icon: "group_add" },
-  { href: "/preflight", label: "환경 점검", icon: "fact_check" },
-  { href: "/develop", label: "개발 진행", icon: "engineering" },
-  { href: "/bundles", label: "팀 템플릿", icon: "dashboard_customize" },
-  { href: "/settings", label: "설정", icon: "settings" },
+  { href: "/", label: "홈", icon: Home, description: "프로젝트 개요" },
+  { href: "/current", label: "현재 상태", icon: Activity, description: "실행 흐름 추적" },
+  { href: "/history", label: "히스토리", icon: History, description: "런 스냅샷 탐색" },
+  { href: "/docs", label: "설계 문서", icon: FileText, description: "최신 AI-DLC 문서" },
+  { href: "/settings", label: "설정", icon: Settings, description: "읽기 전용 구성" },
 ];
-
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { data: config } = useSWR("/api/config", fetcher);
-  const bundleName = config?.bundle || "미설정";
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-64 z-40 bg-white border-r border-slate-200 flex flex-col py-6 font-[var(--font-headline)] antialiased tracking-tight">
-      {/* Logo */}
-      <div className="px-6 mb-8 flex items-center gap-2">
-        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
-          <span className="material-symbols-outlined text-xl filled">diamond</span>
+    <aside className="hidden w-80 shrink-0 border-r border-sidebar-border/80 bg-sidebar/92 backdrop-blur xl:flex xl:flex-col">
+      <div className="px-6 pt-6">
+        <div className="panel-surface overflow-hidden rounded-[28px] bg-sidebar px-5 py-5 shadow-none">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5" />
+            Studio Console
+          </div>
+          <h1 className="text-[22px] font-semibold tracking-tight text-sidebar-foreground">AI-Crew Studio</h1>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            CLI 중심 워크플로를 해치지 않으면서 현재 상태와 과거 변화를 빠르게 읽는 프로젝트 메모리 뷰어.
+          </p>
         </div>
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tighter">AI-Crew Studio</h1>
-          <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">The Cognitive Architect</p>
+      </div>
+
+      <nav className="flex-1 px-4 py-6">
+        <div className="mb-3 px-3 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+          Navigation
         </div>
-      </div>
+        <ul className="space-y-2">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+            const Icon = item.icon;
 
-      {/* CTA Button */}
-      <div className="px-4 mb-6">
-        <Link
-          href="/bundles"
-          className="w-full bg-gradient-to-br from-primary to-primary-container text-white py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg shadow-primary/20 hover:opacity-90"
-        >
-          <span className="material-symbols-outlined text-lg">swap_horiz</span>
-          프로젝트 전환
-        </Link>
-      </div>
-
-      {/* Nav Section Label */}
-      <div className="px-6 mb-2">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">개발 흐름</span>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 space-y-0.5">
-        {navItems.map((item) => {
-          const isActive =
-            pathname === item.href ||
-            (item.href !== "/" && pathname.startsWith(item.href));
-
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-4 py-3 transition-all",
-                isActive
-                  ? "bg-indigo-50/50 text-indigo-600 border-l-[3px] border-indigo-600 font-semibold"
-                  : "text-slate-600 hover:bg-slate-50 border-l-[3px] border-transparent"
-              )}
-            >
-              <span
-                className={cn(
-                  "material-symbols-outlined text-xl",
-                  isActive && "filled"
-                )}
-              >
-                {item.icon}
-              </span>
-              <span className="text-sm">{item.label}</span>
-            </Link>
-          );
-        })}
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  aria-label={item.label}
+                  className={cn(
+                    "group flex items-center gap-3 rounded-2xl border px-3.5 py-3 transition-all",
+                    isActive
+                      ? "border-sidebar-primary/15 bg-primary/95 text-sidebar-primary-foreground shadow-sm"
+                      : "border-transparent text-sidebar-foreground hover:border-border/80 hover:bg-background/85"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex h-10 w-10 items-center justify-center rounded-xl border transition-colors",
+                      isActive
+                        ? "border-white/10 bg-white/10"
+                        : "border-border/70 bg-muted/45 text-muted-foreground group-hover:bg-background"
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-medium tracking-tight">{item.label}</div>
+                    <div className={cn("truncate text-xs", isActive ? "text-sidebar-primary-foreground/70" : "text-muted-foreground")}>
+                      {item.description}
+                    </div>
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
 
-      {/* Footer Badge */}
-      <div className="mt-auto px-4 pt-4 border-t border-slate-100">
-        <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 rounded-full">
-          <span className="material-symbols-outlined text-primary">groups</span>
-          <span className="text-xs font-semibold text-slate-700">팀 템플릿: {bundleName}</span>
+      <div className="px-6 pb-6 pt-2">
+        <div className="panel-subtle px-4 py-4">
+          <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">Workspace mode</div>
+          <div className="mt-2 text-sm font-medium text-sidebar-foreground">읽기 전용 관찰 모드</div>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+            UI는 실행 상태와 문서 스냅샷만 보여주며, 원본 파일은 직접 수정하지 않습니다.
+          </p>
         </div>
       </div>
     </aside>

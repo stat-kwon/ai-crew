@@ -1,0 +1,12 @@
+version: "3.0"
+bundle: dynamic-20260328
+workflow: aidlc
+defaults:
+  model: claude-sonnet-4
+  isolation: worktree
+  rules:
+    - global
+    - git-conventions
+  mcp:
+    - multi-provider
+  locale: ko

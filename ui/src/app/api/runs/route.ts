@@ -1,30 +1,20 @@
 import { NextResponse } from "next/server";
-import { readFile } from "node:fs/promises";
-import { existsSync } from "node:fs";
-import { join } from "node:path";
-
-function getTargetDir(): string {
-  return process.env.AI_CREW_TARGET_DIR || process.cwd();
-}
+import { loadRegistry } from "@/lib/data";
 
 export async function GET() {
   try {
-    const targetDir = getTargetDir();
-    const runsPath = join(targetDir, ".ai-crew", "runs.json");
-
-    if (!existsSync(runsPath)) {
-      return NextResponse.json({ runs: [] });
-    }
-
-    const content = await readFile(runsPath, "utf-8");
-    const registry = JSON.parse(content);
-
+    const registry = await loadRegistry();
     return NextResponse.json(registry);
   } catch (error) {
-    console.error("Error reading runs:", error);
+    console.error("Error loading runs:", error);
     return NextResponse.json(
-      { error: "Failed to read runs" },
-      { status: 500 }
+      {
+        schema: "ai-crew.runs.v1",
+        current: null,
+        runs: [],
+        stats: { totalRuns: 0, totalCompleted: 0, totalFailed: 0 },
+      },
+      { status: 200 }
     );
   }
 }

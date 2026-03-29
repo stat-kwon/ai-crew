@@ -1,31 +1,24 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { Sidebar } from "@/components/layout/Sidebar";
 import "./globals.css";
-import { AppShell } from "@/components/layout/AppShell";
+
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "AI-Crew Studio",
-  description: "AI 에이전트 팀 협업 개발 환경",
+  description: "AI-Crew 프로젝트 관찰 도구",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko">
-      <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body className="antialiased">
-        <AppShell>{children}</AppShell>
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <div className="app-shell xl:grid xl:grid-cols-[320px_minmax(0,1fr)]">
+          <Sidebar />
+          <main className="min-w-0">{children}</main>
+        </div>
       </body>
     </html>
   );

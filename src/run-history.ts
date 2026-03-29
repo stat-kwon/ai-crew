@@ -8,6 +8,8 @@ import type {
   RunRegistry,
   RunIndexEntry,
   NodeSummary,
+  AidlcSnapshot,
+  AidlcDocumentSnapshot,
 } from "./types.js";
 
 const RUNS_DIR = "runs";
@@ -268,13 +270,107 @@ function findLatestCompletion(nodes: Record<string, NodeState>): string | null {
 }
 
 // ============================================================
+// AI-DLC Snapshot Capture
+// ============================================================
+
+const AIDLC_DOCS_DIR = "aidlc-docs";
+const AIDLC_STATE_FILE = "aidlc-state.md";
+
+/**
+ * Determine the stage from a document path.
+ * Maps paths like "inception/requirements/requirements.md" to "requirements".
+ */
+function getStageFromPath(docPath: string): string {
+  const parts = docPath.split("/");
+  if (parts.length >= 2 && parts[0] === "inception") {
+    return parts[1]; // e.g., "requirements", "user-stories", "application-design"
+  }
+  if (parts.length >= 1) {
+    return parts[0]; // e.g., "construction", "operations"
+  }
+  return "unknown";
+}
+
+/**
+ * Recursively collect all markdown files from a directory.
+ */
+async function collectMarkdownFiles(
+  baseDir: string,
+  relativePath: string = "",
+): Promise<{ path: string; content: string }[]> {
+  const results: { path: string; content: string }[] = [];
+  const currentDir = relativePath ? join(baseDir, relativePath) : baseDir;
+
+  try {
+    const entries = await readdir(currentDir, { withFileTypes: true });
+    for (const entry of entries) {
+      const entryRelPath = relativePath ? join(relativePath, entry.name) : entry.name;
+      if (entry.isDirectory()) {
+        const subFiles = await collectMarkdownFiles(baseDir, entryRelPath);
+        results.push(...subFiles);
+      } else if (entry.isFile() && entry.name.endsWith(".md")) {
+        try {
+          const content = await readFile(join(baseDir, entryRelPath), "utf-8");
+          results.push({ path: entryRelPath, content });
+        } catch {
+          // Skip unreadable files
+        }
+      }
+    }
+  } catch {
+    // Directory doesn't exist or isn't readable
+  }
+
+  return results;
+}
+
+/**
+ * Capture a snapshot of aidlc-docs/ at the current moment.
+ * Returns null if aidlc-docs doesn't exist.
+ */
+export async function captureAidlcSnapshot(projectDir: string): Promise<AidlcSnapshot | null> {
+  const aidlcDocsPath = join(projectDir, AIDLC_DOCS_DIR);
+
+  // Check if aidlc-docs exists
+  if (!(await dirExists(aidlcDocsPath))) {
+    return null;
+  }
+
+  // Read aidlc-state.md
+  let stateMd = "";
+  try {
+    stateMd = await readFile(join(aidlcDocsPath, AIDLC_STATE_FILE), "utf-8");
+  } catch {
+    // State file doesn't exist
+  }
+
+  // Collect all markdown documents
+  const files = await collectMarkdownFiles(aidlcDocsPath);
+
+  // Filter out aidlc-state.md from documents (it's stored separately)
+  const documents: AidlcDocumentSnapshot[] = files
+    .filter((f) => f.path !== AIDLC_STATE_FILE)
+    .map((f) => ({
+      path: f.path,
+      content: f.content,
+      stage: getStageFromPath(f.path),
+    }));
+
+  return {
+    stateMd,
+    documents,
+    capturedAt: new Date().toISOString(),
+  };
+}
+
+// ============================================================
 // Archive Run
 // ============================================================
 
 /**
  * Archive the current run's artifacts and update the registry.
  *
- * 1. Creates manifest.json from current state
+ * 1. Creates manifest.json from current state (with aidlcSnapshot if available)
  * 2. Moves scratchpad/ and checkpoints/ to runs/{runId}/
  * 3. Copies state.json snapshot to runs/{runId}/
  * 4. Updates runs.json registry
@@ -282,14 +378,28 @@ function findLatestCompletion(nodes: Record<string, NodeState>): string | null {
 export async function archiveRun(
   crewDir: string,
   manifest: RunManifest,
+  projectDir?: string,
 ): Promise<string> {
   const runDir = join(crewDir, RUNS_DIR, manifest.runId);
 
+  // Capture AI-DLC snapshot if projectDir is provided
+  let manifestWithSnapshot = { ...manifest, state: "archived" as const };
+  if (projectDir) {
+    const snapshot = await captureAidlcSnapshot(projectDir);
+    if (snapshot) {
+      manifestWithSnapshot = {
+        ...manifestWithSnapshot,
+        aidlcSnapshot: snapshot,
+      };
+    }
+  }
+
+  // Initialize autoTitle and autoSummary fields (to be populated by LLM later)
+  manifestWithSnapshot.autoTitle = manifest.autoTitle ?? undefined;
+  manifestWithSnapshot.autoSummary = manifest.autoSummary ?? undefined;
+
   // Write manifest
-  await writeJsonAtomic(join(runDir, MANIFEST_FILE), {
-    ...manifest,
-    state: "archived",
-  });
+  await writeJsonAtomic(join(runDir, MANIFEST_FILE), manifestWithSnapshot);
 
   // Move scratchpad and checkpoints
   await moveDir(join(crewDir, SCRATCHPAD_DIR), join(runDir, SCRATCHPAD_DIR));

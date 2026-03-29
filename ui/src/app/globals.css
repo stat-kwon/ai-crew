@@ -1,369 +1,253 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-/* ============================================
-   Stitch Design System - CSS Variables
-   ============================================ */
+@custom-variant dark (&:is(.dark *));
 
-@theme {
-  /* Primary Colors */
-  --color-primary: #4648d4;
-  --color-primary-container: #6063ee;
-  --color-primary-fixed: #e1e0ff;
-  --color-primary-fixed-dim: #c0c1ff;
-  --color-on-primary: #ffffff;
-  --color-on-primary-container: #fffbff;
-  --color-on-primary-fixed: #07006c;
-  --color-on-primary-fixed-variant: #2f2ebe;
-  --color-inverse-primary: #c0c1ff;
-
-  /* Secondary Colors */
-  --color-secondary: #575992;
-  --color-secondary-container: #bdbefe;
-  --color-secondary-fixed: #e1e0ff;
-  --color-secondary-fixed-dim: #c0c1ff;
-  --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #494b83;
-  --color-on-secondary-fixed: #13144a;
-  --color-on-secondary-fixed-variant: #404178;
-
-  /* Tertiary Colors (Warning) */
-  --color-tertiary: #904900;
-  --color-tertiary-container: #b55d00;
-  --color-tertiary-fixed: #ffdcc5;
-  --color-tertiary-fixed-dim: #ffb783;
-  --color-on-tertiary: #ffffff;
-  --color-on-tertiary-container: #fffbff;
-  --color-on-tertiary-fixed: #301400;
-  --color-on-tertiary-fixed-variant: #703700;
-
-  /* Error Colors */
-  --color-error: #ba1a1a;
-  --color-error-container: #ffdad6;
-  --color-on-error: #ffffff;
-  --color-on-error-container: #93000a;
-
-  /* Surface Colors */
-  --color-surface: #f6fafe;
-  --color-surface-dim: #d6dade;
-  --color-surface-bright: #f6fafe;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f0f4f8;
-  --color-surface-container: #eaeef2;
-  --color-surface-container-high: #e4e9ed;
-  --color-surface-container-highest: #dfe3e7;
-  --color-surface-variant: #dfe3e7;
-  --color-surface-tint: #494bd6;
-  --color-on-surface: #171c1f;
-  --color-on-surface-variant: #464554;
-  --color-inverse-surface: #2c3134;
-  --color-inverse-on-surface: #edf1f5;
-
-  /* Background */
-  --color-background: #f1f5f9;
-  --color-on-background: #171c1f;
-
-  /* Outline */
-  --color-outline: #767586;
-  --color-outline-variant: #c7c4d7;
-
-  /* Graph Node Colors */
-  --color-node-worker: #4648d4;
-  --color-node-router: #f89256;
-  --color-node-aggregator: #006c49;
-
-  /* Status Colors */
-  --color-success: #10b981;
-  --color-success-light: #d1fae5;
-  --color-warning: #f59e0b;
-  --color-warning-light: #fef3c7;
-  --color-info: #3b82f6;
-  --color-info-light: #dbeafe;
-
-  /* Fonts */
-  --font-headline: "Public Sans", "Manrope", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", "Fira Code", monospace;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-  --shadow-card: 0 12px 40px -12px rgba(70, 72, 212, 0.08);
-  --shadow-primary: 0 4px 14px 0 rgba(70, 72, 212, 0.25);
-
-  /* Border Radius */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
-  --radius-full: 9999px;
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* ============================================
-   Base Styles
-   ============================================ */
-
-* {
-  box-sizing: border-box;
+:root {
+  --background: oklch(0.985 0.004 264);
+  --foreground: oklch(0.255 0.02 258);
+  --card: oklch(0.998 0.002 264);
+  --card-foreground: oklch(0.255 0.02 258);
+  --popover: oklch(0.998 0.002 264);
+  --popover-foreground: oklch(0.255 0.02 258);
+  --primary: oklch(0.36 0.03 258);
+  --primary-foreground: oklch(0.985 0.003 264);
+  --secondary: oklch(0.967 0.004 258);
+  --secondary-foreground: oklch(0.29 0.018 258);
+  --muted: oklch(0.965 0.004 258);
+  --muted-foreground: oklch(0.52 0.02 258);
+  --accent: oklch(0.954 0.01 250);
+  --accent-foreground: oklch(0.28 0.018 258);
+  --destructive: oklch(0.56 0.21 26);
+  --border: oklch(0.905 0.01 258);
+  --input: oklch(0.905 0.01 258);
+  --ring: oklch(0.73 0.02 255);
+  --chart-1: oklch(0.68 0.04 250);
+  --chart-2: oklch(0.58 0.03 240);
+  --chart-3: oklch(0.48 0.025 250);
+  --chart-4: oklch(0.78 0.018 255);
+  --chart-5: oklch(0.85 0.012 255);
+  --radius: 1rem;
+  --sidebar: oklch(0.975 0.004 260);
+  --sidebar-foreground: oklch(0.28 0.018 258);
+  --sidebar-primary: oklch(0.36 0.03 258);
+  --sidebar-primary-foreground: oklch(0.985 0.003 264);
+  --sidebar-accent: oklch(0.952 0.01 255);
+  --sidebar-accent-foreground: oklch(0.28 0.018 258);
+  --sidebar-border: oklch(0.9 0.01 258);
+  --sidebar-ring: oklch(0.73 0.02 255);
 }
 
-html {
-  scroll-behavior: smooth;
+.dark {
+  --background: oklch(0.18 0.012 258);
+  --foreground: oklch(0.95 0.005 264);
+  --card: oklch(0.225 0.012 258);
+  --card-foreground: oklch(0.95 0.005 264);
+  --popover: oklch(0.225 0.012 258);
+  --popover-foreground: oklch(0.95 0.005 264);
+  --primary: oklch(0.9 0.01 264);
+  --primary-foreground: oklch(0.24 0.015 258);
+  --secondary: oklch(0.27 0.012 258);
+  --secondary-foreground: oklch(0.94 0.005 264);
+  --muted: oklch(0.27 0.012 258);
+  --muted-foreground: oklch(0.72 0.015 258);
+  --accent: oklch(0.29 0.014 252);
+  --accent-foreground: oklch(0.95 0.005 264);
+  --destructive: oklch(0.7 0.18 25);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.58 0.015 258);
+  --chart-1: oklch(0.72 0.04 250);
+  --chart-2: oklch(0.62 0.03 240);
+  --chart-3: oklch(0.82 0.016 255);
+  --chart-4: oklch(0.45 0.02 248);
+  --chart-5: oklch(0.35 0.02 250);
+  --sidebar: oklch(0.205 0.012 258);
+  --sidebar-foreground: oklch(0.95 0.005 264);
+  --sidebar-primary: oklch(0.84 0.015 264);
+  --sidebar-primary-foreground: oklch(0.2 0.015 258);
+  --sidebar-accent: oklch(0.28 0.014 252);
+  --sidebar-accent-foreground: oklch(0.95 0.005 264);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.58 0.015 258);
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: var(--font-body);
-  background-color: var(--color-background);
-  color: var(--color-on-surface);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans antialiased;
+  }
+
+  body {
+    @apply min-h-screen bg-background text-foreground;
+    background-image:
+      radial-gradient(circle at top, color-mix(in oklab, var(--accent) 55%, transparent) 0, transparent 32%),
+      linear-gradient(180deg, color-mix(in oklab, var(--background) 96%, white 4%) 0%, var(--background) 100%);
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-medium tracking-tight text-foreground;
+  }
 }
 
-/* ============================================
-   Typography
-   ============================================ */
+@layer components {
+  .app-shell {
+    @apply min-h-screen bg-transparent;
+  }
 
-.font-headline {
-  font-family: var(--font-headline);
+  .page-shell {
+    @apply mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8 lg:px-10 lg:py-10;
+  }
+
+  .page-header {
+    @apply flex flex-col gap-4 border-b border-border/70 pb-6;
+  }
+
+  .page-kicker {
+    @apply text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground;
+  }
+
+  .page-title {
+    @apply text-3xl leading-tight font-semibold md:text-4xl;
+  }
+
+  .page-description {
+    @apply max-w-3xl text-sm leading-6 text-muted-foreground md:text-[15px];
+  }
+
+  .panel-surface {
+    @apply rounded-3xl border border-border/70 bg-card/92 shadow-[0_1px_2px_rgba(15,23,42,0.03),0_18px_48px_rgba(15,23,42,0.05)];
+  }
+
+  .panel-subtle {
+    @apply rounded-2xl border border-border/60 bg-muted/35;
+  }
+
+  .metric-value {
+    @apply text-2xl font-semibold tracking-tight md:text-3xl;
+  }
+
+  .metric-label {
+    @apply text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground;
+  }
 }
 
-.font-body {
-  font-family: var(--font-body);
+.prose {
+  @apply max-w-none text-[15px] leading-7 text-foreground;
 }
-
-.font-mono {
-  font-family: var(--font-mono);
+.prose h1 {
+  @apply mt-0 mb-5 text-3xl font-semibold tracking-tight;
 }
-
-/* ============================================
-   Material Icons
-   ============================================ */
-
-.material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-  display: inline-flex;
-  vertical-align: middle;
-  line-height: 1;
+.prose h2 {
+  @apply mt-10 mb-4 text-2xl font-semibold tracking-tight;
 }
-
-.material-symbols-outlined.filled {
-  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+.prose h3 {
+  @apply mt-8 mb-3 text-xl font-medium tracking-tight;
 }
-
-/* ============================================
-   Custom Utilities
-   ============================================ */
-
-.card-shadow {
-  box-shadow: var(--shadow-card);
+.prose p {
+  @apply mb-4 text-[15px] leading-7 text-foreground/90;
 }
-
-.ghost-border {
-  border: 1px solid rgba(199, 196, 215, 0.2);
+.prose ul, .prose ol {
+  @apply mb-5 pl-6;
 }
-
-.active-nav-border {
-  border-left: 3px solid var(--color-primary);
+.prose ul {
+  @apply list-disc;
 }
-
-/* Gradient backgrounds */
-.bg-gradient-primary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-container) 100%);
+.prose ol {
+  @apply list-decimal;
 }
-
-/* Status indicators */
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.prose li {
+  @apply mb-1.5;
 }
-
-.status-dot-pending { background-color: #94a3b8; }
-.status-dot-running { background-color: var(--color-primary); }
-.status-dot-completed { background-color: var(--color-success); }
-.status-dot-failed { background-color: var(--color-error); }
-
-/* ============================================
-   ReactFlow Customization
-   ============================================ */
-
-.react-flow__node {
-  border-radius: var(--radius-lg);
+.prose code {
+  @apply rounded-md bg-muted px-1.5 py-0.5 text-[13px] font-medium font-mono;
 }
-
-.react-flow__minimap {
-  background-color: var(--color-surface-container-lowest);
+.prose pre {
+  @apply mb-5 overflow-x-auto rounded-2xl border border-border/70 bg-muted/70 p-5;
 }
-
-.react-flow__controls button {
-  background-color: var(--color-surface-container-lowest);
-  border-color: var(--color-outline-variant);
+.prose pre code {
+  @apply bg-transparent p-0 font-normal;
 }
-
-.react-flow__controls button:hover {
-  background-color: var(--color-surface-container-low);
+.prose blockquote {
+  @apply my-6 rounded-r-2xl border-l-2 border-border pl-5 italic text-muted-foreground;
 }
-
-/* Dot grid background for canvas */
-.dot-grid {
-  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-  background-size: 24px 24px;
+.prose table {
+  @apply mb-5 w-full border-collapse overflow-hidden rounded-2xl border border-border/70;
 }
-
-/* ============================================
-   Markdown Viewer
-   ============================================ */
-
-.markdown-body {
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--color-on-surface);
+.prose th, .prose td {
+  @apply border-b border-border/70 px-4 py-3 text-left align-top;
 }
-
-.markdown-body h1 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--color-outline-variant);
-  padding-bottom: 0.5rem;
+.prose th {
+  @apply bg-muted/60 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground;
 }
-
-.markdown-body h2 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
+.prose a {
+  @apply font-medium text-foreground underline decoration-border underline-offset-4;
 }
-
-.markdown-body h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
+.prose hr {
+  @apply my-8 border-border;
 }
-
-.markdown-body p {
-  margin-bottom: 1rem;
+.prose img {
+  @apply my-6 max-w-full rounded-2xl border border-border/60;
 }
-
-.markdown-body pre {
-  background-color: var(--color-surface-container-low);
-  padding: 1rem;
-  border-radius: var(--radius-md);
-  overflow-x: auto;
-  margin-bottom: 1rem;
-}
-
-.markdown-body code {
-  background-color: var(--color-surface-container-low);
-  padding: 0.2rem 0.4rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.9em;
-  font-family: var(--font-mono);
-}
-
-.markdown-body pre code {
-  background: none;
-  padding: 0;
-}
-
-.markdown-body ul, .markdown-body ol {
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.markdown-body li {
-  margin-bottom: 0.25rem;
-}
-
-.markdown-body table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-}
-
-.markdown-body th,
-.markdown-body td {
-  border: 1px solid var(--color-outline-variant);
-  padding: 0.5rem 0.75rem;
-  text-align: left;
-}
-
-.markdown-body th {
-  background-color: var(--color-surface-container-low);
-  font-weight: 600;
-}
-
-.markdown-body blockquote {
-  border-left: 4px solid var(--color-primary);
-  padding-left: 1rem;
-  margin: 1rem 0;
-  color: var(--color-on-surface-variant);
-}
-
-/* ============================================
-   Animations
-   ============================================ */
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-.animate-pulse-dot {
-  animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes bounce-dot {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-25%); }
-}
-
-.animate-bounce-dot {
-  animation: bounce-dot 1s ease-in-out infinite;
-}
-
-/* ============================================
-   Scrollbar Styling
-   ============================================ */
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-surface-container-low);
-  border-radius: var(--radius-full);
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-outline-variant);
-  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--muted-foreground) 22%, transparent);
+  border-radius: 999px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-outline);
-}
-
-/* ============================================
-   Focus States
-   ============================================ */
-
-*:focus-visible {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px;
-}
-
-/* ============================================
-   Selection
-   ============================================ */
-
-::selection {
-  background-color: var(--color-primary-fixed);
-  color: var(--color-on-primary-fixed);
+::-webkit-scrollbar-track {
+  background: transparent;
 }
