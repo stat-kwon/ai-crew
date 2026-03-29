@@ -33,16 +33,6 @@ interface DocsResponse {
 
 const fetcher = (url: string) => fetch(url).then((res) => (res.ok ? res.json() : null));
 
-const stageIcons: Record<string, string> = {
-  "Workspace Detection": "search",
-  "Requirements Analysis": "article",
-  Requirements: "article",
-  "User Stories": "account_tree",
-  "Workflow Planning": "assignment",
-  "Architecture Design": "architecture",
-  "Task Decomposition": "grid_view",
-};
-
 const stageLabels: Record<string, string> = {
   "Workspace Detection": "작업공간 감지",
   "Requirements Analysis": "요구사항 분석",
@@ -66,7 +56,7 @@ function getFolderIcon(folder: string): string {
   return folderIcons[folder] || "folder";
 }
 
-export default function DesignPage() {
+export default function DocsPage() {
   const { data: aidlcData } = useSWR<{ stages: AidlcStage[]; raw?: string }>("/api/aidlc/state", fetcher, {
     refreshInterval: 5000,
   });
@@ -100,12 +90,12 @@ export default function DesignPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-screen-2xl space-y-8">
       {/* Page Header */}
       <div className="flex items-baseline justify-between">
         <div className="flex items-center gap-3">
           <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight font-[var(--font-headline)]">
-            설계 단계
+            설계 문서
           </h2>
           <Badge variant="default">인셉션</Badge>
         </div>
@@ -126,7 +116,6 @@ export default function DesignPage() {
             stages.map((stage, idx) => {
               const isCompleted = stage.status === "complete";
               const isActive = stage.status === "active";
-              const icon = stageIcons[stage.name] || "check_circle";
               const label = stageLabels[stage.name] || stage.name;
 
               return (
@@ -165,16 +154,16 @@ export default function DesignPage() {
             <div className="w-full text-center py-8 text-slate-400">
               <span className="material-symbols-outlined text-4xl mb-2">hourglass_empty</span>
               <p className="text-sm">설계 단계가 시작되지 않았습니다</p>
-              <p className="text-xs mt-1">/crew:elaborate 명령어로 시작하세요</p>
+              <p className="text-xs mt-1">CLI에서 /crew:elaborate를 실행하세요</p>
             </div>
           )}
         </div>
       </Card>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-12 gap-8 items-start">
-        {/* Left Column: Generated Documents (grouped by folder) */}
-        <div className="col-span-12 lg:col-span-7">
+      {/* Two Column Layout: Folder Tree (4 cols) + Markdown Viewer (8 cols) */}
+      <div className="grid grid-cols-12 gap-6 items-start">
+        {/* Left Column: Document Tree */}
+        <div className="col-span-12 lg:col-span-4">
           <Card className="overflow-hidden">
             <div className="px-6 py-5 border-b border-slate-50 flex items-center justify-between">
               <h3 className="font-bold text-slate-900 flex items-center gap-2">
@@ -185,7 +174,7 @@ export default function DesignPage() {
                 {totalFiles}개 문서
               </span>
             </div>
-            <div className="p-6 space-y-6">
+            <div className="p-4 space-y-4 max-h-[calc(100vh-320px)] overflow-y-auto">
               {groups.length === 0 ? (
                 <div className="text-center py-8 text-slate-400" data-testid="empty-state">
                   <span className="material-symbols-outlined text-4xl mb-2">folder_off</span>
@@ -193,7 +182,7 @@ export default function DesignPage() {
                 </div>
               ) : (
                 groups.map((group) => (
-                  <div key={group.folder} className="space-y-3" data-testid={`group-${group.folder.replace(/\//g, "-")}`}>
+                  <div key={group.folder} className="space-y-2" data-testid={`group-${group.folder.replace(/\//g, "-")}`}>
                     {/* Group Header */}
                     <div className="flex items-center gap-2 pb-2 border-b border-slate-100">
                       <div className="w-7 h-7 rounded-md bg-indigo-50 flex items-center justify-center">
@@ -211,40 +200,36 @@ export default function DesignPage() {
                     {group.files.length === 0 ? (
                       <p className="text-xs text-slate-400 pl-9">파일 없음</p>
                     ) : (
-                      <div className="space-y-2 pl-0">
+                      <div className="space-y-1">
                         {group.files.map((file) => {
                           const isSelected = selectedDoc === file.path;
 
                           return (
-                            <div
+                            <button
                               key={file.path}
+                              type="button"
                               onClick={() => handleDocSelect(file.path)}
                               data-testid={`file-item-${file.name}`}
-                              className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
+                              className={`w-full text-left flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-colors ${
                                 isSelected
                                   ? "bg-indigo-50/50 border-indigo-200 ring-2 ring-indigo-500/10"
                                   : "bg-slate-50/30 border-slate-100 hover:border-indigo-200"
                               }`}
                             >
-                              <div className="flex items-center gap-3">
-                                <div
-                                  className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                    isSelected ? "bg-indigo-100 text-indigo-600" : "bg-indigo-50 text-indigo-600"
-                                  }`}
-                                >
-                                  <span className="material-symbols-outlined text-sm">description</span>
-                                </div>
-                                <div>
-                                  <h5 className="text-sm font-semibold text-slate-900">
-                                    {file.label}
-                                  </h5>
-                                  <span className="text-[10px] text-slate-400">{file.name}</span>
-                                </div>
+                              <div
+                                className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 ${
+                                  isSelected ? "bg-indigo-100 text-indigo-600" : "bg-indigo-50 text-indigo-600"
+                                }`}
+                              >
+                                <span className="material-symbols-outlined text-sm">description</span>
                               </div>
-                              <Button variant="ghost" size="sm" className="text-xs font-bold text-primary shrink-0">
-                                {isSelected ? "선택됨" : "열기"}
-                              </Button>
-                            </div>
+                              <div className="min-w-0 flex-1">
+                                <h5 className="text-sm font-semibold text-slate-900 truncate">
+                                  {file.label}
+                                </h5>
+                                <span className="text-[10px] text-slate-400">{file.name}</span>
+                              </div>
+                            </button>
                           );
                         })}
                       </div>
@@ -257,7 +242,7 @@ export default function DesignPage() {
         </div>
 
         {/* Right Column: Document Viewer */}
-        <div className="col-span-12 lg:col-span-5">
+        <div className="col-span-12 lg:col-span-8">
           <Card className="overflow-hidden flex flex-col h-[calc(100vh-320px)] min-h-[400px]">
             <div className="px-6 py-4 border-b border-slate-50 bg-slate-50/50 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -266,11 +251,6 @@ export default function DesignPage() {
                   {selectedDoc ? selectedDoc.split("/").pop() : "문서를 선택하세요"}
                 </span>
               </div>
-              {selectedDoc && (
-                <span className="material-symbols-outlined text-slate-400 cursor-pointer hover:text-indigo-600">
-                  fullscreen
-                </span>
-              )}
             </div>
             <div className="p-6 overflow-y-auto flex-1">
               {isLoadingDoc ? (
@@ -293,18 +273,17 @@ export default function DesignPage() {
         </div>
       </div>
 
-      {/* Bottom Banner */}
-      <div className="bg-indigo-50/80 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
-            <span className="material-symbols-outlined text-indigo-600 filled">lightbulb</span>
-          </div>
-          <div>
-            <span className="text-xs font-bold text-indigo-700 block">설계 초안 작성 명령</span>
-            <code className="text-sm font-mono text-indigo-900 font-bold">/crew:elaborate</code>
-          </div>
+      {/* Bottom Banner — Simplified CLI guidance */}
+      <div className="bg-indigo-50/80 border border-indigo-100 rounded-xl p-4 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+          <span className="material-symbols-outlined text-indigo-600 filled">lightbulb</span>
         </div>
-        <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-200">명령 실행</Button>
+        <div>
+          <span className="text-xs font-bold text-indigo-700 block">설계 초안 작성</span>
+          <p className="text-sm text-indigo-900">
+            CLI에서 <code className="font-mono font-bold bg-indigo-100 px-1.5 py-0.5 rounded">/crew:elaborate</code>를 실행하세요
+          </p>
+        </div>
       </div>
     </div>
   );
