@@ -221,6 +221,24 @@ export interface NodeSummary {
   keyDecisions: string[];
 }
 
+// ============================================================
+// AI-DLC Snapshot Types (for UI history)
+// ============================================================
+
+/** Document snapshot captured at run completion */
+export interface AidlcDocumentSnapshot {
+  path: string; // e.g. "inception/requirements/requirements.md"
+  content: string; // markdown content
+  stage: string; // "requirements" | "user-stories" | "application-design" | ...
+}
+
+/** AI-DLC state snapshot captured at run completion */
+export interface AidlcSnapshot {
+  stateMd: string; // Full content of aidlc-state.md
+  documents: AidlcDocumentSnapshot[];
+  capturedAt: string; // ISO 8601 timestamp
+}
+
 /** Canonical snapshot of a single run (ECC ecc.session.v1 pattern) */
 export interface RunManifest {
   schema: "ai-crew.run.v1";
@@ -258,6 +276,13 @@ export interface RunManifest {
   } | null;
 
   nodeSummaries: Record<string, NodeSummary>;
+
+  // AI-DLC snapshot for UI history (captured at run completion)
+  aidlcSnapshot?: AidlcSnapshot;
+
+  // LLM-generated metadata (future implementation)
+  autoTitle?: string;
+  autoSummary?: string;
 }
 
 /** Compact index entry for the run registry */
