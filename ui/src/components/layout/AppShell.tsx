@@ -1,6 +1,5 @@
 "use client";
 
-import { Sidebar } from "./Sidebar";
 import { TopNav } from "./TopNav";
 
 interface AppShellProps {
@@ -10,9 +9,8 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   return (
     <div className="min-h-screen bg-[#f1f5f9]">
-      <Sidebar />
       <TopNav />
-      <main className="ml-64 pt-20 p-6 min-h-screen">
+      <main className="pt-20 p-6 min-h-screen">
         {children}
       </main>
 
