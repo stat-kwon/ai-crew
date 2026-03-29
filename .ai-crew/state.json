@@ -12,9 +12,9 @@
   "nodes": {
     "layout-overhaul": { "status": "completed", "startedAt": "2026-03-29T10:35:00Z", "completedAt": "2026-03-29T10:44:00Z" },
     "page-cleanup": { "status": "completed", "startedAt": "2026-03-29T10:35:00Z", "completedAt": "2026-03-29T10:39:00Z" },
-    "timeline-page": { "status": "pending", "startedAt": null, "completedAt": null },
-    "run-detail-page": { "status": "pending", "startedAt": null, "completedAt": null },
-    "docs-page": { "status": "pending", "startedAt": null, "completedAt": null },
+    "timeline-page": { "status": "completed", "startedAt": "2026-03-29T10:45:00Z", "completedAt": "2026-03-29T10:57:00Z" },
+    "run-detail-page": { "status": "completed", "startedAt": "2026-03-29T10:45:00Z", "completedAt": "2026-03-29T10:51:00Z" },
+    "docs-page": { "status": "completed", "startedAt": "2026-03-29T10:45:00Z", "completedAt": "2026-03-29T10:49:00Z" },
     "test-r1": { "status": "pending", "startedAt": null, "completedAt": null },
     "review-r1": { "status": "pending", "startedAt": null, "completedAt": null },
     "improve-r1": { "status": "pending", "startedAt": null, "completedAt": null },
