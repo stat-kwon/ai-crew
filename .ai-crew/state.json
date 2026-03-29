@@ -10,8 +10,8 @@
     "graphHash": "510f61f2c2ce2ff659ebf22b43d12b9afee53acefa0bb9311c16b6cd3a6e634c"
   },
   "nodes": {
-    "layout-overhaul": { "status": "pending", "startedAt": null, "completedAt": null },
-    "page-cleanup": { "status": "pending", "startedAt": null, "completedAt": null },
+    "layout-overhaul": { "status": "completed", "startedAt": "2026-03-29T10:35:00Z", "completedAt": "2026-03-29T10:44:00Z" },
+    "page-cleanup": { "status": "completed", "startedAt": "2026-03-29T10:35:00Z", "completedAt": "2026-03-29T10:39:00Z" },
     "timeline-page": { "status": "pending", "startedAt": null, "completedAt": null },
     "run-detail-page": { "status": "pending", "startedAt": null, "completedAt": null },
     "docs-page": { "status": "pending", "startedAt": null, "completedAt": null },
