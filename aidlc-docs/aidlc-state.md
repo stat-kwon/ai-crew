@@ -3,7 +3,7 @@
 ## Project Information
 - **Project Type**: Brownfield
 - **Start Date**: 2026-03-29T10:00:00Z
-- **Current Stage**: INCEPTION - Units Generation Complete
+- **Current Stage**: CONSTRUCTION - Complete
 - **Cycle**: 2 (UI 전면 리디자인)
 
 ## Workspace State
@@ -27,23 +27,22 @@
 - [x] Units Generation — unit-of-work-v2.md, graph.yaml 업데이트
 
 ### CONSTRUCTION PHASE
-- [ ] Code Generation (10 nodes: 5 dev + 5 pipeline)
-- [ ] Build and Test
+- [x] Code Generation (13 nodes: 5 dev + 8 pipeline) — 2026-03-29T11:16:30Z
+- [x] Build and Test — vitest 122/122 pass, next build pass, Playwright 3/3 pass
+- [x] Integration — 2026-03-29T11:20:00Z
 
-## Execution Plan Summary
-- **Total Stages**: 3 (Units Generation + Code Generation + Build and Test)
-- **Stages to Execute**: Units Generation, Code Generation, Build and Test
-- **Stages Skipped**: User Stories, Application Design, Functional Design, NFR Requirements, NFR Design, Infrastructure Design
-
-## Graph Summary (10 nodes, 6 levels)
-| Level | Nodes | Type |
-|-------|-------|------|
-| 0 | layout-overhaul, page-cleanup | 2 병렬 worker |
-| 1 | timeline-page, run-detail-page, docs-page | 3 병렬 worker |
-| 2 | test-all | aggregator |
-| 3 | code-review | aggregator |
-| 4 | improve-frontend | worker |
-| 5 | build-verify, qa-final | 2 병렬 |
+## Graph Summary (13 nodes, 9 levels — 2회 ���복 개��� 파이프라인)
+| Level | Nodes | Type | Status |
+|-------|-------|------|--------|
+| 0 | layout-overhaul, page-cleanup | 2 병렬 worker | completed |
+| 1 | timeline-page, run-detail-page, docs-page | 3 병렬 worker | completed |
+| 2 | test-r1 | aggregator | completed |
+| 3 | review-r1 | aggregator | completed |
+| 4 | improve-r1 | worker | completed |
+| 5 | test-r2 | aggregator | completed |
+| 6 | review-r2 | aggregator | completed |
+| 7 | improve-r2 | worker | completed |
+| 8 | build-verify, qa-final | 2 병렬 | completed |
 
 ## Extension Configuration
 | Extension | Enabled | Decided At |

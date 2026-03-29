@@ -1,0 +1,22 @@
+{
+  "id": "cp-20260329-112000",
+  "description": "UI 전면 리디자인 — Integration complete",
+  "createdAt": "2026-03-29T11:20:00Z",
+  "state": {
+    "version": "3.1",
+    "bundleName": "dynamic-20260328",
+    "runId": "ui-redesign-20260329-1",
+    "nodesCompleted": 13,
+    "nodesFailed": 0,
+    "nodesSkipped": 0
+  },
+  "quality": {
+    "vitest": "122/122 pass",
+    "nextBuild": "pass",
+    "playwright": "3/3 pass"
+  },
+  "git": {
+    "mainRef": "0e47d08",
+    "branches": []
+  }
+}
