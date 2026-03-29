@@ -30,9 +30,10 @@ describe('SettingsDrawer', () => {
     }));
   });
 
-  it('isOpen이 false이면 렌더링되지 않아야 함', () => {
+  it('isOpen이 false이면 드로어가 숨겨져야 함', () => {
     render(<SettingsDrawer isOpen={false} onClose={mockOnClose} />);
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    const root = screen.getByTestId('settings-drawer-root');
+    expect(root).toHaveClass('hidden');
   });
 
   it('isOpen이 true이면 설정 패널이 렌더링되어야 함', () => {

@@ -54,8 +54,6 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
     fetcher
   );
 
-  if (!isOpen) return null;
-
   const bundleName = config?.bundle || "미설정";
   const locale = config?.defaults?.locale || "ko";
   const model = config?.defaults?.model || "미설정";
@@ -70,7 +68,11 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
 
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-    <div onKeyDown={handleKeyDown}>
+    <div
+      onKeyDown={handleKeyDown}
+      className={isOpen ? undefined : "hidden"}
+      data-testid="settings-drawer-root"
+    >
       {/* Overlay */}
       <div
         className="fixed inset-0 z-50 bg-black/20 transition-opacity"
@@ -80,7 +82,7 @@ export function SettingsDrawer({ isOpen, onClose }: SettingsDrawerProps) {
 
       {/* Drawer */}
       <aside
-        className="fixed right-0 top-0 z-50 flex h-full w-80 flex-col bg-white shadow-xl"
+        className="fixed right-0 top-0 z-50 flex h-full w-80 flex-col bg-white shadow-xl transition-transform"
         role="dialog"
         aria-modal="true"
         aria-label="설정"
